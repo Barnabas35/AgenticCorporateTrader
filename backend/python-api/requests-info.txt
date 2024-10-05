@@ -1,0 +1,8 @@
+
+The following are requests that can be made to the API.
+Each entry includes the url, the method, and the parameters that can be passed to the API as well as the expected response.
+
+### Get random number (DEBUG)
+URL & Method: GET /random-number
+Response: TEXT - A random integer number between 0 and 1000
+

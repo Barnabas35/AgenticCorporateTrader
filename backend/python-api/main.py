@@ -1,16 +1,22 @@
-# This is a sample Python script.
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# This python script is responsible for running the Flask application.
+# Database queries are not handled in this script.
 
+from flask import Flask, request, jsonify
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+app = Flask(__name__)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@app.route("/", methods=["GET"])
+def index():
+    return "This is the index page of this API."
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+@app.route("/random-number", methods=["GET"])
+def random_number():
+    from random import randint
+    return jsonify({"random_number": randint(0, 1000)}), 200
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
