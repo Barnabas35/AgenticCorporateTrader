@@ -2,7 +2,7 @@
 # This is a singleton class that initializes the Firebase app.
 
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials
 import os
 
 # Get database URL from environment variable
