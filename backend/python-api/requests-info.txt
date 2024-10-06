@@ -4,5 +4,17 @@ Each entry includes the url, the method, and the parameters that can be passed t
 
 ### Get random number (DEBUG)
 URL & Method: GET /random-number
-Response: TEXT - A random integer number between 0 and 1000
+Response: JSON - A random integer number between 0 and 1000
+Example:
+{
+  "random_number": 123
+}
 
+
+### Get number of users (DEBUG)
+URL & Method: GET /user-count
+Response: JSON - The number of users in the database
+Example:
+{
+  "user_count": 123
+}
