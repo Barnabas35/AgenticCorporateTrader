@@ -1,0 +1,34 @@
+
+# Use the python image as a parent image
+FROM python:3.12
+LABEL authors="Barnabas Somodi"
+
+# Add our files to the working directory
+ADD main.py .
+ADD db_access.py .
+ADD query_library/ ./query_library/
+
+# Expose port 5000
+EXPOSE 5000
+
+# Install the required libraries
+RUN pip install firebase-admin
+RUN pip install flask
+
+# Run the application
+CMD ["python", "main.py"]
+
+
+# DEPENDENCIES
+# - Docker
+# - A .env file containing DB_URL and CERT
+
+# TO BUILD
+# Navigate to the directory containing the Dockerfile and run:
+# (Dont forget to replace <version_number> with the version number of the image)
+# docker build -t act-python-api-v<version_number> .
+
+# TO RUN
+# Naviagte to the location of the .env file and run:
+# (Dont forget to replace <version_number> with the version number of the image)
+# docker run --env-file .env -p 5000:5000 --name python-api -d act-python-api-v<version_number>

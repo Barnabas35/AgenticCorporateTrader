@@ -11,6 +11,7 @@ app = Flask(__name__)
 def index():
     return "This is the index page of this API."
 
+
 # Get random number between 0 and 1000
 @app.route("/random-number", methods=["GET"])
 def random_number():
@@ -26,4 +27,4 @@ def user_count():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)
