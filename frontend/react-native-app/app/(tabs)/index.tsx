@@ -1,70 +1,237 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Animated, Easing } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
+const Stack = createStackNavigator();
+
+// Home Screen Component
+function HomeScreen({ navigation }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  
+  const animatedValue1 = useRef(new Animated.Value(0)).current;
+  const animatedValue2 = useRef(new Animated.Value(0)).current;
+  const animatedValue3 = useRef(new Animated.Value(0)).current;
+  const animatedValue4 = useRef(new Animated.Value(0)).current;
+  const animatedValue5 = useRef(new Animated.Value(0)).current;
+  const animatedValue6 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (menuOpen) {
+      Animated.stagger(150, [
+        Animated.timing(animatedValue1, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(animatedValue2, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(animatedValue3, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(animatedValue4, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(animatedValue5, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(animatedValue6, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+      ]).start();
+    } else {
+      [animatedValue1, animatedValue2, animatedValue3, animatedValue4, animatedValue5, animatedValue6].forEach((anim) => {
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }).start();
+      });
+    }
+  }, [menuOpen]);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const getMenuStyle = (animatedValue: Animated.Value) => ({
+    opacity: animatedValue,
+    transform: [{ translateY: animatedValue.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }],
+  });
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Top Bar with Hamburger */}
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={toggleMenu}>
+          <Ionicons name="menu" size={32} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.topBarTitle}>Investment Fund App</Text>
+      </View>
+
+      {/* Dropdown Menu */}
+      {menuOpen && (
+        <View style={styles.menuContainer}>
+          <Animated.View style={[styles.menuItem, getMenuStyle(animatedValue1)]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+              <Text style={styles.menuItemText}>Registration / Login of fund managers</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View style={[styles.menuItem, getMenuStyle(animatedValue2)]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Details')}>
+              <Text style={styles.menuItemText}>Record details of the fund manager</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View style={[styles.menuItem, getMenuStyle(animatedValue3)]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Access')}>
+              <Text style={styles.menuItemText}>Access Restrictions</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View style={[styles.menuItem, getMenuStyle(animatedValue4)]}>
+            <TouchableOpacity onPress={() => navigation.navigate('AI')}>
+              <Text style={styles.menuItemText}>ACT-AI Engine</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View style={[styles.menuItem, getMenuStyle(animatedValue5)]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Reports')}>
+              <Text style={styles.menuItemText}>Reports</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View style={[styles.menuItem, getMenuStyle(animatedValue6)]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Price Alerts')}>
+              <Text style={styles.menuItemText}>Price Alerts</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      )}
+
+      {/* Centered Content Area */}
+      <View style={styles.centeredContent}>
+        <Text style={styles.contentText}>
+          Welcome to the Investment Fund App! Use the menu to explore options.
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+// Other Pages
+const RegistrationScreen = () => (
+  <View style={styles.centeredContent}>
+    <Text style={styles.contentText}>Registration/Login Page</Text>
+  </View>
+);
+
+const DetailsScreen = () => (
+  <View style={styles.centeredContent}>
+    <Text style={styles.contentText}>Fund Manager Details Page</Text>
+  </View>
+);
+
+const AccessScreen = () => (
+  <View style={styles.centeredContent}>
+    <Text style={styles.contentText}>Access Restrictions Page</Text>
+  </View>
+);
+
+const AIScreen = () => (
+  <View style={styles.centeredContent}>
+    <Text style={styles.contentText}>ACT-AI Engine Page</Text>
+  </View>
+);
+
+const ReportsScreen = () => (
+  <View style={styles.centeredContent}>
+    <Text style={styles.contentText}>Reports Page</Text>
+  </View>
+);
+
+const PriceAlertsScreen = () => (
+  <View style={styles.centeredContent}>
+    <Text style={styles.contentText}>Price Alerts Page</Text>
+  </View>
+);
+
+// Main App with Navigation
+export default function MainApp() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Registration" component={RegistrationScreen} />
+        <Stack.Screen name="Details" component={DetailsScreen} />
+        <Stack.Screen name="Access" component={AccessScreen} />
+        <Stack.Screen name="AI" component={AIScreen} />
+        <Stack.Screen name="Reports" component={ReportsScreen} />
+        <Stack.Screen name="Price Alerts" component={PriceAlertsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#94bf73',
+  },
+  topBar: {
+    height: 60,
+    backgroundColor: '#11150d',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    paddingHorizontal: 16,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  topBarTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  menuContainer: {
     position: 'absolute',
+    top: 60,
+    left: 0,
+    width: '40%',
+    backgroundColor: 'black',
+    padding: 10,
+  },
+  menuItem: {
+    paddingVertical: 10,
+    borderBottomColor: 'white',
+    borderBottomWidth: 1,
+  },
+  menuItemText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  centeredContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentText: {
+    color: 'black',
+    fontSize: 18,
+    textAlign: 'center',
   },
 });
