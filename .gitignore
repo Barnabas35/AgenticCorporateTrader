@@ -3,3 +3,4 @@ backend/python-api/agenticcorporatetrader-firebase-adminsdk-hms3b-b39a833119.jso
 backend/python-api/config.txt
 backend/python-api/firebase_creds_base64.txt
 backend/python-api/.env
+backend/python-api/aws-push-docker.txt
