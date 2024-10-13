@@ -2,7 +2,7 @@
 The following are requests that can be made to the API.
 Each entry includes the url, the method, and the parameters that can be passed to the API as well as the expected response.
 
-### Get random number (DEBUG)
+### Get random number (DEBUG) ---------------------------
 URL & Method: GET /random-number
 Response: JSON - A random integer number between 0 and 1000
 Example:
@@ -11,10 +11,27 @@ Example:
 }
 
 
-### Get number of users (DEBUG)
+### Get number of users (DEBUG) -------------------------
 URL & Method: GET /user-count
 Response: JSON - The number of users in the database
 Example:
 {
   "user_count": 123
+}
+
+
+### Login user ------------------------------------------
+URL & Method: POST /login
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "username": "string",
+  "password": "string"
+}
+Response: JSON - Session token and status message
+Example:
+{
+  "token": "yh1vtDb71lexRhXJJW2gnQhzv",
+  "message": "Success"
 }
