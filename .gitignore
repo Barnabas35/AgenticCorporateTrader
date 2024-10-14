@@ -4,3 +4,4 @@ backend/python-api/config.txt
 backend/python-api/firebase_creds_base64.txt
 backend/python-api/.env
 backend/python-api/aws-push-docker.txt
+backend/python-api/aws-push-docker.txt
