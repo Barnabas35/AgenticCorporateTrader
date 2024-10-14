@@ -1,17 +1,13 @@
-from firebase_admin import db
 from db_access import DBAccess
 
 
 def q_user_count():
 
-    # Connect to database
-    DBAccess.connect()
+    # Get database reference
+    db = DBAccess.get_db()
 
-    # Set reference to accounts
-    ref = db.reference("/accounts")
+    # Execute query
+    result = db.collection("users").count().get()
 
-    # Get accounts
-    data = ref.get()
-
-    # Count number of accounts (-1 because there is a None value in the dictionary)
-    return len(data) - 1
+    # Parse result then return
+    return result[0][0].value

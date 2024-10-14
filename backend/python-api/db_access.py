@@ -3,18 +3,26 @@
 
 import firebase_admin
 from firebase_admin import credentials
+from firebase_admin import firestore
 import os
 import base64
 
 
 class DBAccess:
     __instance = None
+    db = None
 
+    # Creates a new instance of the class if there is not one already,
+    # initializes the Firebase app and returns the database object
     @staticmethod
-    def connect():
+    def get_db():
         if DBAccess.__instance is None:
             DBAccess()
-        return DBAccess.__instance
+
+        if DBAccess.db is None:
+            DBAccess.db = firestore.client()
+
+        return DBAccess.db
 
     def __init__(self):
         if DBAccess.__instance is not None:
