@@ -26,12 +26,29 @@ Headers:
  - Content-Type: application/json
 Body (JSON):
 {
-  "username": "string",
+  "email": "string",
   "password": "string"
 }
 Response: JSON - Session token and status message
 Example:
 {
   "token": "yh1vtDb71lexRhXJJW2gnQhzv",
+  "message": "Success"
+}
+
+
+### Register user ---------------------------------------
+URL & Method: POST /register
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "username": "string",
+  "password": "string"
+  "email": "string"
+}
+Response: JSON - Status message
+Example:
+{
   "message": "Success"
 }

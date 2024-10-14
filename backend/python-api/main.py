@@ -26,11 +26,18 @@ def user_count():
     return jsonify({"user_count": q_user_count()}), 200
 
 
-# Get session token
+# Login - Get session token
 @app.route("/login", methods=["POST"])
 def login():
     from query_library.login import q_login
     return jsonify(q_login(request.json)), 200
+
+
+# Register
+@app.route("/register", methods=["POST"])
+def register():
+    from query_library.register import q_register
+    return jsonify(q_register(request.json)), 200
 
 
 if __name__ == "__main__":
