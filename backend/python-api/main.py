@@ -40,5 +40,19 @@ def register():
     return jsonify(q_register(request.json)), 200
 
 
+# Get username
+@app.route("/get-username", methods=["POST"])
+def username():
+    from query_library.get_username import q_get_username
+    return jsonify(q_get_username(request.json)), 200
+
+
+# Get email
+@app.route("/get-email", methods=["POST"])
+def email():
+    from query_library.get_email import q_get_email
+    return jsonify(q_get_email(request.json)), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
