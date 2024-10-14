@@ -7,6 +7,7 @@ LABEL authors="Barnabas Somodi"
 ADD main.py .
 ADD db_access.py .
 ADD query_library/ ./query_library/
+ADD function_library/ ./function_library/
 
 # Expose port 5000
 EXPOSE 5000
@@ -14,6 +15,7 @@ EXPOSE 5000
 # Install the required libraries
 RUN pip install firebase-admin
 RUN pip install flask
+RUN pip install flask-cors
 
 # Run the application
 CMD ["python", "main.py"]
