@@ -1,6 +1,8 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "strict": true,
     "paths": {
       "@/*": [
@@ -8,10 +10,12 @@
       ]
     }
   },
+  
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts", "app/contact.tsx",
   ]
+  
 }
