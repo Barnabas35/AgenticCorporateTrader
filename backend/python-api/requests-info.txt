@@ -33,7 +33,7 @@ Response: JSON - Session token and status message
 Example:
 {
   "token": "yh1vtDb71lexRhXJJW2gnQhzv",
-  "message": "Success"
+  "status": "Success"
 }
 
 
@@ -50,5 +50,37 @@ Body (JSON):
 Response: JSON - Status message
 Example:
 {
-  "message": "Success"
+  "status": "Success"
+}
+
+
+### Get username ----------------------------------------
+URL & Method: POST /get-username
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Username and status message
+Example:
+{
+  "username": "string",
+  "status": "Success"
+}
+
+
+### Get email -------------------------------------------
+URL & Method: POST /get-email
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Email and status message
+Example:
+{
+  "email": "string",
+  "status": "Success"
 }
