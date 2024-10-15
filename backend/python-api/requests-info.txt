@@ -97,7 +97,7 @@ Body (JSON):
 Response: JSON - Profile icon url and status message
 Example:
 {
-  "profile_icon_url": "string",
+  "url": "string",
   "status": "Success"
 }
 INFO: Image is 256x256 pixels.
