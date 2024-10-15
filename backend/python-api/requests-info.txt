@@ -103,3 +103,54 @@ Example:
 INFO: Image is 256x256 pixels.
 WARNING: The profile icon url expires after 3 minutes. Already loaded images will not be affected.
 WARNING: Maximum 5000 requests per day before limit is reached. Download the image where possible.
+
+
+### Add client ------------------------------------------
+URL & Method: POST /add-client
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "client_name": "string",
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get client list -------------------------------------
+URL & Method: POST /get-client-list
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - List of clients and status message
+Example:
+{
+  "clients": [
+    {"client_name": "client1", "id": "AgSO2FnIP46FA"},
+    {"client_name": "client2", "id": "AgSO2FnIP46FB"}
+  ],
+  "status": "Success"
+}
+
+
+### Remove client ---------------------------------------
+URL & Method: POST /remove-client
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "client_name": "string"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}

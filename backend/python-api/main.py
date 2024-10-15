@@ -63,5 +63,26 @@ def get_profile_icon():
     return jsonify(q_get_profile_icon(request.json)), 200
 
 
+# Add new client
+@app.route("/add-client", methods=["POST"])
+def add_client():
+    from query_library.add_client import q_add_client
+    return jsonify(q_add_client(request.json)), 200
+
+
+# Remove client
+@app.route("/remove-client", methods=["POST"])
+def remove_client():
+    from query_library.remove_client import q_remove_client
+    return jsonify(q_remove_client(request.json)), 200
+
+
+# Get client list
+@app.route("/get-client-list", methods=["POST"])
+def get_client_list():
+    from query_library.get_client_list import q_get_client_list
+    return jsonify(q_get_client_list(request.json)), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
