@@ -100,5 +100,6 @@ Example:
   "profile_icon_url": "string",
   "status": "Success"
 }
+INFO: Image is 256x256 pixels.
 WARNING: The profile icon url expires after 3 minutes. Already loaded images will not be affected.
 WARNING: Maximum 5000 requests per day before limit is reached. Download the image where possible.
