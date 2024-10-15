@@ -6,3 +6,4 @@ backend/python-api/.env
 backend/python-api/aws-push-docker.txt
 backend/python-api/aws-push-docker.txt
 .DS_Store
+*.pyc

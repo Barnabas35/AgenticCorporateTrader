@@ -8,6 +8,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/", methods=["GET"])
 def index():
     return "This is the index page of this API."
@@ -43,16 +44,23 @@ def register():
 
 # Get username
 @app.route("/get-username", methods=["POST"])
-def username():
+def get_username():
     from query_library.get_username import q_get_username
     return jsonify(q_get_username(request.json)), 200
 
 
 # Get email
 @app.route("/get-email", methods=["POST"])
-def email():
+def get_email():
     from query_library.get_email import q_get_email
     return jsonify(q_get_email(request.json)), 200
+
+
+# Get user profile icon
+@app.route("/get-profile-icon", methods=["POST"])
+def get_profile_icon():
+    from query_library.get_profile_icon import q_get_profile_icon
+    return jsonify(q_get_profile_icon(request.json)), 200
 
 
 if __name__ == "__main__":

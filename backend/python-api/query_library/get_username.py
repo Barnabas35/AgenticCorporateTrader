@@ -8,10 +8,10 @@ def q_get_username(request_json):
     if "session_token" not in request_json:
         return {"status": "No session token provided."}
 
-    # Get username and password from request
+    # Get session token from request
     session_token = request_json["session_token"]
 
-    # Parse username and password to be safe for Firestore
+    # Parse session token to be safe for Firestore
     session_token = firestore_safe(session_token)
 
     # Get database reference
