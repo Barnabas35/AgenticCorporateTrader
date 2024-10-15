@@ -6,6 +6,7 @@ import Menu from './components/Menu'; // Ensure correct import path
 import Home from './app/home';
 import Login from './app/login';
 import Contact from './app/contact';
+import Register from './app/register'
 import { View, StyleSheet } from 'react-native'; // Import View and StyleSheet for layout
 
 const App: React.FC = () => {
@@ -18,6 +19,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login-register" element={<Login />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </View>
       </View>
