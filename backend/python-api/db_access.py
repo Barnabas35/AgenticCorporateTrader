@@ -53,13 +53,13 @@ class DBAccess:
             # If DB_URL_ENV environment variable is not set, use fallback config.txt
             if DB_URL_ENV is None:
                 with open("config.txt", "r") as f:
-                    DB_URL_ENV = f.readlines()[0]
+                    DB_URL_ENV = f.readlines()[0].strip("\n")
                     f.close()
 
             # If STORAGE_URL_ENV environment variable is not set, use fallback config.txt
             if STORAGE_URL_ENV is None:
                 with open("config.txt", "r") as f:
-                    STORAGE_URL_ENV = f.readlines()[1]
+                    STORAGE_URL_ENV = f.readlines()[1].strip("\n")
                     f.close()
 
             # Get certificate from environment variable or use fallback local file
