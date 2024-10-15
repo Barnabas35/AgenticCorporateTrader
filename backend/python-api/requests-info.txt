@@ -32,7 +32,7 @@ Body (JSON):
 Response: JSON - Session token and status message
 Example:
 {
-  "token": "yh1vtDb71lexRhXJJW2gnQhzv",
+  "session_token": "yh1vtDb71lexRhXJJW2gnQhzv",
   "status": "Success"
 }
 
