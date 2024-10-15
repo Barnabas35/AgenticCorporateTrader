@@ -84,3 +84,21 @@ Example:
   "email": "string",
   "status": "Success"
 }
+
+
+### Get user profile icon url ---------------------------
+URL & Method: POST /get-profile-icon
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Profile icon url and status message
+Example:
+{
+  "profile_icon_url": "string",
+  "status": "Success"
+}
+WARNING: The profile icon url expires after 3 minutes. Already loaded images will not be affected.
+WARNING: Maximum 5000 requests per day before limit is reached. Download the image where possible.
