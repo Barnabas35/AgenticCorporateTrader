@@ -1,12 +1,25 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
-function About() {
+const contact: React.FC = () => {
   return (
-    <div>
-      <h1>About Us</h1>
-      <p>This is the about page.</p>
-    </div>
+    <View style={styles.container}>
+      <Text style={styles.title}>This is the about page</Text>
+    </View>
   );
-}
+};
 
-export default About;
+export default contact;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    width: '100%',
+  },
+  title: {
+    fontSize: 24,
+  },
+});

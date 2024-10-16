@@ -1,28 +1,75 @@
-// src/context/UserContext.tsx
+// src/components/userContext.tsx
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
+// Define the shape of the context data
 interface UserContextType {
-  username: string | null;
-  setUsername: (name: string | null) => void;
+  username: string;
+  setUsername: (username: string) => void; // Setter for username
+  email: string;
+  setEmail: (email: string) => void; // Setter for email
+  profileIconUrl: string;
+  setProfileIconUrl: (url: string) => void; // Setter for profile icon
+  sessionToken: string | null;
+  setSessionToken: (token: string | null) => void; // Setter for session token
 }
 
+// Create a context with a default value of `undefined`
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [username, setUsername] = useState<string | null>(null);
+// Define the props for the provider, including children
+interface UserProviderProps {
+  children: ReactNode;
+}
 
-  return (
-    <UserContext.Provider value={{ username, setUsername }}>
-      {children}
-    </UserContext.Provider>
-  );
+export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+  const [username, setUsername] = useState(''); // State and setter for username
+  const [email, setEmail] = useState(''); // State and setter for email
+  const [profileIconUrl, setProfileIconUrl] = useState(''); // State and setter for profile icon URL
+  const [sessionToken, setSessionToken] = useState<string | null>(null); // State and setter for session token
+
+  // Value to provide to the context
+  const value = {
+    username,
+    setUsername, // Provide the setter function for username
+    email,
+    setEmail, // Provide the setter function for email
+    profileIconUrl,
+    setProfileIconUrl, // Provide the setter function for profile icon URL
+    sessionToken,
+    setSessionToken, // Provide the setter function for session token
+  };
+
+  // Return the context provider
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
-export const useUser = (): UserContextType => {
+// Hook to use the UserContext
+export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
     throw new Error('useUser must be used within a UserProvider');
   }
-  return context;
+  return context; // Return the context
+};
+
+// Custom hooks for individual pieces of user data
+export const useUsername = () => {
+  const { username, setUsername } = useUser();
+  return [username, setUsername] as const; // Return username and its setter
+};
+
+export const useEmail = () => {
+  const { email, setEmail } = useUser();
+  return [email, setEmail] as const; // Return email and its setter
+};
+
+export const useProfileIconUrl = () => {
+  const { profileIconUrl, setProfileIconUrl } = useUser();
+  return [profileIconUrl, setProfileIconUrl] as const; // Return profile icon URL and its setter
+};
+
+export const useSessionToken = () => {
+  const { sessionToken, setSessionToken } = useUser();
+  return [sessionToken, setSessionToken] as const; // Return session token and its setter
 };
