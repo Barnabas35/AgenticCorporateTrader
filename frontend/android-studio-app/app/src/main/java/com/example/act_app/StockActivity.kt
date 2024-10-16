@@ -5,27 +5,27 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MyAssetsActivity : AppCompatActivity() {
+class StockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_my_assets)
+        setContentView(R.layout.activity_stock)
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
-        // Set the selected item to highlight MyAssets when this activity is active
-        bottomNavigationView.selectedItemId = R.id.nav_my_assets
+        // Set the selected item to highlight StockActivity when this activity is active
+        bottomNavigationView.selectedItemId = R.id.nav_stock_activity
 
         // Set navigation item selection listener
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_my_assets -> {
-                    // Already in MyAssetsActivity, do nothing
+                    // Navigate to MyAssetsActivity
+                    val intent = Intent(this, MyAssetsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.nav_stock_activity -> {
-                    // Navigate to StockActivity
-                    val intent = Intent(this, StockActivity::class.java)
-                    startActivity(intent)
+                    // Already in StockActivity, do nothing
                     true
                 }
                 R.id.nav_menu -> {

@@ -10,9 +10,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"> <!-- Add the theme here -->
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"> <!-- App theme -->
 
-        <!-- Main Activity -->
+        <!-- Main Activity (launcher activity) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"> <!-- Exported because it has MAIN/LAUNCHER intent-filter -->
@@ -23,16 +23,29 @@
         </activity>
 
         <!-- Login Activity -->
-        <activity android:name=".LoginActivity"
-            android:exported="false" /> <!-- If this is internal, keep exported as false or remove the attribute -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" /> <!-- Internal activity -->
 
         <!-- Register Activity -->
-        <activity android:name=".RegisterActivity"
-            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" /> <!-- Internal activity -->
 
         <!-- My Assets Activity -->
-        <activity android:name=".MyAssetsActivity"
-            android:exported="false" />
+        <activity
+            android:name=".MyAssetsActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+        <!-- Stock Activity -->
+        <activity
+            android:name=".StockActivity"
+            android:exported="false" /> <!-- Added StockActivity -->
+
+        <!-- Menu Activity (optional, for burger menu navigation) -->
+        <activity
+            android:name=".MenuActivity"
+            android:exported="false" /> <!-- Added MenuActivity -->
 
     </application>
 
