@@ -1,36 +1,56 @@
-// src/components/Menu.tsx
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import { useUser } from './userContext'; // Import the user context
 
 const Menu: React.FC = () => {
+  const { sessionToken } = useUser(); // Accessing sessionToken to check if user is logged in from user Context
+
   return (
     <View style={styles.container}>
-      {/* Make the TradeAgently title clickable and navigate to "/" */}
-      <NavLink to="/" style={styles.titleContainer}>
-        <Text style={styles.title}>TradeAgently</Text>
+      {/* Left-aligned logo */}
+      <NavLink to="/" style={styles.title}>
+        <Image
+          source={require('../assets/images/logo.png')} // Replace with your logo path
+          style={styles.logo}
+        />
       </NavLink>
+
+      {/* Centered menu items */}
       <View style={styles.menuContainer}>
-        <NavLink to="/" style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}>
+        <NavLink
+          to="/"
+          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+        >
           Home
         </NavLink>
         <View style={styles.spacer} />
-        <NavLink to="/login-register" style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}>
-          Login/Register
-        </NavLink>
-        <View style={styles.spacer} />
-        <NavLink to="/record-details" style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}>
-          Record Details
-        </NavLink>
-        <View style={styles.spacer} />
-        <NavLink to="/AI" style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}>
-          ACT-AI
-        </NavLink>
-        <View style={styles.spacer} />
-        <NavLink to="/PriceAlerts" style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}>
-          Price Alerts
-        </NavLink>
+        {sessionToken ? (
+          <>
+            <NavLink
+              to="/user-account"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              User Account
+            </NavLink>
+          </>
+        ) : (
+          <>
+            <NavLink
+              to="/about"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              About
+            </NavLink>
+            <View style={styles.spacer} />
+            <NavLink
+              to="/login-register"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              Login/Register
+            </NavLink>
+          </>
+        )}
       </View>
     </View>
   );
@@ -41,45 +61,46 @@ const styles = StyleSheet.create({
     height: '8%',
     padding: 10,
     backgroundColor: '#272727', // Background color of the menu
-    flexDirection: 'row', // Align items vertically
-    alignItems: 'center', // Center items horizontally
-  },
-  titleContainer: {
-    textDecorationLine: 'none', // Ensure no underline on the clickable title
+    flexDirection: 'row', // Align items horizontally
+    alignItems: 'center', // Center items vertically
+    justifyContent: 'space-between', // Space between title and menu
+    paddingHorizontal: 20, // Add horizontal padding to center content
   },
   title: {
-    fontSize: 39,
-    color: 'white',
-    marginBottom: 10,
-    fontFamily: 'sans-serif', // Sans-serif font
-    fontWeight: 'bold',
+    textDecorationLine: 'none', // No underline for the link
+  },
+  logo: {
+    width: 350, // Adjust the size of the logo as needed
+    height: 120,
+    resizeMode: 'contain', // Ensures the logo maintains aspect ratio
   },
   menuContainer: {
     flexDirection: 'row', // Align menu items horizontally
-    justifyContent: 'center', // Center menu items
-    width: '100%', // Full width to occupy the container
+    alignItems: 'center', // Center vertically
+    justifyContent: 'center', // Center horizontally
+    position: 'absolute', // Position it absolute to center on the screen
+    left: '50%', // Position it in the center of the screen
+    transform: [{ translateX: '-50%' }], // Adjust for proper centering
   },
   menuItem: {
-    backgroundColor: '#288DFF', // Solid green background for menu items
+    backgroundColor: '#4CAF50', // Solid green background for menu items
     color: 'white', // Text color for menu items
     borderRadius: 20, // Rounded edges
     fontSize: 20,
+    fontFamily: 'sans-serif',
     padding: 15, // Padding around the text
     textDecorationLine: 'none', // No underline for links
     fontWeight: 'bold',
-    fontFamily: 'sans-serif',
-    justifyContent: 'center',
   },
   activeMenuItem: {
-    backgroundColor: '#EE4D4D', // Light blue for active link
+    backgroundColor: '#E85759', // Light red for active link
     fontSize: 20,
     color: 'white', // White text for active link
     borderRadius: 20, // Keep rounded edges for active item
     padding: 15, // Padding around the text
+    fontFamily: 'sans-serif',
     textDecorationLine: 'none', // No underline for active link
     fontWeight: 'bold',
-    fontFamily: 'sans-serif',
-    justifyContent: 'center',
   },
   spacer: {
     width: 15,

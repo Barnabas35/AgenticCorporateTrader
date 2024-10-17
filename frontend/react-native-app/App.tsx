@@ -6,24 +6,31 @@ import Menu from './components/Menu'; // Ensure correct import path
 import Home from './app/home';
 import Login from './app/login';
 import Contact from './app/contact';
-import Register from './app/register'
+import Register from './app/register';
+import UserAccount from './app/userAccount';
+import About from './app/about'
 import { View, StyleSheet } from 'react-native'; // Import View and StyleSheet for layout
+import { UserProvider } from './components/userContext';
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <View style={styles.container}>
-        <Menu />
-        <View style={styles.content}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login-register" element={<Login />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
+    <UserProvider>
+      <Router>
+        <View style={styles.container}>
+          <Menu />
+          <View style={styles.content}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login-register" element={<Login />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/user-account" element={<UserAccount />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </View>
         </View>
-      </View>
-    </Router>
+      </Router>
+    </UserProvider>
   );
 };
 
