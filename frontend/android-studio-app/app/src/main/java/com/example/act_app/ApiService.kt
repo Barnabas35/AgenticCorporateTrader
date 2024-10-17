@@ -10,17 +10,35 @@ data class LoginRequest(val email: String, val password: String)
 // Data class for register request
 data class RegisterRequest(
     val username: String,
-    val email: String,
     val password: String,
-    val confirmPassword: String
+    val email: String
 )
+
+// Data class for the token request (used for get-username, get-email, etc.)
+data class TokenRequest(val session_token: String)
 
 // API response model for login/register response
 data class ApiResponse(
-    val success: Boolean,          // 'true' if the operation was successful
     val session_token: String?,    // Nullable token (could be null on failure)
-    val message: String?,          // Optional error or success message
-    val status: String?            // Optional status, such as "Success"
+    val status: String?            // Status message, such as "Success"
+)
+
+// Data class for username response
+data class UsernameResponse(
+    val username: String?,         // Username returned from the API
+    val status: String?            // Status message
+)
+
+// Data class for email response
+data class EmailResponse(
+    val email: String?,            // Email returned from the API
+    val status: String?            // Status message
+)
+
+// Data class for the profile icon response
+data class ProfileIconResponse(
+    val url: String?,          // Profile icon URL returned from the API
+    val status: String?        // Status message
 )
 
 // Retrofit interface for API calls
@@ -33,4 +51,17 @@ interface ApiService {
     // Endpoint for registration
     @POST("/register")
     fun register(@Body registerRequest: RegisterRequest): Call<ApiResponse>
+
+    // Endpoint for getting the username
+    @POST("/get-username")
+    fun getUsername(@Body tokenRequest: TokenRequest): Call<UsernameResponse>
+
+    // Endpoint for getting the email
+    @POST("/get-email")
+    fun getEmail(@Body tokenRequest: TokenRequest): Call<EmailResponse>
+
+    // Endpoint for getting the profile icon
+    @POST("/get-profile-icon")
+    fun getProfileIcon(@Body tokenRequest: TokenRequest): Call<ProfileIconResponse>
+
 }

@@ -31,7 +31,6 @@
     </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- ImageView for the logo -->
-
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="527dp"
@@ -42,6 +41,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/menuToolbar"
         app:srcCompat="@drawable/tradeagentlylogogray" />
+
+    <!-- Button to access ProfileActivity -->
+
+    <!-- Bottom Navigation -->
+    <Button
+        android:id="@+id/profileButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/primary"
+        android:text="Go to Profile"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView"
+        app:layout_constraintVertical_bias="0.055" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

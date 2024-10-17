@@ -29,6 +29,7 @@ class RegisterActivity : AppCompatActivity() {
             val password = passwordEditText.text.toString().trim()
             val confirmPassword = confirmPasswordEditText.text.toString().trim()
 
+            // Validate the input
             if (username.isEmpty()) {
                 usernameEditText.error = "Please enter your username"
                 return@setOnClickListener
@@ -50,21 +51,22 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             // Create registration request
-            val registerRequest = RegisterRequest(username, email, password, confirmPassword)
+            val registerRequest = RegisterRequest(username, email, password)
 
-            // Make API call
+            // Make API call for registration
             RetrofitClient.apiService.register(registerRequest).enqueue(object : Callback<ApiResponse> {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     if (response.isSuccessful) {
                         val apiResponse = response.body()
-                        if (apiResponse?.success == true) {
+                        if (apiResponse?.status == "Success") {
                             Toast.makeText(this@RegisterActivity, "Registration Successful!", Toast.LENGTH_SHORT).show()
-                            // Navigate to MyAssetsActivity
-                            val intent = Intent(this@RegisterActivity, MyAssetsActivity::class.java)
+
+                            // Navigate to MyAssetsActivity or LoginActivity after successful registration
+                            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
                             startActivity(intent)
-                            finish() // Optionally close the register activity
+                            finish() // Close the registration activity
                         } else {
-                            Toast.makeText(this@RegisterActivity, apiResponse?.message ?: "Registration failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@RegisterActivity, apiResponse?.status ?: "Registration failed", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(this@RegisterActivity, "Registration failed", Toast.LENGTH_SHORT).show()
@@ -77,6 +79,7 @@ class RegisterActivity : AppCompatActivity() {
             })
         }
 
+        // Navigate to login screen when the login link is clicked
         loginTextView.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)

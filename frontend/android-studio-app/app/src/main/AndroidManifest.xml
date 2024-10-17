@@ -40,12 +40,17 @@
         <!-- Stock Activity -->
         <activity
             android:name=".StockActivity"
-            android:exported="false" /> <!-- Added StockActivity -->
+            android:exported="false" /> <!-- Internal activity -->
 
-        <!-- Menu Activity (optional, for burger menu navigation) -->
+        <!-- Menu Activity -->
         <activity
             android:name=".MenuActivity"
-            android:exported="false" /> <!-- Added MenuActivity -->
+            android:exported="false" /> <!-- Internal activity -->
+
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
 
     </application>
 
