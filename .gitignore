@@ -7,3 +7,5 @@ backend/python-api/aws-push-docker.txt
 backend/python-api/aws-push-docker.txt
 .DS_Store
 *.pyc
+.idea/workspace.xml
+frontend/.DS_Store
