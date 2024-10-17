@@ -86,7 +86,10 @@ const UserAccount: React.FC = () => {
   }, [sessionToken, username, email, profileIconUrl, navigate, setUsername, setEmail, setProfileIconUrl]);
 
   const handleLogout = () => {
-    setSessionToken(null);  // Clear session token on logout
+    setSessionToken(null);
+    setEmail("");
+    setUsername("")
+    setProfileIconUrl("")  // Clear session token on logout
     navigate('/login');     // Redirect to login
   };
 

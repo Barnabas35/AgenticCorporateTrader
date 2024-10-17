@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { useUser } from './userContext'; // Import the user context
 
 const Menu: React.FC = () => {
@@ -8,9 +8,12 @@ const Menu: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Left-aligned title */}
+      {/* Left-aligned logo */}
       <NavLink to="/" style={styles.title}>
-        <Text style={styles.titleText}>TradeAgently</Text>
+        <Image
+          source={require('../assets/images/logo.png')} // Replace with your logo path
+          style={styles.logo}
+        />
       </NavLink>
 
       {/* Centered menu items */}
@@ -66,11 +69,10 @@ const styles = StyleSheet.create({
   title: {
     textDecorationLine: 'none', // No underline for the link
   },
-  titleText: {
-    fontSize: 39,
-    color: 'white',
-    fontFamily: 'sans-serif', // Sans-serif font
-    fontWeight: 'bold',
+  logo: {
+    width: 350, // Adjust the size of the logo as needed
+    height: 120,
+    resizeMode: 'contain', // Ensures the logo maintains aspect ratio
   },
   menuContainer: {
     flexDirection: 'row', // Align menu items horizontally

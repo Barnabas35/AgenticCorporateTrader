@@ -1,17 +1,35 @@
-// src/app/Login.tsx
-
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../components/userContext'; // Adjust the path as needed
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // State to display error messages
   const navigate = useNavigate();
   const { setUsername, setEmail: setUserEmail, setSessionToken, setProfileIconUrl } = useUser(); // Get the setters from context
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email validation regex
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async () => {
+    // Reset the error message on every login attempt
+    setErrorMessage('');
+
+    // Check if the email is in valid format
+    if (!isValidEmail(email.trim())) {
+      window.alert('Invalid Email: Please enter a valid email address.');
+      return; // Prevent login if email format is invalid
+    }
+
+    if (!email || !password) {
+      window.alert('Missing Fields: Please fill out both email and password.');
+      return;
+    }
+
     const url = 'https://tradeagently.dev/login';
     const bodyData = {
       email: email.trim(),
@@ -49,7 +67,7 @@ const Login: React.FC = () => {
           // Store the username in context
           setUsername(usernameData.username);
         } else {
-          Alert.alert('Error', usernameData.message || 'Failed to fetch username.');
+          window.alert(usernameData.message || 'Failed to fetch username.');
         }
 
         // Fetch email with the session token
@@ -66,7 +84,7 @@ const Login: React.FC = () => {
         if (emailData.status === 'Success') {
           setUserEmail(emailData.email);
         } else {
-          Alert.alert('Error', emailData.message || 'Failed to fetch email.');
+          window.alert(emailData.message || 'Failed to fetch email.');
         }
 
         // Fetch profile icon with the session token
@@ -83,18 +101,18 @@ const Login: React.FC = () => {
         if (profileIconData.status === 'Success') {
           setProfileIconUrl(profileIconData.profile_icon_url);
         } else {
-          Alert.alert('Error', profileIconData.message || 'Failed to fetch profile icon.');
+          window.alert(profileIconData.message || 'Failed to fetch profile icon.');
         }
 
         // Navigate to the home page or any other protected route
         navigate('/');
       } else {
         // Handle errors (e.g., invalid credentials)
-        Alert.alert('Error', data.message || 'Login failed. Please try again.');
+        window.alert(data.message || 'Login failed. Please try again.');
       }
     } catch (error) {
       console.error('Error during login:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      window.alert('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -120,6 +138,7 @@ const Login: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <TouchableOpacity onPress={() => navigate('/register')} style={styles.registerLink}>
         <Text style={styles.registerText}>Don't have an account? Register here</Text>
       </TouchableOpacity>
@@ -161,6 +180,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10,
   },
   registerLink: {
     marginTop: 20,
