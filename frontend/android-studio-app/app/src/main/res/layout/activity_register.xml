@@ -19,16 +19,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Centered title within the toolbar -->
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="TradeAgently"
-            android:textColor="#ffffff"
-            android:textSize="48sp" />
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="441dp"
+            android:layout_height="90dp"
+            app:srcCompat="@drawable/tradeagentlylogo"
+            tools:layout_editor_absoluteX="-2dp"
+            tools:layout_editor_absoluteY="0dp" />
+
     </com.google.android.material.appbar.MaterialToolbar>
 
 

@@ -9,6 +9,11 @@
     tools:context=".MainActivity">
 
     <!-- Toolbar with centered title -->
+
+    <!-- LOGIN Button -->
+
+    <!-- REGISTER Button -->
+
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/materialToolbar"
         android:layout_width="417dp"
@@ -20,21 +25,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Centered title within the toolbar -->
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="TradeAgently"
-            android:textColor="#ffffff"
-            android:textSize="48sp" />
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="441dp"
+            android:layout_height="90dp"
+            app:srcCompat="@drawable/tradeagentlylogo"
+            tools:layout_editor_absoluteX="-2dp"
+            tools:layout_editor_absoluteY="0dp" />
+
     </com.google.android.material.appbar.MaterialToolbar>
-
-    <!-- LOGIN Button -->
-
-    <!-- REGISTER Button -->
 
     <Button
         android:id="@+id/button8"
@@ -66,5 +65,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button8"
         app:layout_constraintWidth_percent="0.6" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

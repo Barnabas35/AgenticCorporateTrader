@@ -1,17 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_my_assets"
         android:icon="@drawable/ic_assets"
-        android:title="My Assets" />
-
+        android:title="Assets" />
     <item
-        android:id="@+id/nav_stock_activity"
+        android:id="@+id/nav_stock"
         android:icon="@drawable/ic_stock"
-        android:title="Stocks" />
-
+        android:title="Stock" />
     <item
         android:id="@+id/nav_menu"
-        android:icon="@drawable/ic_burger_menu"
+        android:icon="@drawable/ic_menu"
         android:title="Menu" />
 </menu>
