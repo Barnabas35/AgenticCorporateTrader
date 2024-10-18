@@ -22,5 +22,14 @@ class MenuActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(0, 0)  // Disable the transition animation
         }
+
+        // Find the profile button and set its click listener
+        val reviewpageButton = findViewById<Button>(R.id.reviewpageButton)
+        reviewpageButton.setOnClickListener {
+            // Start ProfileActivity without animation
+            val intent = Intent(this, ReviewPageActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)  // Disable the transition animation
+        }
     }
 }

@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -17,6 +18,15 @@ class ProfileActivity : AppCompatActivity() {
 
         // Set up the bottom navigation, pass -1 since ProfileActivity has no associated nav item
         NavigationHelper.setupBottomNavigation(this, -1)
+
+        // Find the bottom navigation view
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        // Explicitly deselect all menu items
+        bottomNavigationView.menu.setGroupCheckable(0, true, false)
+        for (i in 0 until bottomNavigationView.menu.size()) {
+            bottomNavigationView.menu.getItem(i).isChecked = false
+        }
 
         // Retrieve token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -60,6 +70,18 @@ class ProfileActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure the navigation view doesn't select any item for ProfileActivity
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        // Explicitly deselect all items again to ensure nothing is selected
+        bottomNavigationView.menu.setGroupCheckable(0, true, false)
+        for (i in 0 until bottomNavigationView.menu.size()) {
+            bottomNavigationView.menu.getItem(i).isChecked = false
         }
     }
 
