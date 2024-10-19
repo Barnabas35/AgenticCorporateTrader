@@ -9,3 +9,4 @@ backend/python-api/aws-push-docker.txt
 *.pyc
 .idea/workspace.xml
 frontend/.DS_Store
+.idea
