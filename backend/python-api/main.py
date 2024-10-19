@@ -84,5 +84,26 @@ def get_client_list():
     return jsonify(q_get_client_list(request.json)), 200
 
 
+# Submit support ticket
+@app.route("/submit-support-ticket", methods=["POST"])
+def submit_support_ticket():
+    from query_library.submit_support_ticket import q_submit_support_ticket
+    return jsonify(q_submit_support_ticket(request.json)), 200
+
+
+# Get support ticket list
+@app.route("/get-support-ticket-list", methods=["POST"])
+def get_support_ticket_list():
+    from query_library.get_support_ticket_list import q_get_support_ticket_list
+    return jsonify(q_get_support_ticket_list(request.json)), 200
+
+
+# Resolve support ticket
+@app.route("/resolve-support-ticket", methods=["POST"])
+def resolve_support_ticket():
+    from query_library.resolve_support_ticket import q_resolve_support_ticket
+    return jsonify(q_resolve_support_ticket(request.json)), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
