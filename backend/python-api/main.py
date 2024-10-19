@@ -105,5 +105,19 @@ def resolve_support_ticket():
     return jsonify(q_resolve_support_ticket(request.json)), 200
 
 
+# Submit review
+@app.route("/submit-review", methods=["POST"])
+def submit_review():
+    from query_library.submit_review import q_submit_review
+    return jsonify(q_submit_review(request.json)), 200
+
+
+# Get review list
+@app.route("/get-review-list", methods=["POST"])
+def get_review_list():
+    from query_library.get_review_list import q_get_review_list
+    return jsonify(q_get_review_list(request.json)), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
