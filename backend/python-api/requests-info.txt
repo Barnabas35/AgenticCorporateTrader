@@ -229,8 +229,8 @@ Headers:
 Body (JSON):
 {
   "session_token": "string",
-  "score": "integer",               // 1 to 5
-  "comment": "string"
+  "review_score": "integer",        // 1 to 5
+  "review_comment": "string"
 }
 Response: JSON - Status message
 Example:
@@ -256,8 +256,8 @@ Example:
      "user_id": "AgSO2FnIP46FA"},
 
     {"score": 3,
-     "review_comment": "comment2",
-     "review_user_id": "AgSO2FnIP46FB"}
+     "comment": "comment2",
+     "user_id": "AgSO2FnIP46FB"}
   ],
   "status": "Success"
 }
