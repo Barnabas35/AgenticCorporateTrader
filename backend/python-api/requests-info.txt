@@ -155,3 +155,68 @@ Example:
 {
   "status": "Success"
 }
+
+
+### Submit support ticket -------------------------------
+URL & Method: POST /submit-support-ticket
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "issue_description": "string",
+  "issue_subject": "string"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get support ticket list -----------------------------
+URL & Method: POST /get-support-ticket-list
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"         // User session token of an admin
+}
+Response: JSON - List of support tickets and status message
+Example:
+{
+  "support_tickets": [
+    {"issue_subject": "subject1",
+     "user_id": "AgSO2FnIP46FA",
+     "issue_description": "description1",
+     "issue_status": "open",
+     "ticket_id": "AgSO2FnIP46FA",
+     "unix_timestamp": 1234567890},
+
+    {"issue_subject": "subject2",
+     "user_id": "AgSO2FnIP46FB",
+     "issue_description": "description2",
+     "issue_status": "closed",
+     "ticket_id": "AgSO2FnIP46FB",
+     "unix_timestamp": 1234567890}
+  ],
+  "status": "Success"
+}
+
+
+### Resolve support ticket ------------------------------
+URL & Method: POST /resolve-support-ticket
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",        // User session token of an admin
+  "ticket_id": "string"
+  "response_subject": "string",     // Email subject
+  "response_body": "string"         // Email body
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
