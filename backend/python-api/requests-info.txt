@@ -220,3 +220,44 @@ Example:
 {
   "status": "Success"
 }
+
+
+### Submit review ---------------------------------------
+URL & Method: POST /submit-review
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "score": "integer",               // 1 to 5
+  "comment": "string"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get review list -------------------------------------
+URL & Method: POST /get-review-list
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"        // User session token of an admin
+}
+Response: JSON - List of reviews and status message
+Example:
+{
+  "reviews": [
+    {"score": 5,
+     "comment": "comment1",
+     "user_id": "AgSO2FnIP46FA"},
+
+    {"score": 3,
+     "review_comment": "comment2",
+     "review_user_id": "AgSO2FnIP46FB"}
+  ],
+  "status": "Success"
+}
