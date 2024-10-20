@@ -16,6 +16,7 @@ EXPOSE 5000
 RUN pip install firebase-admin
 RUN pip install flask
 RUN pip install flask-cors
+RUN pip install polygon-api-client
 
 # Run the application
 CMD ["python", "main.py"]
