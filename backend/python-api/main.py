@@ -119,5 +119,12 @@ def get_review_list():
     return jsonify(q_get_review_list(request.json)), 200
 
 
+# Get user type
+@app.route("/get-user-type", methods=["POST"])
+def get_user_type():
+    from query_library.get_user_type import q_get_user_type
+    return jsonify(q_get_user_type(request.json)), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
