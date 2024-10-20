@@ -2,6 +2,7 @@
 # This is a singleton class that provides access to the polygon client
 
 from polygon import RESTClient
+import requests
 import os
 
 
@@ -13,6 +14,16 @@ class StockAPIAccess:
         if StockAPIAccess.__instance is None:
             StockAPIAccess()
         return StockAPIAccess.__instance.client
+
+    @staticmethod
+    def request(url):
+        api_key = StockAPIAccess.__instance.API_KEY_ENV
+        response = requests.get(url, headers={"Authorization": f"Bearer {api_key}"})
+
+        if response.status_code != 200:
+            return response.status_code
+
+        return response.json()
 
     def __init__(self):
         if StockAPIAccess.__instance is not None:
