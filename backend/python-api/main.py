@@ -119,6 +119,20 @@ def get_review_list():
     return jsonify(q_get_review_list(request.json)), 200
 
 
+# Get top stocks - Returns a list of stock symbols and their respective company names and prices (10 max)
+@app.route("/get-top-stocks", methods=["GET"])
+def get_top_stocks():
+    from polygon_request_library.get_top_stocks import api_get_top_stocks
+    return jsonify(api_get_top_stocks(request.args)), 200
+
+
+# Quick search stock by text - Returns a list of stock symbols and their respective company names (5 max)
+@app.route("/text-search-stock", methods=["POST"])
+def text_search_stock():
+    from polygon_request_library.text_search_market import api_text_search_market
+    return jsonify(api_text_search_market(request.json)), 200
+
+  
 # Get user type
 @app.route("/get-user-type", methods=["POST"])
 def get_user_type():
