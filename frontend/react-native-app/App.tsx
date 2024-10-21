@@ -8,7 +8,9 @@ import Login from './app/login';
 import Contact from './app/contact';
 import Register from './app/register';
 import UserAccount from './app/userAccount';
+import CryptoSearch from './app/cryptoSearch';
 import About from './app/about'
+import ClientManagement from './app/client-management';
 import { View, StyleSheet } from 'react-native'; // Import View and StyleSheet for layout
 import { UserProvider } from './components/userContext';
 
@@ -26,6 +28,8 @@ const App: React.FC = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/user-account" element={<UserAccount />} />
               <Route path="/about" element={<About />} />
+              <Route path="/client-management" element={<ClientManagement />} />
+              <Route path="crypto-search" element={<CryptoSearch />} />
             </Routes>
           </View>
         </View>
