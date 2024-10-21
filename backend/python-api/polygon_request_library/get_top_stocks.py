@@ -41,4 +41,4 @@ def api_get_top_stocks(req_args):
                            "price": stock[0].close,
                            "currency": details.currency_name})
 
-    return {"stocks": top_stocks, "status": "Success"}
+    return {"ticker_details": top_stocks, "status": "Success"}

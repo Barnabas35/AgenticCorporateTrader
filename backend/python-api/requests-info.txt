@@ -270,7 +270,29 @@ Parameters:
 Response: JSON - List of top stocks
 Example:
 {
-  "stocks": [
+  "ticker_details": [
+    {"symbol": "AAPL", "company_name": "Apple Inc.", "price": 123.45, "currency": "usd"},
+    {"symbol": "GOOGL", "company_name": "Google Inc.", "price": 678.90, "currency": "usd"}
+  ],
+  "status": "Success"
+}
+
+
+### Search stock markets --------------------------------
+URL & Method: POST /text-search-markets
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "search_query": "string",
+  "limit": "integer",        // Number of results to return (default 5, min 1, max 50)
+  "session_token": "string",
+  "show_price": "boolean"    // Show price in results (default false, true takes twice as long)
+}
+Response: JSON - List of tickers
+Example:
+{
+  "ticker_details": [
     {"symbol": "AAPL", "company_name": "Apple Inc.", "price": 123.45, "currency": "usd"},
     {"symbol": "GOOGL", "company_name": "Google Inc.", "price": 678.90, "currency": "usd"}
   ],
