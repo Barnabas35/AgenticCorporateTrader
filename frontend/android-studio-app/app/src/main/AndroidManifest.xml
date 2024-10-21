@@ -57,6 +57,11 @@
             android:name=".ReviewPageActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- Review Page Activity -->
+        <activity
+            android:name=".SupportPageActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
     </application>
 
 </manifest>

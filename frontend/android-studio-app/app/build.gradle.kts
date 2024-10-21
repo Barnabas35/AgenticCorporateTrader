@@ -58,4 +58,6 @@ dependencies {
 
     // OkHttp for logging HTTP requests/responses (optional, but useful for debugging)
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+
 }

@@ -4,12 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RatingBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ReviewPageActivity : AppCompatActivity() {
 
@@ -17,7 +21,7 @@ class ReviewPageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reviewpage)
 
-        // Set up the bottom navigation and pass -1 since ReviewPageActivity has no associated nav item
+        // Set up the bottom navigation
         NavigationHelper.setupBottomNavigation(this, -1)
 
         // Retrieve user's name from SharedPreferences
@@ -37,20 +41,60 @@ class ReviewPageActivity : AppCompatActivity() {
             val featuresAnswer = findViewById<EditText>(R.id.editTextFeatures).text.toString()
             val overallSatisfactionAnswer = findViewById<EditText>(R.id.editTextSatisfaction).text.toString()
 
-            // Handle form submission - Additional Comments is optional
+            // Check that all required fields are filled
             if (easeOfUseAnswer.isNotEmpty() && featuresAnswer.isNotEmpty() && overallSatisfactionAnswer.isNotEmpty()) {
-                Toast.makeText(this, "Thank you for your review!", Toast.LENGTH_LONG).show()
+                // Retrieve session token from SharedPreferences
+                val sessionToken = sharedPreferences.getString("session_token", null)
+                Log.d("SessionToken", "Retrieved token: $sessionToken") // Log for debugging
 
-                // If rating is 4 or higher, open Play Store for user to rate the app
-                if (rating >= 4) {
-                    openPlayStoreForRating()
+                // Ensure session token is available
+                if (sessionToken != null) {
+                    submitReview(sessionToken, rating.toInt(), reviewText)
+                } else {
+                    Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
                 }
-
-                // Optionally, you can save the review or send it to a backend service here
             } else {
                 Toast.makeText(this, "Please fill in all required fields before submitting.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    // Function to submit the review to the API using RetrofitClient
+    private fun submitReview(sessionToken: String, rating: Int, reviewComment: String) {
+        val reviewRequest = ReviewRequest(
+            session_token = sessionToken,
+            review_score = rating,
+            review_comment = reviewComment
+        )
+
+        // Use RetrofitClient to submit the review
+        RetrofitClient.apiService.submitReview(reviewRequest).enqueue(object : Callback<ReviewResponse> {
+            override fun onResponse(call: Call<ReviewResponse>, response: Response<ReviewResponse>) {
+                if (response.isSuccessful) {
+                    val reviewResponse = response.body()
+                    if (reviewResponse?.status == "Success") {
+                        // Show success message
+                        Toast.makeText(this@ReviewPageActivity, "Review submitted successfully!", Toast.LENGTH_LONG).show()
+
+                        // If rating is 4 or higher, open Play Store for user to rate the app
+                        if (rating >= 4) {
+                            openPlayStoreForRating()
+                        }
+                    } else {
+                        // Handle API error message
+                        Toast.makeText(this@ReviewPageActivity, "Error: ${reviewResponse?.status}", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    // Handle unsuccessful response
+                    Toast.makeText(this@ReviewPageActivity, "Failed to submit review: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ReviewResponse>, t: Throwable) {
+                // Handle failure to connect to the API
+                Toast.makeText(this@ReviewPageActivity, "Error submitting review: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun openPlayStoreForRating() {

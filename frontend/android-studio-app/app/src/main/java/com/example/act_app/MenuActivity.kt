@@ -23,11 +23,20 @@ class MenuActivity : AppCompatActivity() {
             overridePendingTransition(0, 0)  // Disable the transition animation
         }
 
-        // Find the profile button and set its click listener
+        // Find the review button and set its click listener
         val reviewpageButton = findViewById<Button>(R.id.reviewpageButton)
         reviewpageButton.setOnClickListener {
-            // Start ProfileActivity without animation
+            // Start ReviewPageActivity without animation
             val intent = Intent(this, ReviewPageActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)  // Disable the transition animation
+        }
+
+        // Find the support button and set its click listener
+        val supportButton = findViewById<Button>(R.id.supportButton)
+        supportButton.setOnClickListener {
+            // Start SupportPageActivity without animation
+            val intent = Intent(this, SupportPageActivity::class.java)
             startActivity(intent)
             overridePendingTransition(0, 0)  // Disable the transition animation
         }

@@ -57,10 +57,11 @@ class LoginActivity : AppCompatActivity() {
                             val token = apiResponse.session_token
                             saveUserDetails(token)
 
-                            // Fetch username, email, and profile icon
+                            // Fetch username, email, profile icon, and user type
                             fetchAndSaveUsername(token)
                             fetchAndSaveEmail(token)
                             fetchAndSaveProfileIcon(token)
+                            fetchAndSaveUserType(token)
 
                             // Navigate to MyAssetsActivity
                             val intent = Intent(this@LoginActivity, MyAssetsActivity::class.java)
@@ -93,8 +94,9 @@ class LoginActivity : AppCompatActivity() {
     private fun saveUserDetails(token: String) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putString("api_token", token)
+        editor.putString("session_token", token) // Use "session_token" as the key
         editor.apply()
+        Log.d("SessionToken", "Saving token: $token") // Log for debugging
     }
 
     // Fetch and save username
@@ -175,6 +177,33 @@ class LoginActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putString("profile_icon_url", profileIconUrl)
+        editor.apply()
+    }
+
+    // Fetch and save user type
+    private fun fetchAndSaveUserType(token: String) {
+        RetrofitClient.apiService.getUserType(TokenRequest(token)).enqueue(object : Callback<UserTypeResponse> {
+            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val userType = response.body()?.user_type ?: "Unknown"
+                    Log.d("USER_TYPE_FETCHED", "Fetched user type: $userType")
+                    saveUserType(userType)
+                } else {
+                    Log.e("API_ERROR", "Failed to fetch user type: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
+                Log.e("NETWORK_ERROR", "Error fetching user type: ${t.message}")
+            }
+        })
+    }
+
+    // Save user type to SharedPreferences
+    private fun saveUserType(userType: String) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("user_type", userType)
         editor.apply()
     }
 }

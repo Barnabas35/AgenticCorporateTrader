@@ -40,16 +40,20 @@ class ProfileActivity : AppCompatActivity() {
             return
         }
 
-        // Find TextViews for username and email
+        // Find TextViews for username, email, and user type
         val usernameTextView = findViewById<TextView>(R.id.username)
         val emailTextView = findViewById<TextView>(R.id.email)
+        val userTypeTextView = findViewById<TextView>(R.id.userType)  // New TextView for User Type
         val profileImageView = findViewById<ImageView>(R.id.profileImage)
 
         // Retrieve and display user's email and username from SharedPreferences
         val userEmail = sharedPreferences.getString("user_email", "Unknown")
         val userName = sharedPreferences.getString("user_name", "Unknown")
+        val userType = sharedPreferences.getString("user_type", "Unknown")  // Retrieve the user type
+
         usernameTextView.text = "Username: $userName"
         emailTextView.text = "Email: $userEmail"
+        userTypeTextView.text = "User Type: $userType"  // Display the user type
 
         // Retrieve and display profile icon URL
         val profileIconUrl = sharedPreferences.getString("profile_icon_url", null)
