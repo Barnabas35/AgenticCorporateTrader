@@ -298,3 +298,19 @@ Example:
   ],
   "status": "Success"
 }
+
+
+### Get user type ---------------------------------------
+URL & Method: POST /get-user-type
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - User type and status message
+Example:
+{
+  "user_type": "string",        // "admin" or "fa" or "fm"
+  "status": "Success"
+}

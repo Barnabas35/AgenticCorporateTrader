@@ -132,6 +132,13 @@ def text_search_stock():
     from polygon_request_library.text_search_market import api_text_search_market
     return jsonify(api_text_search_market(request.json)), 200
 
+  
+# Get user type
+@app.route("/get-user-type", methods=["POST"])
+def get_user_type():
+    from query_library.get_user_type import q_get_user_type
+    return jsonify(q_get_user_type(request.json)), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
