@@ -16,8 +16,7 @@ def q_submit_review(request_json):
     review_score = request_json["review_score"]
     review_comment = request_json["review_comment"]
 
-    # Parse review subject and review description to be safe for Firestore
-    review_score = firestore_safe(review_score)
+    # Parse session token and review comment to be safe for Firestore
     review_comment = firestore_safe(review_comment)
     session_token = firestore_safe(session_token)
 
