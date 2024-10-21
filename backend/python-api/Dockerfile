@@ -6,8 +6,10 @@ LABEL authors="Barnabas Somodi"
 # Add our files to the working directory
 ADD main.py .
 ADD db_access.py .
+ADD stock_api_access.py .
 ADD query_library/ ./query_library/
 ADD function_library/ ./function_library/
+ADD polygon_request_library/ ./polygon_request_library/
 
 # Expose port 5000
 EXPOSE 5000
@@ -32,6 +34,6 @@ CMD ["python", "main.py"]
 # docker build -t act-python-api-v<version_number> .
 
 # TO RUN
-# Naviagte to the location of the .env file and run:
+# Navigate to the location of the .env file and run:
 # (Dont forget to replace <version_number> with the version number of the image)
 # docker run --env-file .env -p 5000:5000 --name python-api -d act-python-api-v<version_number>
