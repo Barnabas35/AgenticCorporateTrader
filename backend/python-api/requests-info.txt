@@ -261,3 +261,18 @@ Example:
   ],
   "status": "Success"
 }
+
+
+### Get top stocks --------------------------------------
+URL & Method: GET /get-top-stocks
+Parameters:
+ - limit: integer (optional) - Number of top stocks to return (default 10)
+Response: JSON - List of top stocks
+Example:
+{
+  "stocks": [
+    {"symbol": "AAPL", "company_name": "Apple Inc.", "price": 123.45, "currency": "usd"},
+    {"symbol": "GOOGL", "company_name": "Google Inc.", "price": 678.90, "currency": "usd"}
+  ],
+  "status": "Success"
+}
