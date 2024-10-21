@@ -129,15 +129,8 @@ def get_top_stocks():
 # Quick search stock by text - Returns a list of stock symbols and their respective company names (5 max)
 @app.route("/text-search-stock", methods=["POST"])
 def text_search_stock():
-    from polygon_request_library.text_search_stock import q_text_search_stock
-    return jsonify(q_text_search_stock(request.json)), 200
-
-
-# Get stock list by text search - Returns a list of stock symbols and their respective company names and prices (50 max)
-@app.route("/get-stock-list", methods=["POST"])
-def get_stock_list():
-    from polygon_request_library.get_stock_list import q_get_stock_list
-    return jsonify(q_get_stock_list(request.json)), 200
+    from polygon_request_library.text_search_market import api_text_search_market
+    return jsonify(api_text_search_market(request.json)), 200
 
 
 if __name__ == "__main__":

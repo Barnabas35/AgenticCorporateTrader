@@ -20,7 +20,7 @@ def api_get_top_stocks(req_args):
         limit = firestore_safe(limit)
 
         try:
-            limit = int(limit)
+            limit = min(max(int(limit), 1), 10)
         except ValueError:
             return {"status": "Limit must be an integer."}
 

@@ -32,12 +32,12 @@ class StockAPIAccess:
             StockAPIAccess.__instance = self
 
             # Try to get API key from environment variable
-            API_KEY_ENV = os.getenv("POLYGON_API_KEY")
+            self.API_KEY_ENV = os.getenv("POLYGON_API_KEY")
 
             # If API_KEY_ENV environment variable is not set, use fallback config.txt
-            if API_KEY_ENV is None:
+            if self.API_KEY_ENV is None:
                 with open("config.txt", "r") as f:
-                    API_KEY_ENV = f.readlines()[2].strip("\n")
+                    self.API_KEY_ENV = f.readlines()[2].strip("\n")
                     f.close()
 
-            self.client = RESTClient(API_KEY_ENV)
+            self.client = RESTClient(self.API_KEY_ENV)
