@@ -13,7 +13,7 @@ def q_submit_review(request_json):
 
     # Get user session id, review subject, and review description from request
     session_token = request_json["session_token"]
-    review_score = request_json["review_score"]
+    review_score = str(request_json["review_score"])
     review_comment = request_json["review_comment"]
 
     # Parse session token and review comment to be safe for Firestore
@@ -22,7 +22,7 @@ def q_submit_review(request_json):
 
     # Make sure review score is a number between 1 and 5
     try:
-        if not review_score.isnumeric() or int(review_score) < 1 or int(review_score) > 5:
+        if (not review_score.isnumeric()) or int(review_score) < 1 or int(review_score) > 5:
             return {"status": "Invalid review score."}
         else:
             review_score = int(review_score)

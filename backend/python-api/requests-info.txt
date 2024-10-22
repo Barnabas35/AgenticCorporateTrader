@@ -314,3 +314,18 @@ Example:
   "user_type": "string",        // "admin" or "fa" or "fm"
   "status": "Success"
 }
+
+
+### Delete user -----------------------------------------
+URL & Method: POST /delete-user
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
