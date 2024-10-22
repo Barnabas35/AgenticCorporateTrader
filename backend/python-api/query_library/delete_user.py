@@ -30,5 +30,11 @@ def q_delete_user(request_json):
     # Delete user
     db.collection("users").document(user_id).delete()
 
+    # Delete user's client list
+    client_list = (db.collection("clients").where(field_path="user_id", op_string="==", value=user_id).get())
+    for client in client_list:
+        client_id = client.id
+        db.collection("clients").document(client_id).delete()
+
     # Return email
     return {"status": "Success"}
