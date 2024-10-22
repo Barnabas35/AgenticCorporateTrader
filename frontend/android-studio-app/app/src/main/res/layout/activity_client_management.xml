@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundLight">
 
+    <!-- Toolbar for Client Management -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/assetsToolbar"
         android:layout_width="0dp"
@@ -19,7 +22,6 @@
             android:id="@+id/toolbarTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:gravity="center"
             android:text="Client Management"
             android:textAlignment="center"
@@ -27,15 +29,73 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
+    <!-- CardView for adding new client -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/addClientContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/assetsToolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editTextNewClient"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Enter new client name"
+                android:padding="12dp"
+                android:background="@drawable/btn_bg"
+                android:backgroundTint="#E0E0E0"
+                android:layout_marginEnd="8dp"
+                android:inputType="text" />
+
+
+
+            <Button
+                android:id="@+id/addClientButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ADD CLIENT"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white"
+                android:padding="12dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- RecyclerView for listing clients -->
+
+    <!-- Bottom Navigation View -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/clientRecyclerView"
+        android:layout_width="393dp"
+        android:layout_height="463dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addClientContainer"
+        app:layout_constraintVertical_bias="0.0" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/bottom_nav_menu"
         app:itemIconTint="@color/activeIconColor"
         app:itemTextColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

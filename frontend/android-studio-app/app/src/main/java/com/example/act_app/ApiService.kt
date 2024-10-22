@@ -65,6 +65,20 @@ data class SupportTicketRequest(
     val issue_description: String     // Detailed description of the issue
 )
 
+data class AddClientRequest(val session_token: String, val client_name: String)
+
+data class RemoveClientRequest(val session_token: String, val client_name: String)
+
+data class ClientListResponse(
+    val clients: List<Client>,
+    val status: String
+)
+
+data class Client(
+    val client_name: String,
+    val id: String
+)
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -97,5 +111,14 @@ interface ApiService {
 
     @POST("/submit-support-ticket")
     fun submitSupportTicket(@Body supportTicketRequest: SupportTicketRequest): Call<ApiResponse>
+
+    @POST("/get-client-list")
+    fun getClientList(@Body tokenRequest: TokenRequest): Call<ClientListResponse>
+
+    @POST("/add-client")
+    fun addClient(@Body addClientRequest: AddClientRequest): Call<ApiResponse>
+
+    @POST("/remove-client")
+    fun removeClient(@Body removeClientRequest: RemoveClientRequest): Call<ApiResponse>
 
 }
