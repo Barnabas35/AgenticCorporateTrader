@@ -140,5 +140,12 @@ def get_user_type():
     return jsonify(q_get_user_type(request.json)), 200
 
 
+# Delete user
+@app.route("/delete-user", methods=["POST"])
+def delete_user():
+    from query_library.delete_user import q_delete_user
+    return jsonify(q_delete_user(request.json)), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
