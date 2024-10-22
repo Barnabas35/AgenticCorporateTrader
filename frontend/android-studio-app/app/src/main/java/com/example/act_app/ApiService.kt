@@ -59,6 +59,12 @@ data class UserTypeResponse(
     val status: String?           // Status message, such as "Success"
 )
 
+data class SupportTicketRequest(
+    val session_token: String,        // The user's session token
+    val issue_subject: String,        // Subject of the issue
+    val issue_description: String     // Detailed description of the issue
+)
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -88,4 +94,8 @@ interface ApiService {
 
     @POST("/get-user-type")
     fun getUserType(@Body tokenRequest: TokenRequest): Call<UserTypeResponse>
+
+    @POST("/submit-support-ticket")
+    fun submitSupportTicket(@Body supportTicketRequest: SupportTicketRequest): Call<ApiResponse>
+
 }

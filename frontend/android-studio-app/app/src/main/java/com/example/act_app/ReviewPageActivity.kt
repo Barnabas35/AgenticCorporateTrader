@@ -35,8 +35,9 @@ class ReviewPageActivity : AppCompatActivity() {
         // Find the Submit button and set its click listener
         val submitButton = findViewById<Button>(R.id.buttonSubmit)
         submitButton.setOnClickListener {
+            // Gather input data
             val reviewText = findViewById<EditText>(R.id.editTextReview).text.toString()
-            val rating = findViewById<RatingBar>(R.id.ratingBar).rating
+            val rating = findViewById<RatingBar>(R.id.ratingBar).rating.toInt()
             val easeOfUseAnswer = findViewById<EditText>(R.id.editTextEaseOfUse).text.toString()
             val featuresAnswer = findViewById<EditText>(R.id.editTextFeatures).text.toString()
             val overallSatisfactionAnswer = findViewById<EditText>(R.id.editTextSatisfaction).text.toString()
@@ -49,7 +50,8 @@ class ReviewPageActivity : AppCompatActivity() {
 
                 // Ensure session token is available
                 if (sessionToken != null) {
-                    submitReview(sessionToken, rating.toInt(), reviewText)
+                    // Submit the review
+                    submitReview(sessionToken, rating, reviewText)
                 } else {
                     Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
                 }
