@@ -10,12 +10,20 @@ data class LoginRequest(val email: String, val password: String)
 // Data class for register request
 data class RegisterRequest(
     val username: String,
+    val email: String,
     val password: String,
-    val email: String
+    val user_type: String
 )
 
 // Data class for the token request (used for get-username, get-email, etc.)
 data class TokenRequest(val session_token: String)
+
+// Data class for submitting a review
+data class ReviewRequest(
+    val session_token: String,     // Session token to authenticate the user
+    val review_score: Int,         // Review score, an integer from 1 to 5
+    val review_comment: String     // Review comment text
+)
 
 // API response model for login/register response
 data class ApiResponse(
@@ -37,8 +45,38 @@ data class EmailResponse(
 
 // Data class for the profile icon response
 data class ProfileIconResponse(
-    val url: String?,          // Profile icon URL returned from the API
-    val status: String?        // Status message
+    val url: String?,              // Profile icon URL returned from the API
+    val status: String?            // Status message
+)
+
+// API response model for submitting a review
+data class ReviewResponse(
+    val status: String?            // Status message, such as "Success" or "Error"
+)
+
+data class UserTypeResponse(
+    val user_type: String?,       // The user type, such as "admin", "fa", or "fm"
+    val status: String?           // Status message, such as "Success"
+)
+
+data class SupportTicketRequest(
+    val session_token: String,        // The user's session token
+    val issue_subject: String,        // Subject of the issue
+    val issue_description: String     // Detailed description of the issue
+)
+
+data class AddClientRequest(val session_token: String, val client_name: String)
+
+data class RemoveClientRequest(val session_token: String, val client_name: String)
+
+data class ClientListResponse(
+    val clients: List<Client>,
+    val status: String
+)
+
+data class Client(
+    val client_name: String,
+    val id: String
 )
 
 // Retrofit interface for API calls
@@ -63,5 +101,24 @@ interface ApiService {
     // Endpoint for getting the profile icon
     @POST("/get-profile-icon")
     fun getProfileIcon(@Body tokenRequest: TokenRequest): Call<ProfileIconResponse>
+
+    // Endpoint for submitting a review
+    @POST("/submit-review")
+    fun submitReview(@Body reviewRequest: ReviewRequest): Call<ReviewResponse>
+
+    @POST("/get-user-type")
+    fun getUserType(@Body tokenRequest: TokenRequest): Call<UserTypeResponse>
+
+    @POST("/submit-support-ticket")
+    fun submitSupportTicket(@Body supportTicketRequest: SupportTicketRequest): Call<ApiResponse>
+
+    @POST("/get-client-list")
+    fun getClientList(@Body tokenRequest: TokenRequest): Call<ClientListResponse>
+
+    @POST("/add-client")
+    fun addClient(@Body addClientRequest: AddClientRequest): Call<ApiResponse>
+
+    @POST("/remove-client")
+    fun removeClient(@Body removeClientRequest: RemoveClientRequest): Call<ApiResponse>
 
 }

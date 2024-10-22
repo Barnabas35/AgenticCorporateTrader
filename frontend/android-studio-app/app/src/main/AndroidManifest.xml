@@ -52,6 +52,21 @@
             android:name=".ProfileActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- Review Page Activity -->
+        <activity
+            android:name=".ReviewPageActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+        <!-- Support Page Activity -->
+        <activity
+            android:name=".SupportPageActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+        <!-- Client Management Page Activity -->
+        <activity
+            android:name=".ClientManagementActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
     </application>
 
 </manifest>

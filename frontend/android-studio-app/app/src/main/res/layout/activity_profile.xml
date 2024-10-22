@@ -66,7 +66,7 @@
                 android:text="Username: "
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="16dp"/>
 
             <!-- Email -->
             <TextView
@@ -77,6 +77,16 @@
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:layout_marginBottom="16dp"/>
+
+            <!-- User Type -->
+            <TextView
+                android:id="@+id/userType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Type: "
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp" />
 
             <!-- Logout Button -->
             <Button
@@ -95,7 +105,7 @@
         android:layout_height="wrap_content"
         app:menu="@menu/bottom_nav_menu"
         app:itemIconTint="@color/activeIconColor"
-        app:itemTextColor="@color/activeIconColor"
+        app:itemTextColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

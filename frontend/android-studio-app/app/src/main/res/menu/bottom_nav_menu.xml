@@ -1,12 +1,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/nav_dummy"
+        android:icon="@android:color/transparent"
+        android:title=""
+        android:visible="false" />
+
+    <item
         android:id="@+id/nav_my_assets"
         android:icon="@drawable/ic_assets"
         android:title="Assets" />
+
     <item
         android:id="@+id/nav_stock"
         android:icon="@drawable/ic_stock"
         android:title="Stock" />
+
     <item
         android:id="@+id/nav_menu"
         android:icon="@drawable/ic_menu"

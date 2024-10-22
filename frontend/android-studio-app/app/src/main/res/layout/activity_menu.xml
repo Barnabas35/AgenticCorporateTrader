@@ -43,22 +43,84 @@
         app:srcCompat="@drawable/tradeagentlylogogray" />
 
     <!-- Button to access ProfileActivity -->
-
-    <!-- Bottom Navigation -->
     <Button
         android:id="@+id/profileButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="@drawable/btn_bg"
         android:backgroundTint="@color/primary"
-        android:text="Go to Profile"
+        android:elevation="4dp"
+        android:padding="12dp"
+        android:text="PROFILE"
         android:textColor="@color/white"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageView"
-        app:layout_constraintVertical_bias="0.055" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.018" />
+
+    <!-- Button to access ReviewPageActivity -->
+    <Button
+        android:id="@+id/reviewpageButton"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="@color/primary"
+        android:elevation="4dp"
+        android:padding="12dp"
+        android:text="REVIEW"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profileButton"
+        app:layout_constraintVertical_bias="0.066" />
+
+    <!-- Button to access SupportPageActivity -->
+
+    <!-- Button to access SupportPageActivity -->
+
+    <!-- Bottom Navigation View -->
+
+    <Button
+        android:id="@+id/supportButton"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="@color/primary"
+        android:elevation="4dp"
+        android:padding="12dp"
+        android:text="SUPPORT"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reviewpageButton"
+        app:layout_constraintVertical_bias="0.076" />
+
+    <Button
+        android:id="@+id/clientManagementButton"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="@color/primary"
+        android:elevation="4dp"
+        android:padding="12dp"
+        android:text="CLIENT MANAGEMENT"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/supportButton"
+        app:layout_constraintVertical_bias="0.083" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
