@@ -126,7 +126,7 @@ def get_top_stocks():
     return jsonify(api_get_top_stocks(request.args)), 200
 
 
-# Quick search stock by text - Returns a list of stock symbols and their respective company names (5 max)
+# Quick search stock by text
 @app.route("/text-search-stock", methods=["POST"])
 def text_search_stock():
     from polygon_request_library.text_search_market import api_text_search_market
@@ -145,6 +145,20 @@ def get_user_type():
 def delete_user():
     from query_library.delete_user import q_delete_user
     return jsonify(q_delete_user(request.json)), 200
+
+
+# All details of a ticker
+@app.route("/get-ticker-info", methods=["POST"])
+def get_stock_price():
+    from polygon_request_library.get_ticker_info import api_get_ticker_info
+    return jsonify(api_get_ticker_info(request.json)), 200
+
+
+# Get ticker aggregates for time range
+@app.route("/get-ticker-aggregates", methods=["POST"])
+def get_stock_aggregates():
+    from polygon_request_library.get_ticker_aggregates import api_get_ticker_aggregates
+    return jsonify(api_get_ticker_aggregates(request.json)), 200
 
 
 if __name__ == "__main__":

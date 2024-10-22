@@ -329,3 +329,95 @@ Example:
 {
   "status": "Success"
 }
+
+
+### Get ticker info -------------------------------------
+URL & Method: POST /get-ticker-info
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "ticker": "string",
+  "session_token": "string"
+}
+Response: JSON - Ticker info and status message
+Example:
+{
+    "status": "Success",
+    "ticker_info": {
+        "change_percentage": -0.3467523680649498,
+        "close_price": 235.86,
+        "company_description": "Apple is among the largest companies in the world...",
+        "company_name": "Apple Inc.",
+        "currency": "usd",
+        "employee_count": 161000,
+        "high_price": 236.22,
+        "homepage": "https://www.apple.com",
+        "low_price": 232.6,
+        "open_price": 233.885,
+        "symbol": "AAPL",
+        "volume": 33278632.0
+    }
+}
+
+
+### Get ticker aggregates -------------------------------
+URL & Method: POST /get-ticker-aggregates
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "ticker": "string",
+  "session_token": "string",
+  "start_date": "string",           // Format: "YYYY-MM-DD"
+  "end_date": "string"              // Format: "YYYY-MM-DD"
+  "interval": "string"              // "hour", "day", "week", "month" (level of detail)
+  "limit": "integer"                // Number of data points to return (default 100, min 10, max 1000)
+}
+Response: JSON - List of aggregates
+Example:
+{
+  "aggregates": [                   // Most recent data first
+        {
+            "v": 8700,              // Volume
+            "vw": 236.0925,         // Volume weighted average price
+            "o": 236.12,            // Open price
+            "c": 236.0801,          // Close price
+            "h": 236.12,            // High price
+            "l": 236.05,            // Low price
+            "t": 1729626870000,     // Unix timestamp
+            "n": 145                // Number of trades
+        },
+        {
+            "v": 4298,
+            "vw": 236.1067,
+            "o": 236.095,
+            "c": 236.1201,
+            "h": 236.1201,
+            "l": 236.095,
+            "t": 1729626869000,
+            "n": 53
+        },
+        {
+            "v": 285,
+            "vw": 236.058,
+            "o": 236.095,
+            "c": 236.095,
+            "h": 236.095,
+            "l": 236.095,
+            "t": 1729626868000,
+            "n": 11
+        },
+        {
+            "v": 760,
+            "vw": 236.0928,
+            "o": 236.09,
+            "c": 236.1,
+            "h": 236.1,
+            "l": 236.09,
+            "t": 1729626867000,
+            "n": 21
+        }
+  ],
+  "status": "Success"
+}
