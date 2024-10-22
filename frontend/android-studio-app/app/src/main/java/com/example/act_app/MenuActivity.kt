@@ -40,5 +40,14 @@ class MenuActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(0, 0)  // Disable the transition animation
         }
+
+        // Find the client management button and set its click listener
+        val clientManagementButton = findViewById<Button>(R.id.clientManagementButton)
+        clientManagementButton.setOnClickListener {
+            // Start ClientManagementActivity without animation
+            val intent = Intent(this, ClientManagementActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)  // Disable the transition animation
+        }
     }
 }
