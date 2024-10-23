@@ -25,24 +25,39 @@ const Menu: React.FC = () => {
           Home
         </NavLink>
         <View style={styles.spacer} />
-        {sessionToken ? (
-          <>
-            <NavLink
-              to="/user-account"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              User Account
-            </NavLink>
-          </>
-        ) : (
-          <>
-            <NavLink
+        <NavLink
               to="/about"
               style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
             >
               About
             </NavLink>
             <View style={styles.spacer} />
+            <NavLink
+              to="/crypto-search"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              Crypto Search
+            </NavLink>
+            <View style={styles.spacer} />
+        {sessionToken ? (
+          <>
+            <NavLink
+              to="/client-management"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              Client Management
+            </NavLink>
+            <View style={styles.spacer} />
+            <NavLink
+              to="/user-account"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              User Account
+            </NavLink>
+
+          </>
+        ) : (
+          <>
             <NavLink
               to="/login-register"
               style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}

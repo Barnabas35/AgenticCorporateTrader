@@ -1,5 +1,3 @@
-// src/app/Register.tsx
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +7,7 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [userType, setUserType] = useState('user'); // Default user type is 'user'
   const navigate = useNavigate();
 
   const handleRegister = async () => {
@@ -23,6 +22,7 @@ const Register: React.FC = () => {
       username: username.trim(),
       email: email.trim(),
       password: password.trim(),
+      user_type: userType, // Include the user type in the registration request
     };
 
     try {
@@ -87,9 +87,24 @@ const Register: React.FC = () => {
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
+
+      {/* Dropdown for selecting user type */}
+      <View style={styles.dropdownContainer}>
+        <Text style={styles.label}>Select User Type:</Text>
+        <select
+          value={userType}
+          onChange={(e) => setUserType(e.target.value)}
+          style={styles.dropdown}
+        >
+          <option value="fa">Fund Administrator</option>
+          <option value="fm">Fund Manager</option>
+        </select>
+      </View>
+
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigate('/login-register')} style={styles.loginLink}>
         <Text style={styles.loginText}>Already have an account? Login here</Text>
       </TouchableOpacity>
@@ -119,6 +134,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
+  },
+  dropdownContainer: {
+    width: '30%',
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  dropdown: {
+    width: '100%',
+    height: 40,
+    padding: 10,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    backgroundColor: '#F2F1F1', // Gray background
   },
   button: {
     width: '30%',
