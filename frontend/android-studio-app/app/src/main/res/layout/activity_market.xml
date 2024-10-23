@@ -3,14 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/stockLayout"
+    android:id="@+id/marketLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundLight"
-    tools:context=".StockActivity">
+    tools:context=".MarketActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/stockToolbar"
+        android:id="@+id/marketToolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/activeIconColor"
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Stock Activity"
+            android:text="Market Activity"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textAlignment="center" />

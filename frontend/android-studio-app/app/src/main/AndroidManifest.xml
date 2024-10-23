@@ -37,9 +37,9 @@
             android:name=".MyAssetsActivity"
             android:exported="false" /> <!-- Internal activity -->
 
-        <!-- Stock Activity -->
+        <!-- Market Activity -->
         <activity
-            android:name=".StockActivity"
+            android:name=".MarketActivity"
             android:exported="false" /> <!-- Internal activity -->
 
         <!-- Menu Activity -->

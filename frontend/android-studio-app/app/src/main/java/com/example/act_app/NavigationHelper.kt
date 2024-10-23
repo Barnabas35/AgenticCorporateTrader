@@ -29,9 +29,9 @@ object NavigationHelper {
                     }
                     true
                 }
-                R.id.nav_stock -> {
-                    if (selectedItemId != R.id.nav_stock) {
-                        val intent = Intent(activity, StockActivity::class.java)
+                R.id.nav_market -> {
+                    if (selectedItemId != R.id.nav_market) {
+                        val intent = Intent(activity, MarketActivity::class.java)
                         activity.startActivity(intent)
                         activity.overridePendingTransition(0, 0)
                         activity.finish()
