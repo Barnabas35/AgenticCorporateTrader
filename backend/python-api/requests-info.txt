@@ -421,3 +421,18 @@ Example:
   ],
   "status": "Success"
 }
+
+
+### Logout user -----------------------------------------
+URL & Method: POST /logout
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}

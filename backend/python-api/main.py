@@ -161,5 +161,11 @@ def get_stock_aggregates():
     return jsonify(api_get_ticker_aggregates(request.json)), 200
 
 
+# Logout user
+@app.route("/logout", methods=["POST"])
+def logout():
+    from query_library.logout import q_logout
+    return jsonify(q_logout(request.json)), 200
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
