@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.act_app"
+    namespace = "com.tradeagently.act_app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.act_app"
+        applicationId = "com.tradeagently.act_app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -54,6 +54,9 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+
 
 
     // OkHttp for logging HTTP requests/responses (optional, but useful for debugging)
