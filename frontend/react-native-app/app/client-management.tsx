@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, TextInput, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { useSessionToken } from '../components/userContext';
+import { useNavigate } from 'react-router-dom';
 
 const ClientManagement: React.FC = () => {
   const [sessionToken] = useSessionToken(); // Get session token from user context
@@ -8,11 +9,21 @@ const ClientManagement: React.FC = () => {
   const [newClientName, setNewClientName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+
+  if (!sessionToken) {
+    // If not logged in, redirect to login
+    navigate('/login');
+    return;
+  }
+
 
   // Fetch client list from the API
   const fetchClientList = async () => {
     setLoading(true);
     setError(null);
+
 
     console.log("Session Token for fetchClientList:", sessionToken); // Troubleshooting: Print session token
 
