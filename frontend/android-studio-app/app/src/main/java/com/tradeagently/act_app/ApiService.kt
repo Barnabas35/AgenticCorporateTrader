@@ -156,7 +156,7 @@ interface ApiService {
     @GET("/get-top-stocks")
     fun getTopStocks(@Query("limit") limit: Int = 10): Call<TopStocksResponse>
 
-    @POST("/text-search-markets")
+    @POST("/text-search-stock")
     fun searchStocks(@Body searchRequest: SearchRequest): Call<StockSearchResponse>
 
     @POST("/delete-user")
