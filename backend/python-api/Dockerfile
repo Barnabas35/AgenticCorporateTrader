@@ -9,6 +9,7 @@ ADD db_access.py .
 ADD stock_api_access.py .
 ADD query_library/ ./query_library/
 ADD function_library/ ./function_library/
+ADD yfinance_requests/ ./yfinance_requests/
 ADD polygon_request_library/ ./polygon_request_library/
 
 # Expose port 5000
@@ -19,6 +20,7 @@ RUN pip install firebase-admin
 RUN pip install flask
 RUN pip install flask-cors
 RUN pip install polygon-api-client
+RUN pip install yfinance
 
 # Run the application
 CMD ["python", "main.py"]

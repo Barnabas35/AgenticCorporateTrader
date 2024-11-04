@@ -17,6 +17,9 @@ class StockAPIAccess:
 
     @staticmethod
     def request(url):
+        if StockAPIAccess.__instance is None:
+            StockAPIAccess()
+
         api_key = StockAPIAccess.__instance.API_KEY_ENV
         response = requests.get(url, headers={"Authorization": f"Bearer {api_key}"})
 

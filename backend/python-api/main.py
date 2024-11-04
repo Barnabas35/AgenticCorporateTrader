@@ -167,5 +167,33 @@ def logout():
     from query_library.logout import q_logout
     return jsonify(q_logout(request.json)), 200
 
+
+# Search for crypto by text
+@app.route("/text-search-crypto", methods=["POST"])
+def text_search_crypto():
+    from polygon_request_library.text_search_crypto import api_text_search_crypto
+    return jsonify(api_text_search_crypto(request.json)), 200
+
+
+# Get top cryptos
+@app.route("/get-top-cryptos", methods=["POST"])
+def get_top_cryptos():
+    from yfinance_requests.get_top_cryptos import api_get_top_cryptos
+    return jsonify(api_get_top_cryptos(request.json)), 200
+
+
+# Get crypto info
+@app.route("/get-crypto-info", methods=["POST"])
+def get_crypto_info():
+    from yfinance_requests.get_crypto_info import api_get_crypto_info
+    return jsonify(api_get_crypto_info(request.json)), 200
+
+
+# Get crypto aggregates for time range
+@app.route("/get-crypto-aggregates", methods=["POST"])
+def get_crypto_aggregates():
+    from yfinance_requests.get_crypto_aggregates import api_get_crypto_aggregates
+    return jsonify(api_get_crypto_aggregates(request.json)), 200
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
