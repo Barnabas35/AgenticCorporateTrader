@@ -62,6 +62,13 @@
         app:layout_constraintVertical_bias="0.018" />
 
     <!-- Button to access ReviewPageActivity -->
+
+    <!-- Button to access SupportPageActivity -->
+
+    <!-- Button to access SupportPageActivity -->
+
+    <!-- Bottom Navigation View -->
+
     <Button
         android:id="@+id/reviewpageButton"
         android:layout_width="200dp"
@@ -78,13 +85,7 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profileButton"
-        app:layout_constraintVertical_bias="0.066" />
-
-    <!-- Button to access SupportPageActivity -->
-
-    <!-- Button to access SupportPageActivity -->
-
-    <!-- Bottom Navigation View -->
+        app:layout_constraintVertical_bias="0.086" />
 
     <Button
         android:id="@+id/supportButton"
@@ -102,7 +103,23 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/reviewpageButton"
-        app:layout_constraintVertical_bias="0.076" />
+        app:layout_constraintVertical_bias="0.11" />
+
+    <Button
+        android:id="@+id/adminToolsButton"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="104dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="@color/primary"
+        android:elevation="4dp"
+        android:padding="12dp"
+        android:text="ADMIN TOOLS"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/supportButton" />
 
     <Button
         android:id="@+id/clientManagementButton"
@@ -117,10 +134,10 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/supportButton"
-        app:layout_constraintVertical_bias="0.083" />
+        app:layout_constraintVertical_bias="0.16" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

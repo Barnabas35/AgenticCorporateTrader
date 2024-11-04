@@ -110,6 +110,30 @@ data class DeleteUserResponse(
     val status: String
 )
 
+data class SupportTicketResponse(
+    val support_tickets: List<SupportTicket>,
+    val status: String
+)
+
+data class SupportTicket(
+    val issue_subject: String,
+    val user_id: String,
+    val issue_description: String,
+    val issue_status: String,
+    val ticket_id: String,
+    val unix_timestamp: Long
+)
+
+data class ReviewListResponse(
+    val reviews: List<Review>,
+    val status: String
+)
+
+data class Review(
+    val score: Int,
+    val comment: String,
+    val user_id: String
+)
 
 // Retrofit interface for API calls
 interface ApiService {
@@ -161,5 +185,12 @@ interface ApiService {
 
     @POST("/delete-user")
     fun deleteUser(@Body requestBody: Map<String, String>): Call<DeleteUserResponse>
+
+    @POST("/get-support-ticket-list")
+    fun getSupportTicketList(@Body tokenRequest: TokenRequest): Call<SupportTicketResponse>
+
+    @POST("/get-review-list")
+    fun getReviewList(@Body tokenRequest: TokenRequest): Call<ReviewListResponse>
+
 
 }

@@ -257,10 +257,40 @@ class LoginActivity : AppCompatActivity() {
         saveToPreferences("top_stocks", stockData)
     }
 
+    private fun fetchAndSaveSupportTickets(token: String) {
+        RetrofitClient.apiService.getSupportTicketList(TokenRequest(token)).enqueue(object : Callback<SupportTicketResponse> {
+            override fun onResponse(call: Call<SupportTicketResponse>, response: Response<SupportTicketResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val tickets = response.body()?.support_tickets ?: emptyList()
+                    val ticketData = tickets.joinToString(";") { "${it.issue_subject},${it.issue_description},${it.issue_status}" }
+                    saveToPreferences("support_tickets", ticketData)
+                }
+            }
+
+            override fun onFailure(call: Call<SupportTicketResponse>, t: Throwable) {
+                Log.e("SUPPORT_TICKETS_ERROR", "Error fetching support tickets: ${t.message}")
+            }
+        })
+    }
+
+    private fun fetchAndSaveReviews(token: String) {
+        RetrofitClient.apiService.getReviewList(TokenRequest(token)).enqueue(object : Callback<ReviewListResponse> {
+            override fun onResponse(call: Call<ReviewListResponse>, response: Response<ReviewListResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val reviews = response.body()?.reviews ?: emptyList()
+                    val reviewData = reviews.joinToString(";") { "${it.score},${it.comment}" }
+                    saveToPreferences("reviews", reviewData)
+                }
+            }
+
+            override fun onFailure(call: Call<ReviewListResponse>, t: Throwable) {
+                Log.e("REVIEWS_ERROR", "Error fetching reviews: ${t.message}")
+            }
+        })
+    }
+
     private fun saveToPreferences(key: String, value: String) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString(key, value)
-        editor.apply()
+        sharedPreferences.edit().putString(key, value).apply()
     }
 }

@@ -67,6 +67,11 @@
             android:name=".ClientManagementActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- Admin Tools Activity -->
+        <activity
+            android:name=".AdminToolsActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
     </application>
 
 </manifest>
