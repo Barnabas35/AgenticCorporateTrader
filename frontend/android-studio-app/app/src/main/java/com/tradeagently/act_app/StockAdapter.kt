@@ -1,5 +1,7 @@
 package com.tradeagently.act_app
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +23,18 @@ class StockAdapter(private val stockList: List<StockItem>) : RecyclerView.Adapte
         holder.symbolTextView.text = stock.symbol
         holder.companyNameTextView.text = stock.company_name
         holder.priceTextView.text = "${stock.price} ${stock.currency}"
+
+        // Set up a click listener to open StockProfileActivity
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, StockProfileActivity::class.java).apply {
+                putExtra("stock_symbol", stock.symbol)
+                putExtra("stock_company_name", stock.company_name)
+                putExtra("stock_price", stock.price)
+                putExtra("stock_currency", stock.currency)
+            }
+            context.startActivity(intent)
+        }
     }
 
     // Returns the total number of items

@@ -72,6 +72,11 @@
             android:name=".AdminToolsActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- Stock Profile Activity -->
+        <activity
+            android:name=".StockProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
     </application>
 
 </manifest>

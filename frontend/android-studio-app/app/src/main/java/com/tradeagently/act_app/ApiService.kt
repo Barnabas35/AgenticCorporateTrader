@@ -124,6 +124,32 @@ data class SupportTicket(
     val unix_timestamp: Long
 )
 
+data class TickerAggregateRequest(
+    val ticker: String,
+    val session_token: String,
+    val start_date: String,
+    val end_date: String,
+    val interval: String,
+    val limit: Int
+)
+
+data class TickerAggregate(
+    val v: Int,          // Volume
+    val vw: Double,      // Volume weighted average price
+    val o: Double,       // Open price
+    val c: Double,       // Close price
+    val h: Double,       // High price
+    val l: Double,       // Low price
+    val t: Long,         // Unix timestamp
+    val n: Int           // Number of trades
+)
+
+data class TickerAggregateResponse(
+    val aggregates: List<TickerAggregate>,
+    val status: String
+)
+
+
 data class ReviewListResponse(
     val reviews: List<Review>,
     val status: String
@@ -182,6 +208,9 @@ interface ApiService {
 
     @POST("/text-search-stock")
     fun searchStocks(@Body searchRequest: SearchRequest): Call<StockSearchResponse>
+
+    @POST("/get-ticker-aggregates")
+    fun getTickerAggregates(@Body request: TickerAggregateRequest): Call<TickerAggregateResponse>
 
     @POST("/delete-user")
     fun deleteUser(@Body requestBody: Map<String, String>): Call<DeleteUserResponse>

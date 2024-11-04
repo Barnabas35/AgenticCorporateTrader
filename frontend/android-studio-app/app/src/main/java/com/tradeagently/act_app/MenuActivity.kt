@@ -37,10 +37,14 @@ class MenuActivity : AppCompatActivity() {
             "fa" -> {
                 // Hide Client Management button for "fa" users
                 clientManagementButton.visibility = View.GONE
+                adminToolsButton.visibility = View.GONE
+
             }
             "fm" -> {
                 // Show Client Management button for "fm" users
                 clientManagementButton.visibility = View.VISIBLE
+                adminToolsButton.visibility = View.GONE
+
             }
             else -> {
                 // Hide Admin Tools and Client Management button for unknown types

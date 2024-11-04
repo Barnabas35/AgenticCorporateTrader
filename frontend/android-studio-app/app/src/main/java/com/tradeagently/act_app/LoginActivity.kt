@@ -257,6 +257,53 @@ class LoginActivity : AppCompatActivity() {
         saveToPreferences("top_stocks", stockData)
     }
 
+    private fun fetchAndSaveTickerAggregates(token: String) {
+        // Define parameters for the ticker aggregates request
+        val ticker = "AAPL" // Example ticker symbol
+        val startDate = "2023-01-01"
+        val endDate = "2023-12-31"
+        val interval = "day"
+        val limit = 100
+
+        // Create the request object
+        val request = TickerAggregateRequest(
+            ticker = ticker,
+            session_token = token,
+            start_date = startDate,
+            end_date = endDate,
+            interval = interval,
+            limit = limit
+        )
+
+        // Make the API call
+        RetrofitClient.apiService.getTickerAggregates(request).enqueue(object : Callback<TickerAggregateResponse> {
+            override fun onResponse(call: Call<TickerAggregateResponse>, response: Response<TickerAggregateResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val aggregates = response.body()?.aggregates ?: emptyList()
+                    Log.d("AGGREGATES_FETCHED", "Fetched aggregates: $aggregates")
+
+                    // Save or process aggregates as needed; for example, save to SharedPreferences
+                    saveAggregatesToPreferences(aggregates)
+                } else {
+                    Log.e("API_ERROR", "Failed to fetch ticker aggregates: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<TickerAggregateResponse>, t: Throwable) {
+                Log.e("NETWORK_ERROR", "Error fetching ticker aggregates: ${t.message}")
+            }
+        })
+    }
+
+    private fun saveAggregatesToPreferences(aggregates: List<TickerAggregate>) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val aggregatesData = aggregates.joinToString(";") { "${it.t},${it.o},${it.c},${it.h},${it.l},${it.v},${it.vw},${it.n}" }
+        editor.putString("ticker_aggregates", aggregatesData)
+        editor.apply()
+        Log.d("AGGREGATES_SAVED", "Ticker aggregates saved to preferences")
+    }
+
     private fun fetchAndSaveSupportTickets(token: String) {
         RetrofitClient.apiService.getSupportTicketList(TokenRequest(token)).enqueue(object : Callback<SupportTicketResponse> {
             override fun onResponse(call: Call<SupportTicketResponse>, response: Response<SupportTicketResponse>) {
