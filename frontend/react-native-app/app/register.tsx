@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Pressable } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
@@ -7,22 +7,24 @@ const Register: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userType, setUserType] = useState('user'); // Default user type is 'user'
+  const [userType, setUserType] = useState('user');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      setModalMessage('Passwords do not match');
+      setModalVisible(true);
       return;
     }
 
     const url = 'https://tradeagently.dev/register';
-
     const bodyData = {
       username: username.trim(),
       email: email.trim(),
       password: password.trim(),
-      user_type: userType, // Include the user type in the registration request
+      user_type: userType,
     };
 
     try {
@@ -37,19 +39,20 @@ const Register: React.FC = () => {
       const data = await response.json();
 
       if (data.status === 'Success') {
-        // Handle successful registration
-        console.log('Registration successful:', data);
-        Alert.alert('Success', 'Registration successful!');
-        
-        // Redirect to login after successful registration
-        navigate('/');
+        setModalMessage('Registration successful!');
+        setModalVisible(true);
+        navigate('/'); // Navigate to login or another page after a successful registration
+      } else if (data.message === 'Email already exists.') {
+        setModalMessage('Email already exists. Please use a different email.');
+        setModalVisible(true);
       } else {
-        // Handle registration errors
-        Alert.alert('Error', data.message || 'Registration failed. Please try again.');
+        setModalMessage(data.message || 'Registration failed. Please try again.');
+        setModalVisible(true);
       }
     } catch (error) {
       console.error('Error during registration:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      setModalMessage('An unexpected error occurred. Please try again.');
+      setModalVisible(true);
     }
   };
 
@@ -88,7 +91,6 @@ const Register: React.FC = () => {
         secureTextEntry
       />
 
-      {/* Dropdown for selecting user type */}
       <View style={styles.dropdownContainer}>
         <Text style={styles.label}>Select User Type:</Text>
         <select
@@ -108,6 +110,25 @@ const Register: React.FC = () => {
       <TouchableOpacity onPress={() => navigate('/login-register')} style={styles.loginLink}>
         <Text style={styles.loginText}>Already have an account? Login here</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{modalMessage}</Text>
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -117,9 +138,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
     padding: 20,
-    backgroundColor: '#f0f0f0', // Background color of the register screen
+    width: "100%",
+    backgroundColor: '#f0f0f0',
   },
   title: {
     fontSize: 32,
@@ -127,7 +148,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: '30%',
+    width: '40%',
     height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
@@ -136,7 +157,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   dropdownContainer: {
-    width: '30%',
+    width: '40%',
     marginBottom: 20,
   },
   label: {
@@ -150,12 +171,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: '#ccc',
     borderWidth: 1,
-    backgroundColor: '#F2F1F1', // Gray background
+    backgroundColor: '#F2F1F1',
   },
   button: {
-    width: '30%',
+    width: '40%',
     height: 50,
-    backgroundColor: '#4CAF50', // Green background for the button
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
@@ -168,8 +189,35 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginText: {
-    color: '#4CAF50', // Color for the login link
+    color: '#4CAF50',
     fontSize: 16,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    width: '60%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  closeButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
