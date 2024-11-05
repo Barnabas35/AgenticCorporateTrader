@@ -63,19 +63,24 @@
             android:text="REVIEWS"
             android:textColor="@color/white"
             android:textSize="16sp" />
-
     </LinearLayout>
 
-    <!-- RecyclerView for displaying tickets or reviews -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <!-- Scrollable section for RecyclerView -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/buttonContainer"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- RecyclerView for displaying tickets or reviews -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"/>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Bottom Navigation for Admin Tools Activity -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

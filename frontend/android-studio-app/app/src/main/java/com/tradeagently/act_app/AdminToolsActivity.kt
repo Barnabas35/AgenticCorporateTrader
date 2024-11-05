@@ -1,9 +1,9 @@
 package com.tradeagently.act_app
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -66,7 +66,22 @@ class AdminToolsActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<SupportTicketResponse>, response: Response<SupportTicketResponse>) {
                     if (response.isSuccessful && response.body()?.status == "Success") {
                         val tickets = response.body()?.support_tickets ?: emptyList()
-                        adapter = AdminToolsAdapter(tickets, null)
+                        adapter = AdminToolsAdapter(
+                            tickets,
+                            null,
+                            onTicketClick = { subject, description, userId, status, ticketId, timestamp ->
+                                // Create intent and pass ticket details
+                                val intent = Intent(this@AdminToolsActivity, TicketDetailsActivity::class.java).apply {
+                                    putExtra("issue_subject", subject)
+                                    putExtra("user_id", userId)
+                                    putExtra("issue_description", description)
+                                    putExtra("issue_status", status)
+                                    putExtra("ticket_id", ticketId)
+                                    putExtra("unix_timestamp", timestamp)
+                                }
+                                startActivity(intent)
+                            }
+                        )
                         recyclerView.adapter = adapter
                     } else {
                         Toast.makeText(this@AdminToolsActivity, "Failed to fetch support tickets", Toast.LENGTH_SHORT).show()
@@ -87,7 +102,18 @@ class AdminToolsActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<ReviewListResponse>, response: Response<ReviewListResponse>) {
                     if (response.isSuccessful && response.body()?.status == "Success") {
                         val reviews = response.body()?.reviews ?: emptyList()
-                        adapter = AdminToolsAdapter(null, reviews)
+                        adapter = AdminToolsAdapter(
+                            null,
+                            reviews,
+                            onReviewClick = { score, comment ->
+                                // Create intent and pass review details
+                                val intent = Intent(this@AdminToolsActivity, ReviewDetailsActivity::class.java).apply {
+                                    putExtra("score", score)
+                                    putExtra("comment", comment)
+                                }
+                                startActivity(intent)
+                            }
+                        )
                         recyclerView.adapter = adapter
                     } else {
                         Toast.makeText(this@AdminToolsActivity, "Failed to fetch reviews", Toast.LENGTH_SHORT).show()

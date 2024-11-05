@@ -8,12 +8,33 @@ import androidx.recyclerview.widget.RecyclerView
 
 class AdminToolsAdapter(
     private val tickets: List<SupportTicket>?,
-    private val reviews: List<Review>?
+    private val reviews: List<Review>?,
+    private val onTicketClick: ((String, String, String, String, String, Long) -> Unit)? = null,
+    private val onReviewClick: ((Int, String) -> Unit)? = null
 ) : RecyclerView.Adapter<AdminToolsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val subjectText: TextView = view.findViewById(R.id.subjectText)
         val descriptionText: TextView = view.findViewById(R.id.descriptionText)
+
+        init {
+            view.setOnClickListener {
+                tickets?.get(adapterPosition)?.let { ticket ->
+                    onTicketClick?.invoke(
+                        ticket.issue_subject,
+                        ticket.issue_description,
+                        ticket.user_id,
+                        ticket.issue_status,
+                        ticket.ticket_id,
+                        ticket.unix_timestamp
+                    )
+                }
+
+                reviews?.get(adapterPosition)?.let { review ->
+                    onReviewClick?.invoke(review.score, review.comment)
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -22,11 +43,11 @@ class AdminToolsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (tickets != null) { // Display ticket data
+        if (tickets != null) {
             val ticket = tickets[position]
             holder.subjectText.text = ticket.issue_subject
             holder.descriptionText.text = ticket.issue_description
-        } else if (reviews != null) { // Display review data
+        } else if (reviews != null) {
             val review = reviews[position]
             holder.subjectText.text = "Score: ${review.score}"
             holder.descriptionText.text = review.comment
