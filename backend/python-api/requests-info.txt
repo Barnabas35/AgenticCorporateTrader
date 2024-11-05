@@ -279,7 +279,7 @@ Example:
 
 
 ### Search stock markets --------------------------------
-URL & Method: POST /text-search-markets
+URL & Method: POST /text-search-stock
 Headers:
  - Content-Type: application/json
 Body (JSON):
@@ -435,4 +435,116 @@ Response: JSON - Status message
 Example:
 {
   "status": "Success"
+}
+
+
+### Text search crypto ----------------------------------
+URL & Method: POST /text-search-crypto
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "search_query": "string",
+  "limit": "integer",        // Number of results to return (default 5, min 1, max 50)
+  "session_token": "string",
+  "show_price": "boolean"    // Show price in results (default false, true takes twice as long)
+}
+Response: JSON - List of tickers
+Example:
+{
+  "ticker_details": [
+    {"symbol": "BTC", "name": "Bitcoin", "price": 12345.67},
+    {"symbol": "ETH", "name": "Ethereum", "price": 890.12}
+  ],
+  "status": "Success"
+}
+INFO: Prices are in USD.
+WARNING: When show_price is true, some cryptos may not show up due to them not being supported by yfinance.
+
+
+### Get top cryptos -------------------------------------
+URL & Method: GET /get-top-cryptos
+Parameters:
+ - limit: integer (optional) - Number of top cryptos to return (default 10)
+Response: JSON - List of top cryptos
+Example:
+{
+  "ticker_details": [
+    {"symbol": "BTC", "name": "Bitcoin", "price": 12345.67},
+    {"symbol": "ETH", "name": "Ethereum", "price": 890.12}
+  ],
+  "status": "Success"
+}
+INFO: Prices are in USD.
+
+
+### Get crypto info -------------------------------------
+URL & Method: POST /get-crypto-info
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "crypto": "string",
+  "session_token": "string"
+}
+Response: JSON - Crypto info and status message
+Example:
+{
+    "crypto_info": {
+        "description": "Bitcoin (BTC) is a cryptocurrency launched in 2010. Users are able to generate BTC through...",
+        "high": 68873.016,
+        "latest_price": 68899.84375,
+        "low": 68261.336,
+        "name": "Bitcoin",
+        "open": 68746.79,
+        "previous_close": 68746.79,
+        "symbol": "BTC",
+        "volume": 36003250176
+    },
+    "status": "Success"
+}
+
+
+### Get crypto aggregates -------------------------------
+URL & Method: POST /get-crypto-aggregates
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "crypto": "string",               // Crypto symbol "BTC"
+  "session_token": "string",
+  "start_date": "string",           // Format: "YYYY-MM-DD"
+  "end_date": "string"              // Format: "YYYY-MM-DD"
+  "interval": "string"              // Level of detail example: "1d"
+}
+Response: JSON - List of aggregates
+Example:
+{
+    "crypto_aggregates": [
+        {
+            "close": 70215.1875,            // Close price
+            "date": "2024-10-31 00:00:00",  // Date and time
+            "high": 72662.3125,             // High price
+            "low": 69590.5,                 // Low price
+            "open": 72335.046875,           // Open price
+            "volume": 40627912076.0         // Volume
+        },
+        {
+            "close": 72339.5390625,
+            "date": "2024-10-30 00:00:00",
+            "high": 72905.296875,
+            "low": 71411.734375,
+            "open": 72715.3671875,
+            "volume": 40646637831.0
+        },
+        {
+            "close": 72720.4921875,
+            "date": "2024-10-29 00:00:00",
+            "high": 73577.2109375,
+            "low": 69729.9140625,
+            "open": 69910.046875,
+            "volume": 58541874402.0
+        }
+    ],
+    "status": "Success"
 }
