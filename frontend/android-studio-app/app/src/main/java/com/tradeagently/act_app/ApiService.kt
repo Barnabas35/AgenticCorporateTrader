@@ -160,9 +160,10 @@ data class TickerAggregatesRequest(
 
 // Data class for ticker info response
 data class TickerInfoResponse(
-    val ticker_info: TickerInfo?,
-    val status: String?
+    val status: String,
+    val ticker_info: TickerInfo?
 )
+
 
 // Ticker info details
 data class TickerInfo(
@@ -171,7 +172,7 @@ data class TickerInfo(
     val company_description: String?,
     val company_name: String,
     val currency: String,
-    val employee_count: Int,
+    val employee_count: Int?,
     val high_price: Double,
     val homepage: String?,
     val low_price: Double,

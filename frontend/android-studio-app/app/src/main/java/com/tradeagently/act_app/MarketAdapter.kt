@@ -45,6 +45,7 @@ class StockAdapter(
             override fun onResponse(call: Call<TickerInfoResponse>, response: Response<TickerInfoResponse>) {
                 if (response.isSuccessful && response.body()?.ticker_info != null) {
                     val tickerInfo = response.body()?.ticker_info!!
+                    Log.d("StockAdapter", "TickerInfo: $tickerInfo")
                     launchStockProfileActivity(context, tickerInfo)
                 } else {
                     Toast.makeText(context, "Failed to fetch ticker info", Toast.LENGTH_SHORT).show()
@@ -59,6 +60,8 @@ class StockAdapter(
     }
 
     private fun launchStockProfileActivity(context: Context, tickerInfo: TickerInfo) {
+        Log.d("StockAdapter", "Launching profile with data: $tickerInfo")
+
         val intent = Intent(context, StockProfileActivity::class.java).apply {
             putExtra("company_name", tickerInfo.company_name)
             putExtra("symbol", tickerInfo.symbol)
@@ -73,10 +76,7 @@ class StockAdapter(
             putExtra("homepage", tickerInfo.homepage)
         }
         context.startActivity(intent)
-
-        if (context is AppCompatActivity) {
-            context.overridePendingTransition(0, 0)
-        }
+        (context as? AppCompatActivity)?.overridePendingTransition(0, 0)
     }
 
     inner class StockViewHolder(view: View) : RecyclerView.ViewHolder(view) {

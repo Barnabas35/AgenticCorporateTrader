@@ -42,6 +42,9 @@ class ReviewPageActivity : AppCompatActivity() {
             val featuresAnswer = findViewById<EditText>(R.id.editTextFeatures).text.toString()
             val overallSatisfactionAnswer = findViewById<EditText>(R.id.editTextSatisfaction).text.toString()
 
+            // Combine answers into `reviewComment`
+            val reviewComment = "Review: $reviewText\nEase of Use: $easeOfUseAnswer\nFeatures: $featuresAnswer\nOverall Satisfaction: $overallSatisfactionAnswer"
+
             // Check that all required fields are filled
             if (easeOfUseAnswer.isNotEmpty() && featuresAnswer.isNotEmpty() && overallSatisfactionAnswer.isNotEmpty()) {
                 // Retrieve session token from SharedPreferences
@@ -51,7 +54,7 @@ class ReviewPageActivity : AppCompatActivity() {
                 // Ensure session token is available
                 if (sessionToken != null) {
                     // Submit the review
-                    submitReview(sessionToken, rating, reviewText)
+                    submitReview(sessionToken, rating, reviewComment)
                 } else {
                     Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
                 }
@@ -61,7 +64,6 @@ class ReviewPageActivity : AppCompatActivity() {
         }
     }
 
-    // Function to submit the review to the API using RetrofitClient
     private fun submitReview(sessionToken: String, rating: Int, reviewComment: String) {
         val reviewRequest = ReviewRequest(
             session_token = sessionToken,
@@ -78,7 +80,7 @@ class ReviewPageActivity : AppCompatActivity() {
                         // Show success message
                         Toast.makeText(this@ReviewPageActivity, "Review submitted successfully!", Toast.LENGTH_LONG).show()
 
-                        // If rating is 4 or higher, open Play Store for user to rate the app
+                        // Call `openPlayStoreForRating` if rating is 4 or higher
                         if (rating >= 4) {
                             openPlayStoreForRating()
                         }
@@ -98,6 +100,7 @@ class ReviewPageActivity : AppCompatActivity() {
             }
         })
     }
+
 
     private fun openPlayStoreForRating() {
         val packageName = applicationContext.packageName

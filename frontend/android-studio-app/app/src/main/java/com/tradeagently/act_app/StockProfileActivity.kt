@@ -1,7 +1,6 @@
 package com.tradeagently.act_app
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -42,7 +41,6 @@ class StockProfileActivity : AppCompatActivity() {
     }
 
     private fun displayStockInfoFromIntent() {
-        // Retrieve data from Intent extras
         val companyName = intent.getStringExtra("company_name")
         val symbol = intent.getStringExtra("symbol")
         val closePrice = intent.getDoubleExtra("close_price", 0.0)
@@ -55,15 +53,16 @@ class StockProfileActivity : AppCompatActivity() {
         val homepage = intent.getStringExtra("homepage")
 
         // Set data to TextViews
-        symbolTextView.text = symbol
-        companyNameTextView.text = companyName
-        closePriceTextView.text = closePrice.toString()
-        changePercentageTextView.text = "${changePercentage}%"
+        symbolTextView.text = symbol ?: "N/A"
+        companyNameTextView.text = companyName ?: "N/A"
+        closePriceTextView.text = "Close Price: ${if (closePrice != 0.0) String.format("%.2f", closePrice) else "N/A"}"
+        changePercentageTextView.text = "Change Percentage: ${String.format("%.4f%%", changePercentage)}"
         descriptionTextView.text = description ?: "No description available"
-        highPriceTextView.text = highPrice.toString()
-        lowPriceTextView.text = lowPrice.toString()
-        openPriceTextView.text = openPrice.toString()
-        volumeTextView.text = volume.toString()
+        highPriceTextView.text = "High Price: ${if (highPrice != 0.0) String.format("%.2f", highPrice) else "N/A"}"
+        lowPriceTextView.text = "Low Price: ${if (lowPrice != 0.0) String.format("%.2f", lowPrice) else "N/A"}"
+        openPriceTextView.text = "Open Price: ${if (openPrice != 0.0) String.format("%.2f", openPrice) else "N/A"}"
+        volumeTextView.text = "Volume: ${if (volume != 0.0) String.format("%.0f", volume) else "N/A"}"
         homepageTextView.text = homepage ?: "No homepage available"
     }
+
 }

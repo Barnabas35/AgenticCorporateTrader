@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Button
 import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -81,18 +82,23 @@ class ProfileActivity : AppCompatActivity() {
             finish()
         }
 
-        // Find the Delete Account button
+        // Find the Delete Account button and set visibility based on user type
         val deleteAccountButton = findViewById<Button>(R.id.deleteAccountButton)
-        deleteAccountButton.setOnClickListener {
-            // Show a confirmation dialog
-            AlertDialog.Builder(this)
-                .setTitle("Delete Account")
-                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
-                .setPositiveButton("Yes") { _, _ ->
-                    deleteAccount(token)
-                }
-                .setNegativeButton("No", null)
-                .show()
+        if (userType == "admin") {
+            deleteAccountButton.visibility = View.GONE // Hide for admin
+        } else {
+            deleteAccountButton.visibility = View.VISIBLE // Show for "fa" and "fm"
+            deleteAccountButton.setOnClickListener {
+                // Show a confirmation dialog
+                AlertDialog.Builder(this)
+                    .setTitle("Delete Account")
+                    .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                    .setPositiveButton("Yes") { _, _ ->
+                        deleteAccount(token)
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
         }
 
         // Fetch user type if it's not already set in SharedPreferences
