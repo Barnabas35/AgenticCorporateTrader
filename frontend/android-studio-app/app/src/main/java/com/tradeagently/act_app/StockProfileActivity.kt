@@ -1,17 +1,22 @@
 package com.tradeagently.act_app
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
+import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class StockProfileActivity : AppCompatActivity() {
 
-    private lateinit var buyButton: Button
-    private lateinit var sellButton: Button
-    private lateinit var purchaseLogLayout: LinearLayout
+    private lateinit var companyNameTextView: TextView
+    private lateinit var symbolTextView: TextView
+    private lateinit var closePriceTextView: TextView
+    private lateinit var changePercentageTextView: TextView
+    private lateinit var descriptionTextView: TextView
+    private lateinit var highPriceTextView: TextView
+    private lateinit var lowPriceTextView: TextView
+    private lateinit var openPriceTextView: TextView
+    private lateinit var volumeTextView: TextView
+    private lateinit var homepageTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,29 +25,45 @@ class StockProfileActivity : AppCompatActivity() {
         // Set up the bottom navigation
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Retrieve stock details from the intent
-        val stockSymbol = intent.getStringExtra("stock_symbol") ?: "N/A"
-        val stockCompanyName = intent.getStringExtra("stock_company_name") ?: "N/A"
-        val previousClose = intent.getDoubleExtra("previous_close", 0.0)
-        val ownsStock = intent.getBooleanExtra("owns_stock", false)
+        // Initialize TextViews
+        companyNameTextView = findViewById(R.id.companyNameTextView)
+        symbolTextView = findViewById(R.id.symbolTextView)
+        closePriceTextView = findViewById(R.id.closePriceTextView)
+        changePercentageTextView = findViewById(R.id.changePercentageTextView)
+        descriptionTextView = findViewById(R.id.descriptionTextView)
+        highPriceTextView = findViewById(R.id.highPriceTextView)
+        lowPriceTextView = findViewById(R.id.lowPriceTextView)
+        openPriceTextView = findViewById(R.id.openPriceTextView)
+        volumeTextView = findViewById(R.id.volumeTextView)
+        homepageTextView = findViewById(R.id.homepageTextView)
 
-        // Initialize UI elements
-        findViewById<TextView>(R.id.stockSymbolTextView).text = stockSymbol
-        findViewById<TextView>(R.id.stockCompanyNameTextView).text = stockCompanyName
-        findViewById<TextView>(R.id.previousCloseTextView).text = "Previous Close: $$previousClose"
+        // Display stock information
+        displayStockInfoFromIntent()
+    }
 
-        buyButton = findViewById(R.id.buyButton)
-        sellButton = findViewById(R.id.sellButton)
-        purchaseLogLayout = findViewById(R.id.purchaseLogLayout)
+    private fun displayStockInfoFromIntent() {
+        // Retrieve data from Intent extras
+        val companyName = intent.getStringExtra("company_name")
+        val symbol = intent.getStringExtra("symbol")
+        val closePrice = intent.getDoubleExtra("close_price", 0.0)
+        val changePercentage = intent.getDoubleExtra("change_percentage", 0.0)
+        val description = intent.getStringExtra("company_description")
+        val highPrice = intent.getDoubleExtra("high_price", 0.0)
+        val lowPrice = intent.getDoubleExtra("low_price", 0.0)
+        val openPrice = intent.getDoubleExtra("open_price", 0.0)
+        val volume = intent.getDoubleExtra("volume", 0.0)
+        val homepage = intent.getStringExtra("homepage")
 
-        // Show purchase log if the user owns the stock
-        purchaseLogLayout.visibility = if (ownsStock) View.VISIBLE else View.GONE
-
-        // Set up other UI elements as needed
-        findViewById<TextView>(R.id.openPriceTextView).text = "Open: 100" // Replace with dynamic data
-        findViewById<TextView>(R.id.closePriceTextView).text = "Close: 90" // Replace with dynamic data
-        findViewById<TextView>(R.id.highPriceTextView).text = "High: 110" // Replace with dynamic data
-        findViewById<TextView>(R.id.lowPriceTextView).text = "Low: 80" // Replace with dynamic data
-        findViewById<TextView>(R.id.companyDescriptionTextView).text = "Company: Description..."
+        // Set data to TextViews
+        symbolTextView.text = symbol
+        companyNameTextView.text = companyName
+        closePriceTextView.text = closePrice.toString()
+        changePercentageTextView.text = "${changePercentage}%"
+        descriptionTextView.text = description ?: "No description available"
+        highPriceTextView.text = highPrice.toString()
+        lowPriceTextView.text = lowPrice.toString()
+        openPriceTextView.text = openPrice.toString()
+        volumeTextView.text = volume.toString()
+        homepageTextView.text = homepage ?: "No homepage available"
     }
 }

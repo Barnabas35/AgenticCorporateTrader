@@ -25,6 +25,9 @@ class MarketActivity : AppCompatActivity() {
     private lateinit var buttonStock: Button
     private lateinit var buttonCrypto: Button
 
+    // Store session token as a class variable
+    private lateinit var sessionToken: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_market)
@@ -43,6 +46,10 @@ class MarketActivity : AppCompatActivity() {
         stockSearchView = findViewById(R.id.stockSearchView)
         buttonStock = findViewById(R.id.buttonStock)
         buttonCrypto = findViewById(R.id.buttonCrypto)
+
+        // Retrieve session token from shared preferences
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        sessionToken = sharedPreferences.getString("session_token", "") ?: ""
 
         // Set initial button states
         buttonStock.isSelected = true
@@ -125,13 +132,10 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun fetchSuggestions(query: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("session_token", null) ?: return
-
         val searchRequest = SearchRequest(
             search_query = query,
             limit = 3,
-            session_token = token,
+            session_token = sessionToken,
             show_price = false
         )
 
@@ -170,13 +174,10 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun performStockSearch(query: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("session_token", null) ?: return
-
         val searchRequest = SearchRequest(
             search_query = query,
             limit = 50,
-            session_token = token,
+            session_token = sessionToken,
             show_price = true
         )
 
@@ -202,7 +203,7 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun displayStocks(stocks: List<StockItem>) {
-        stockAdapter = StockAdapter(stocks)
+        stockAdapter = StockAdapter(stocks, RetrofitClient.apiService, sessionToken)
         stockRecyclerView.adapter = stockAdapter
     }
 }

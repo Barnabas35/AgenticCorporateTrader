@@ -42,7 +42,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-
+    implementation(libs.androidx.room.compiler) {
+        exclude(group = "com.intellij", module = "annotations")
+    }
 
     // Testing dependencies
     testImplementation(libs.junit)
@@ -52,15 +54,16 @@ dependencies {
     // Retrofit for networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.github.bumptech.glide:glide:4.12.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.0")
-    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("com.github.bumptech.glide:glide:4.12.0") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-
-
-    // OkHttp for logging HTTP requests/responses (optional, but useful for debugging)
+    // OkHttp for logging HTTP requests/responses
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
-
+    implementation("com.squareup.okhttp3:okhttp:4.9.3") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
 }

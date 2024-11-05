@@ -22,49 +22,49 @@ data class TokenRequest(val session_token: String)
 
 // Data class for submitting a review
 data class ReviewRequest(
-    val session_token: String,     // Session token to authenticate the user
-    val review_score: Int,         // Review score, an integer from 1 to 5
-    val review_comment: String     // Review comment text
+    val session_token: String,
+    val review_score: Int,
+    val review_comment: String
 )
 
 // API response model for login/register response
 data class ApiResponse(
-    val session_token: String?,    // Nullable token (could be null on failure)
-    val status: String?            // Status message, such as "Success"
+    val session_token: String?,
+    val status: String?
 )
 
 // Data class for username response
 data class UsernameResponse(
-    val username: String?,         // Username returned from the API
-    val status: String?            // Status message
+    val username: String?,
+    val status: String?
 )
 
 // Data class for email response
 data class EmailResponse(
-    val email: String?,            // Email returned from the API
-    val status: String?            // Status message
+    val email: String?,
+    val status: String?
 )
 
-// Data class for the profile icon response
+// Data class for profile icon response
 data class ProfileIconResponse(
-    val url: String?,              // Profile icon URL returned from the API
-    val status: String?            // Status message
+    val url: String?,
+    val status: String?
 )
 
 // API response model for submitting a review
 data class ReviewResponse(
-    val status: String?            // Status message, such as "Success" or "Error"
+    val status: String?
 )
 
 data class UserTypeResponse(
-    val user_type: String?,       // The user type, such as "admin", "fa", or "fm"
-    val status: String?           // Status message, such as "Success"
+    val user_type: String?,
+    val status: String?
 )
 
 data class SupportTicketRequest(
-    val session_token: String,        // The user's session token
-    val issue_subject: String,        // Subject of the issue
-    val issue_description: String     // Detailed description of the issue
+    val session_token: String,
+    val issue_subject: String,
+    val issue_description: String
 )
 
 data class AddClientRequest(val session_token: String, val client_name: String)
@@ -91,7 +91,14 @@ data class StockItem(
     val symbol: String,
     val company_name: String,
     val price: Double,
-    val currency: String
+    val currency: String,
+    val change_percentage: Double,
+    val company_description: String,
+    val high_price: Double,
+    val low_price: Double,
+    val open_price: Double,
+    val volume: Double,
+    val homepage: String
 )
 
 data class SearchRequest(
@@ -124,32 +131,6 @@ data class SupportTicket(
     val unix_timestamp: Long
 )
 
-data class TickerAggregateRequest(
-    val ticker: String,
-    val session_token: String,
-    val start_date: String,
-    val end_date: String,
-    val interval: String,
-    val limit: Int
-)
-
-data class TickerAggregate(
-    val v: Int,          // Volume
-    val vw: Double,      // Volume weighted average price
-    val o: Double,       // Open price
-    val c: Double,       // Close price
-    val h: Double,       // High price
-    val l: Double,       // Low price
-    val t: Long,         // Unix timestamp
-    val n: Int           // Number of trades
-)
-
-data class TickerAggregateResponse(
-    val aggregates: List<TickerAggregate>,
-    val status: String
-)
-
-
 data class ReviewListResponse(
     val reviews: List<Review>,
     val status: String
@@ -159,6 +140,62 @@ data class Review(
     val score: Int,
     val comment: String,
     val user_id: String
+)
+
+// Data class for ticker info request
+data class TickerRequest(
+    val ticker: String,
+    val session_token: String
+)
+
+// Data class for ticker aggregates request
+data class TickerAggregatesRequest(
+    val ticker: String,
+    val session_token: String,
+    val start_date: String,
+    val end_date: String,
+    val interval: String,
+    val limit: Int
+)
+
+// Data class for ticker info response
+data class TickerInfoResponse(
+    val ticker_info: TickerInfo?,
+    val status: String?
+)
+
+// Ticker info details
+data class TickerInfo(
+    val change_percentage: Double,
+    val close_price: Double,
+    val company_description: String?,
+    val company_name: String,
+    val currency: String,
+    val employee_count: Int,
+    val high_price: Double,
+    val homepage: String?,
+    val low_price: Double,
+    val open_price: Double,
+    val symbol: String,
+    val volume: Double
+)
+
+// Data class for ticker aggregates response
+data class TickerAggregatesResponse(
+    val aggregates: List<TickerAggregate>?,
+    val status: String?
+)
+
+// Ticker aggregate data item
+data class TickerAggregate(
+    val v: Double,
+    val vw: Double,
+    val o: Double,
+    val c: Double,
+    val h: Double,
+    val l: Double,
+    val t: Long,
+    val n: Int
 )
 
 // Retrofit interface for API calls
@@ -188,38 +225,51 @@ interface ApiService {
     @POST("/submit-review")
     fun submitReview(@Body reviewRequest: ReviewRequest): Call<ReviewResponse>
 
+    // Endpoint for getting user type
     @POST("/get-user-type")
     fun getUserType(@Body tokenRequest: TokenRequest): Call<UserTypeResponse>
 
+    // Endpoint for submitting a support ticket
     @POST("/submit-support-ticket")
     fun submitSupportTicket(@Body supportTicketRequest: SupportTicketRequest): Call<ApiResponse>
 
+    // Endpoint for getting client list
     @POST("/get-client-list")
     fun getClientList(@Body tokenRequest: TokenRequest): Call<ClientListResponse>
 
+    // Endpoint for adding a client
     @POST("/add-client")
     fun addClient(@Body addClientRequest: AddClientRequest): Call<ApiResponse>
 
+    // Endpoint for removing a client
     @POST("/remove-client")
     fun removeClient(@Body removeClientRequest: RemoveClientRequest): Call<ApiResponse>
 
+    // Endpoint for getting top stocks
     @GET("/get-top-stocks")
     fun getTopStocks(@Query("limit") limit: Int = 10): Call<TopStocksResponse>
 
+    // Endpoint for searching stocks
     @POST("/text-search-stock")
     fun searchStocks(@Body searchRequest: SearchRequest): Call<StockSearchResponse>
 
-    @POST("/get-ticker-aggregates")
-    fun getTickerAggregates(@Body request: TickerAggregateRequest): Call<TickerAggregateResponse>
-
+    // Endpoint for deleting a user
     @POST("/delete-user")
     fun deleteUser(@Body requestBody: Map<String, String>): Call<DeleteUserResponse>
 
+    // Endpoint for getting support ticket list
     @POST("/get-support-ticket-list")
     fun getSupportTicketList(@Body tokenRequest: TokenRequest): Call<SupportTicketResponse>
 
+    // Endpoint for getting review list
     @POST("/get-review-list")
     fun getReviewList(@Body tokenRequest: TokenRequest): Call<ReviewListResponse>
 
+    // Endpoint for getting ticker info
+    @POST("/get-ticker-info")
+    fun getTickerInfo(@Body tickerRequest: TickerRequest): Call<TickerInfoResponse>
 
+    // Endpoint for getting ticker aggregates
+    @POST("/get-ticker-aggregates")
+    fun getTickerAggregates(@Body request: TickerAggregatesRequest): Call<TickerAggregatesResponse>
 }
