@@ -176,9 +176,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
     padding: 20,
+    width: '120%',
   },
   container: {
-    width: '120%',
+    width: '50%',
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,

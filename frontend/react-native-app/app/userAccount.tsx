@@ -1,7 +1,5 @@
-// src/pages/UserAccount.tsx
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, Modal, Pressable } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { 
   useUsername, 
@@ -16,25 +14,27 @@ const UserAccount: React.FC = () => {
   const [email, setEmail] = useEmail();
   const [profileIconUrl, setProfileIconUrl] = useProfileIconUrl();
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [debugMessage, setDebugMessage] = useState(''); // Debug message state
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user data is already present, skip fetching
+    setDebugMessage('Starting useEffect...');
     if (username && email && profileIconUrl) {
       setLoading(false);
+      setDebugMessage('User data already loaded');
       return;
     }
 
     if (!sessionToken) {
-      // If not logged in, redirect to login
-      navigate('/login');
+      setDebugMessage('No session token, redirecting to login');
+      navigate('/login-register');
       return;
     }
 
-    // Fetch user data: username, email, and profile icon
     const fetchUserData = async () => {
       try {
-        // Fetch profile icon
+        setDebugMessage('Fetching profile icon...');
         const iconResponse = await fetch('https://tradeagently.dev/get-profile-icon', {
           method: 'POST',
           headers: {
@@ -43,9 +43,9 @@ const UserAccount: React.FC = () => {
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const iconData = await iconResponse.json();
-        console.log('Icon Data:', iconData);
+        setDebugMessage(`Profile icon response: ${JSON.stringify(iconData)}`);
 
-        // Fetch username
+        setDebugMessage('Fetching username...');
         const usernameResponse = await fetch('https://tradeagently.dev/get-username', {
           method: 'POST',
           headers: {
@@ -54,9 +54,9 @@ const UserAccount: React.FC = () => {
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const usernameData = await usernameResponse.json();
-        console.log('Username Data:', usernameData);
+        setDebugMessage(`Username response: ${JSON.stringify(usernameData)}`);
 
-        // Fetch email
+        setDebugMessage('Fetching email...');
         const emailResponse = await fetch('https://tradeagently.dev/get-email', {
           method: 'POST',
           headers: {
@@ -65,18 +65,19 @@ const UserAccount: React.FC = () => {
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const emailData = await emailResponse.json();
-        console.log('Email Data:', emailData);
+        setDebugMessage(`Email response: ${JSON.stringify(emailData)}`);
 
-        // Update user context
         if (usernameData.status === 'Success' && emailData.status === 'Success' && iconData.status === 'Success') {
           setUsername(usernameData.username);
           setEmail(emailData.email);
           setProfileIconUrl(iconData.url);
+          setDebugMessage('User data successfully fetched and set');
         } else {
-          Alert.alert('Error', 'Failed to fetch user data');
+          setDebugMessage('Error: Failed to fetch all user data');
+          setModalVisible(true);
         }
       } catch (error) {
-        Alert.alert('Error', 'An error occurred while fetching user details.');
+        setDebugMessage(`Error: ${error}`);
       } finally {
         setLoading(false);
       }
@@ -88,26 +89,57 @@ const UserAccount: React.FC = () => {
   const handleLogout = () => {
     setSessionToken(null);
     setEmail("");
-    setUsername("")
-    setProfileIconUrl("")  // Clear session token on logout
-    navigate('/login');     // Redirect to login
+    setUsername("");
+    setProfileIconUrl("");
+    navigate('/login-register');
+  };
+
+  const handleDeleteAccount = async () => {
+    setModalVisible(true); // Show delete confirmation modal
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      setDebugMessage('Deleting account...');
+      const response = await fetch('https://tradeagently.dev/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const result = await response.json();
+      setDebugMessage(`Delete account response: ${JSON.stringify(result)}`);
+
+      if (result.status === 'Success') {
+        setDebugMessage('Account successfully deleted');
+        handleLogout(); // Log the user out and clear session
+      } else {
+        setDebugMessage('Failed to delete account');
+      }
+    } catch (error) {
+      setDebugMessage(`Error during deletion: ${error}`);
+    } finally {
+      setModalVisible(false);
+    }
   };
 
   if (loading) {
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
+        {debugMessage ? <Text style={styles.debugText}>{debugMessage}</Text> : null}
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.detailsBox}> {/* Added the box for user details */}
+      <View style={styles.detailsBox}>
         <View>
           {profileIconUrl ? (
             <Image
-              source={{ uri: profileIconUrl }} // Use the profileIconUrl from context
+              source={{ uri: profileIconUrl }}
               style={styles.profileIcon}
             />
           ) : (
@@ -117,7 +149,38 @@ const UserAccount: React.FC = () => {
         <Text style={styles.text}>Username: {username}</Text>
         <Text style={styles.text}>Email: {email}</Text>
         <Button title="Logout" onPress={handleLogout} />
+        <View style={styles.spacer} /> {/* Spacer between buttons */}
+        <Button title="Delete Account" color="red" onPress={handleDeleteAccount} /> 
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              Are you sure you want to delete your account? This action cannot be undone.
+            </Text>
+            <Pressable
+              style={[styles.button, styles.buttonCancel]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonDelete]}
+              onPress={confirmDeleteAccount}
+            >
+              <Text style={styles.buttonText}>Delete</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {debugMessage ? <Text style={styles.debugText}>{debugMessage}</Text> : null}
     </View>
   );
 };
@@ -143,12 +206,55 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   detailsBox: {
-    backgroundColor: '#e0e0e0', // Light gray background
-    borderRadius: 10,            // Rounded corners
-    padding: 20,                 // Padding inside the box
-    alignItems: 'center',        // Center items inside the box
-    width: '40%',                // Make the box 80% of the container width
-    marginBottom: 20,            // Space below the box
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    width: '30%',
+    marginBottom: 20,
+  },
+  spacer: {
+    height: 20, // Space between buttons
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    width: '40%',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  button: {
+    width: '80%',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 8,
+  },
+  buttonCancel: {
+    backgroundColor: '#ccc',
+  },
+  buttonDelete: {
+    backgroundColor: '#FF3B30',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  debugText: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 10,
   },
 });
 
