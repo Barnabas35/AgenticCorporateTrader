@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { View, Image, StyleSheet } from 'react-native';
 import { useUser } from './userContext'; // Import the user context
 
 const Menu: React.FC = () => {
-  const { sessionToken } = useUser(); // Accessing sessionToken to check if user is logged in from user Context
+  const { sessionToken } = useUser(); // Access sessionToken from userContext
+  const [userType, setUserType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        const response = await fetch('/get-user-type', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_token: sessionToken }),
+        });
+
+        const data = await response.json();
+        if (data.status === 'Success') {
+          setUserType(data.user_type); // Set user type if request is successful
+        } else {
+          console.error('Failed to fetch user type');
+        }
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+      }
+    };
+
+    if (sessionToken) {
+      fetchUserType();
+    }
+  }, [sessionToken]);
 
   return (
     <View style={styles.container}>
@@ -26,45 +54,54 @@ const Menu: React.FC = () => {
         </NavLink>
         <View style={styles.spacer} />
         <NavLink
-              to="/about"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              About
-            </NavLink>
-            <View style={styles.spacer} />
-            <NavLink
-              to="/crypto-search"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              Crypto Search
-            </NavLink>
-            <View style={styles.spacer} />
+          to="/about"
+          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+        >
+          About
+        </NavLink>
+        <View style={styles.spacer} />
+        <NavLink
+          to="/crypto-search"
+          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+        >
+          Crypto Search
+        </NavLink>
+        <View style={styles.spacer} />
+        <NavLink
+          to="/stock-search"
+          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+        >
+          Stock Search
+        </NavLink>
+        <View style={styles.spacer} />
         {sessionToken ? (
           <>
-            <NavLink
-              to="/client-management"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              Client Management
-            </NavLink>
-            <View style={styles.spacer} />
+            {/* Conditionally render Client Management for 'fa' user type only */}
+            {userType === 'fa' && (
+              <>
+                <NavLink
+                  to="/client-management"
+                  style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+                >
+                  Client Management
+                </NavLink>
+                <View style={styles.spacer} />
+              </>
+            )}
             <NavLink
               to="/user-account"
               style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
             >
               User Account
             </NavLink>
-
           </>
         ) : (
-          <>
-            <NavLink
-              to="/login-register"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              Login/Register
-            </NavLink>
-          </>
+          <NavLink
+            to="/login-register"
+            style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+          >
+            Login/Register
+          </NavLink>
         )}
       </View>
     </View>

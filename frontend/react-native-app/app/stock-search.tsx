@@ -1,5 +1,3 @@
-// src/app/StockSearch.tsx
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -9,9 +7,24 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
-import { LineChart } from 'react-native-chart-kit';
+import { Line } from 'react-chartjs-2';
+import { Picker } from '@react-native-picker/picker'; // Updated import
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register necessary components for Chart.js
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface Stock {
   symbol: string;
@@ -45,6 +58,7 @@ const StockSearch: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sessionToken] = useSessionToken();
   const [historicalData, setHistoricalData] = useState<number[]>([]); // Placeholder for historical prices
+  const [interval, setInterval] = useState<string>('day'); // Default interval
 
   useEffect(() => {
     fetchTopStocks();
@@ -120,14 +134,51 @@ const StockSearch: React.FC = () => {
       const data = await response.json();
       if (data.status === 'Success') {
         setSelectedStock(data.ticker_info);
-        // Simulating historical data for the chart
-        setHistoricalData([data.ticker_info.close_price + 5, data.ticker_info.close_price - 2, data.ticker_info.close_price + 3, data.ticker_info.close_price - 1, data.ticker_info.close_price + 4]); // Sample data
+        fetchStockAggregates(data.ticker_info.symbol);
       } else {
         setError(data.message || 'Failed to fetch stock details');
       }
     } catch (error) {
       console.error('Error fetching stock details:', error);
       setError('Failed to fetch stock details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStockAggregates = async (ticker: string) => {
+    setLoading(true);
+    setError(null);
+    const startDate = '2024-01-01'; // Placeholder date
+    const endDate = '2024-12-31'; // Placeholder date
+
+    try {
+      const response = await fetch('https://tradeagently.dev/get-ticker-aggregates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticker,
+          session_token: sessionToken || '',
+          start_date: startDate,
+          end_date: endDate,
+          interval, // Interval is dynamic based on user selection
+          limit: 100,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'Success' && data.aggregates) {
+        // Prepare data for chart
+        const labels = data.aggregates.map((item: any) => new Date(item.t).toLocaleDateString());
+        const prices = data.aggregates.map((item: any) => item.c); // Use closing price for the graph
+
+        setHistoricalData(prices);
+      } else {
+        setError('Failed to fetch stock aggregates');
+      }
+    } catch (error) {
+      console.error('Error fetching stock aggregates:', error);
+      setError('Failed to fetch stock aggregates');
     } finally {
       setLoading(false);
     }
@@ -140,12 +191,12 @@ const StockSearch: React.FC = () => {
     >
       <Text style={styles.stockSymbol}>{item.symbol}</Text>
       <Text>{item.company_name}</Text>
-      <Text>{item.price} {item.currency}</Text>
+      <Text style={styles.priceText}>{item.price} {item.currency}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <TextInput
         style={styles.searchInput}
         placeholder="Search for a stock..."
@@ -154,6 +205,8 @@ const StockSearch: React.FC = () => {
       />
 
       {error && <Text style={styles.errorText}>{error}</Text>}
+      
+      <Text style={styles.sectionTitle}>Top Stocks</Text>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
 
       {selectedStock ? (
@@ -164,121 +217,131 @@ const StockSearch: React.FC = () => {
           <Text style={styles.detailText}>Open: {selectedStock.open_price}, High: {selectedStock.high_price}, Low: {selectedStock.low_price}</Text>
           <Text style={styles.detailText}>Volume: {selectedStock.volume}</Text>
           <Text style={styles.detailText}>Employee Count: {selectedStock.employee_count}</Text>
-          
+
+          {/* Interval Picker */}
+          <Picker
+            selectedValue={interval}
+            style={styles.picker}
+            onValueChange={(itemValue) => setInterval(itemValue)}
+          >
+            <Picker.Item label="Hourly" value="hour" />
+            <Picker.Item label="Daily" value="day" />
+            <Picker.Item label="Weekly" value="week" />
+            <Picker.Item label="Monthly" value="month" />
+          </Picker>
+
           {/* Line Chart for historical prices */}
-          <LineChart
-            data={{
-              labels: ['1', '2', '3', '4', '5'],
-              datasets: [
-                {
-                  data: historicalData,
+          <View style={styles.chartContainer}>
+            <Line
+              data={{
+                labels: historicalData.length > 0 ? historicalData.map((_, index) => index + 1) : [], // Placeholder labels
+                datasets: [
+                  {
+                    label: `Price in ${selectedStock.currency}`,
+                    data: historicalData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1,
+                    fill: true,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: `${selectedStock.symbol} Price History`,
+                  },
                 },
-              ],
-            }}
-            width={340} // from react-native
-            height={220}
-            yAxisLabel="$"
-            yAxisInterval={1} // optional, defaults to 1
-            chartConfig={{
-              backgroundColor: '#ffffff',
-              backgroundGradientFrom: '#ffffff',
-              backgroundGradientTo: '#ffffff',
-              decimalPlaces: 2, // optional, defaults to 2
-              color: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-              propsForDots: {
-                r: '6',
-                strokeWidth: '2',
-                stroke: '#ffa726',
-              },
-            }}
-            style={{
-              marginVertical: 8,
-              borderRadius: 16,
-            }}
-          />
-          
-          <TouchableOpacity onPress={() => setSelectedStock(null)}>
-            <Text style={styles.backButton}>Back to Results</Text>
-          </TouchableOpacity>
+                scales: {
+                  x: {
+                    type: 'linear',
+                    position: 'bottom',
+                  },
+                },
+              }}
+            />
+          </View>
         </View>
       ) : (
-        <>
-          <Text style={styles.sectionTitle}>Top Stocks</Text>
-          <FlatList
-            data={searchQuery ? searchResults : topStocks}
-            renderItem={renderStockItem}
-            keyExtractor={(item) => item.symbol}
-          />
-        </>
+        <FlatList
+          data={searchQuery.trim() ? searchResults : topStocks}
+          renderItem={renderStockItem}
+          keyExtractor={(item) => item.symbol}
+        />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-    width: '50%'
+    padding: 10,
+    backgroundColor: '#f4f4f4',
+    width: '100%',
   },
   searchInput: {
-    height: 50,
-    borderColor: '#ccc',
+    padding: 10,
     borderWidth: 1,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    borderColor: '#ccc',
     borderRadius: 5,
-    fontSize: 18,
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 10,
   },
   stockItem: {
     padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    borderRadius: 5,
     backgroundColor: '#fff',
+    borderRadius: 5,
     marginBottom: 10,
-  },
-  stockSymbol: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  stockDetails: {
-    padding: 16,
-    borderRadius: 5,
-    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    marginVertical: 10,
+    shadowRadius: 5,
   },
-  detailText: {
-    fontSize: 18,
-    marginVertical: 4,
+  stockSymbol: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  priceText: {
+    fontSize: 16,
+    color: '#007bff',
+  },
+  stockDetails: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   description: {
+    marginVertical: 10,
     fontSize: 16,
+    color: '#666',
+  },
+  detailText: {
     marginVertical: 4,
-    color: '#555',
+    fontSize: 16,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  chartContainer: {
+    width: '100%',
+    height: 300,
+    marginVertical: 20,
   },
   errorText: {
     color: 'red',
-    marginBottom: 10,
-  },
-  backButton: {
-    color: 'blue',
-    marginTop: 10,
     textAlign: 'center',
-    fontSize: 18,
+    marginVertical: 10,
   },
 });
 

@@ -19,22 +19,18 @@ const UserAccount: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setDebugMessage('Starting useEffect...');
     if (username && email && profileIconUrl) {
       setLoading(false);
-      setDebugMessage('User data already loaded');
       return;
     }
 
     if (!sessionToken) {
-      setDebugMessage('No session token, redirecting to login');
       navigate('/login-register');
       return;
     }
 
     const fetchUserData = async () => {
       try {
-        setDebugMessage('Fetching profile icon...');
         const iconResponse = await fetch('https://tradeagently.dev/get-profile-icon', {
           method: 'POST',
           headers: {
@@ -43,9 +39,7 @@ const UserAccount: React.FC = () => {
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const iconData = await iconResponse.json();
-        setDebugMessage(`Profile icon response: ${JSON.stringify(iconData)}`);
 
-        setDebugMessage('Fetching username...');
         const usernameResponse = await fetch('https://tradeagently.dev/get-username', {
           method: 'POST',
           headers: {
@@ -54,9 +48,8 @@ const UserAccount: React.FC = () => {
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const usernameData = await usernameResponse.json();
-        setDebugMessage(`Username response: ${JSON.stringify(usernameData)}`);
 
-        setDebugMessage('Fetching email...');
+
         const emailResponse = await fetch('https://tradeagently.dev/get-email', {
           method: 'POST',
           headers: {
@@ -65,15 +58,12 @@ const UserAccount: React.FC = () => {
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const emailData = await emailResponse.json();
-        setDebugMessage(`Email response: ${JSON.stringify(emailData)}`);
 
         if (usernameData.status === 'Success' && emailData.status === 'Success' && iconData.status === 'Success') {
           setUsername(usernameData.username);
           setEmail(emailData.email);
           setProfileIconUrl(iconData.url);
-          setDebugMessage('User data successfully fetched and set');
         } else {
-          setDebugMessage('Error: Failed to fetch all user data');
           setModalVisible(true);
         }
       } catch (error) {
@@ -100,7 +90,6 @@ const UserAccount: React.FC = () => {
 
   const confirmDeleteAccount = async () => {
     try {
-      setDebugMessage('Deleting account...');
       const response = await fetch('https://tradeagently.dev/delete-user', {
         method: 'POST',
         headers: {
@@ -109,10 +98,8 @@ const UserAccount: React.FC = () => {
         body: JSON.stringify({ session_token: sessionToken }),
       });
       const result = await response.json();
-      setDebugMessage(`Delete account response: ${JSON.stringify(result)}`);
 
       if (result.status === 'Success') {
-        setDebugMessage('Account successfully deleted');
         handleLogout(); // Log the user out and clear session
       } else {
         setDebugMessage('Failed to delete account');

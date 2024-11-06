@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.3",
+    "@react-native-picker/picker": "^2.9.0",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.4.1",
@@ -42,7 +43,8 @@
     "react-native-web": "~0.19.10",
     "react-native-webview": "^13.12.3",
     "react-navigation": "^5.0.0",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "victory-native": "^41.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
