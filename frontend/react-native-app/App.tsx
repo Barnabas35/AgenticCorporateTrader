@@ -3,7 +3,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Menu from './components/Menu'; // Ensure correct import path
-import Home from './app/home';
+import Home from './app/index';
 import Login from './app/login';
 import Contact from './app/contact';
 import Register from './app/register';
