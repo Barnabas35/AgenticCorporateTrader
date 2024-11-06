@@ -181,22 +181,20 @@ data class TickerInfo(
     val volume: Double
 )
 
-// Data class for ticker aggregates response
 data class TickerAggregatesResponse(
-    val aggregates: List<TickerAggregate>?,
+    val ticker_info: List<TickerAggregate>?,  // Renamed from 'aggregates' to 'ticker_info'
     val status: String?
 )
 
-// Ticker aggregate data item
 data class TickerAggregate(
-    val v: Double,
-    val vw: Double,
-    val o: Double,
-    val c: Double,
-    val h: Double,
-    val l: Double,
-    val t: Long,
-    val n: Int
+    val close: Double,      // Close price
+    val high: Double,       // High price
+    val low: Double,        // Low price
+    val open: Double,       // Open price
+    val volume: Double,     // Volume
+    val vwap: Double,       // Volume weighted average price
+    val timestamp: Long,    // Unix timestamp
+    val transactions: Int   // Number of trades
 )
 
 // Retrofit interface for API calls

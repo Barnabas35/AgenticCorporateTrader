@@ -24,4 +24,8 @@ object RetrofitClient {
         .build()
 
     val apiService: ApiService = retrofit.create(ApiService::class.java)
+
+    fun <T> createService(serviceClass: Class<T>): T {
+        return retrofit.create(serviceClass)
+    }
 }

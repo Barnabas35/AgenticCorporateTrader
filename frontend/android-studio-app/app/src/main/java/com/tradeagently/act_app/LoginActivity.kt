@@ -104,8 +104,6 @@ class LoginActivity : AppCompatActivity() {
         fetchAndSaveUserType(token)
         fetchAndSaveClientList(token)
         fetchTopStocks(token)
-        fetchTickerInfo(token)
-        fetchTickerAggregates(token)
         fetchAndSaveSupportTickets(token)
         fetchAndSaveReviews(token)
     }
@@ -306,118 +304,5 @@ class LoginActivity : AppCompatActivity() {
     private fun saveToPreferences(key: String, value: String) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().putString(key, value).apply()
-    }
-
-    // Fetch Ticker Info using top stocks list
-    private fun fetchTickerInfo(token: String) {
-        RetrofitClient.apiService.getTopStocks().enqueue(object : Callback<TopStocksResponse> {
-            override fun onResponse(call: Call<TopStocksResponse>, response: Response<TopStocksResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    // Get the first stock symbol or default to "AAPL"
-                    val tickerSymbol = response.body()?.ticker_details?.firstOrNull()?.symbol ?: "AAPL"
-                    val tickerRequest = TickerRequest(tickerSymbol, token)
-
-                    // Now fetch the ticker info for the first symbol
-                    RetrofitClient.apiService.getTickerInfo(tickerRequest).enqueue(object : Callback<TickerInfoResponse> {
-                        override fun onResponse(call: Call<TickerInfoResponse>, response: Response<TickerInfoResponse>) {
-                            if (response.isSuccessful && response.body()?.status == "Success") {
-                                val tickerInfo = response.body()?.ticker_info
-                                Log.d("TICKER_INFO", "Fetched info: $tickerInfo")
-
-                                // Save ticker info to SharedPreferences
-                                tickerInfo?.let {
-                                    saveTickerInfoToPreferences(it)
-                                }
-                            } else {
-                                Log.e("API_ERROR", "Failed to fetch ticker info: ${response.errorBody()?.string()}")
-                            }
-                        }
-
-                        override fun onFailure(call: Call<TickerInfoResponse>, t: Throwable) {
-                            Log.e("NETWORK_ERROR", "Failure fetching ticker info: ${t.message}")
-                        }
-                    })
-                } else {
-                    Log.e("TOP_STOCKS_ERROR", "Failed to fetch top stocks for ticker info: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<TopStocksResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Failure fetching top stocks for ticker info: ${t.message}")
-            }
-        })
-    }
-
-    // Save Ticker Info to SharedPreferences
-    private fun saveTickerInfoToPreferences(tickerInfo: TickerInfo) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("ticker_symbol", tickerInfo.symbol)
-        editor.putString("ticker_company_name", tickerInfo.company_name)
-        editor.putString("ticker_currency", tickerInfo.currency)
-        editor.putFloat("ticker_close_price", tickerInfo.close_price.toFloat())
-        editor.putFloat("ticker_high_price", tickerInfo.high_price.toFloat())
-        editor.putFloat("ticker_low_price", tickerInfo.low_price.toFloat())
-        editor.putFloat("ticker_open_price", tickerInfo.open_price.toFloat())
-        editor.putFloat("ticker_change_percentage", tickerInfo.change_percentage.toFloat())
-        editor.putLong("ticker_volume", tickerInfo.volume.toLong())
-        editor.apply()
-        Log.d("TICKER_INFO_SAVED", "Saved ticker info: $tickerInfo")
-    }
-
-    // Fetch Ticker Aggregates using top stocks list
-    private fun fetchTickerAggregates(token: String) {
-        RetrofitClient.apiService.getTopStocks().enqueue(object : Callback<TopStocksResponse> {
-            override fun onResponse(call: Call<TopStocksResponse>, response: Response<TopStocksResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    // Get the first stock symbol or default to "AAPL"
-                    val tickerSymbol = response.body()?.ticker_details?.firstOrNull()?.symbol ?: "AAPL"
-                    val startDate = "2024-01-01"
-                    val endDate = "2024-01-31"
-                    val interval = "day"
-                    val limit = 100
-                    val aggregatesRequest = TickerAggregatesRequest(tickerSymbol, token, startDate, endDate, interval, limit)
-
-                    // Now fetch the ticker aggregates for the first symbol
-                    RetrofitClient.apiService.getTickerAggregates(aggregatesRequest).enqueue(object : Callback<TickerAggregatesResponse> {
-                        override fun onResponse(call: Call<TickerAggregatesResponse>, response: Response<TickerAggregatesResponse>) {
-                            if (response.isSuccessful && response.body()?.status == "Success") {
-                                val aggregates = response.body()?.aggregates
-                                Log.d("TICKER_AGGREGATES", "Fetched aggregates: $aggregates")
-
-                                // Save aggregates to SharedPreferences
-                                aggregates?.let {
-                                    saveAggregatesToPreferences(it)
-                                }
-                            } else {
-                                Log.e("API_ERROR", "Failed to fetch ticker aggregates: ${response.errorBody()?.string()}")
-                            }
-                        }
-
-                        override fun onFailure(call: Call<TickerAggregatesResponse>, t: Throwable) {
-                            Log.e("NETWORK_ERROR", "Failure fetching aggregates: ${t.message}")
-                        }
-                    })
-                } else {
-                    Log.e("TOP_STOCKS_ERROR", "Failed to fetch top stocks for aggregates: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<TopStocksResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Failure fetching top stocks for aggregates: ${t.message}")
-            }
-        })
-    }
-
-    // Save Ticker Aggregates to SharedPreferences
-    private fun saveAggregatesToPreferences(aggregates: List<TickerAggregate>) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val aggregatesData = aggregates.joinToString(";") {
-            "${it.v},${it.vw},${it.o},${it.c},${it.h},${it.l},${it.t},${it.n}"
-        }
-        editor.putString("ticker_aggregates", aggregatesData)
-        editor.apply()
-        Log.d("AGGREGATES_SAVED", "Saved aggregates: $aggregatesData")
     }
 }
