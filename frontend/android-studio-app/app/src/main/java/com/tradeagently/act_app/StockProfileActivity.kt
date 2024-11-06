@@ -11,9 +11,13 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class StockProfileActivity : AppCompatActivity() {
 
@@ -87,7 +91,7 @@ class StockProfileActivity : AppCompatActivity() {
     private fun fetchTickerAggregates() {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
-        val ticker = intent.getStringExtra("symbol") ?: "AAPL"  // Use symbol from Intent or a default
+        val ticker = intent.getStringExtra("symbol?") ?: "AAPL"  // Use symbol from Intent or a default
 
         if (sessionToken == null) {
             Log.e("StockProfileActivity", "Session token is missing. User may need to log in.")
@@ -95,8 +99,8 @@ class StockProfileActivity : AppCompatActivity() {
             return
         }
 
-        val startDate = "2024-10-01"
-        val endDate = "2024-11-05"
+        val startDate = "2024-10-05"
+        val endDate = "2024-11-07"
         val interval = "day"
         val limit = 100
 
@@ -133,20 +137,25 @@ class StockProfileActivity : AppCompatActivity() {
 
     private fun updateChartWithData(aggregates: List<TickerAggregate>) {
         val entries = mutableListOf<Entry>()
+        val dateLabels = mutableListOf<String>()
 
-        if (aggregates.isEmpty()) {
-            lineChart.setNoDataText("No chart data available.")
-            return
-        }
+        // Format for the date labels
+        val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
 
-        // Assign sequential indices instead of normalized timestamps
-        aggregates.forEachIndexed { index, aggregate ->
+        // Reverse the order of aggregates to display newest on the left, oldest on the right
+        val reversedAggregates = aggregates.reversed()
+
+        reversedAggregates.forEachIndexed { index, aggregate ->
             val closePrice = aggregate.close.toFloat()
-            Log.d("StockProfileActivity", "Adding Entry(time index: $index, closePrice: $closePrice)")
+
+            // Convert timestamp to formatted date
+            val date = dateFormat.format(Date(aggregate.timestamp))
+            dateLabels.add(date)
+
             entries.add(Entry(index.toFloat(), closePrice))
         }
 
-        // Set up the data set and configure the chart appearance
+        // Set up the dataset for the LineChart
         val lineDataSet = LineDataSet(entries, "Close Price").apply {
             lineWidth = 2f
             color = BLUE
@@ -156,8 +165,20 @@ class StockProfileActivity : AppCompatActivity() {
 
         val lineData = LineData(lineDataSet)
         lineChart.data = lineData
-        lineChart.description.text = "Close Price Over Time (Indexed)"
-        lineChart.invalidate() // Refresh chart with new data
-    }
 
+        // Set x-axis properties to improve readability and reverse the direction
+        lineChart.xAxis.apply {
+            valueFormatter = IndexAxisValueFormatter(dateLabels)
+            labelRotationAngle = 0f    // Rotate labels for readability
+            granularity = 1f             // Set granularity for one label per entry
+            setLabelCount(4, true)       // Display a maximum of 4 labels to avoid clutter
+            textSize = 10f               // Set text size for readability
+            isGranularityEnabled = true  // Enable granularity for the reversed axis
+            axisMinimum = 0f             // Set the minimum for the axis
+            axisMaximum = (entries.size - 1).toFloat() // Set maximum to match the entry count
+        }
+
+        lineChart.description.text = "Close Price Over Time"
+        lineChart.invalidate() // Refresh the chart with new data
+    }
 }
