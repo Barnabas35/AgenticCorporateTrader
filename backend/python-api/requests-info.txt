@@ -548,3 +548,68 @@ Example:
     ],
     "status": "Success"
 }
+
+
+### Get user list as admin ------------------------------
+URL & Method: POST /get-user-list
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - List of users and status message
+Example:
+{
+    "status": "Success",
+    "user_list": [
+        {
+            "email": "milosz@gmail.com",
+            "id": "1W0lH5oMGPsGBvG0A",
+            "password": "96cae35c8a9b24418bf24966c2c1b8385723a9a6b8358cddca0a1e",
+            "session_token": "",
+            "user_type": "fm",
+            "username": "Milosz"
+        },
+        {
+            "email": "kbooks1@gmail.com",
+            "id": "9e8YODxoCKswYH0DW",
+            "password": "091e6bb938c4e6925b1b927682b8bbeaad44109889b6c38dea54a49ee4",
+            "session_token": "hRAiBp69AeU0POanxvrlNw3LV69BlWfhAsxKf6xFAi1mDiv5vfJBHh0ZlO6M",
+            "user_type": "fa",
+            "username": "kbooks1"
+        },
+        {
+            "email": "user2@gmail.com",
+            "id": "E6xQPxkSI4Znq61Vb",
+            "password": "6025d1fe48abd4168528f18a2e265dd98d41a7084aa09f6141703901a3",
+            "session_token": "VJSawERPfifve3Lk36Mm141jZqY2zLmpa9zoRqpGxxph2QZp0n8i1RUWKZBG",
+            "user_type": "fa",
+            "username": "user2"
+        },
+        {
+            "email": "menel@gmail.com",
+            "id": "H3Ek22fwlQcic7kpV",
+            "password": "c5b6783c56b7662e2d3d64220e69a2c356c21f173d7926762ccda643d6",
+            "session_token": "TOTpcEM8LFzaSJs7VI0dxt1KOOCqyM35VaedV3iVTUeGRvelsSCRLloXm8SU",
+            "user_type": "fa",
+            "username": "menel"
+        }
+    ]
+}
+
+
+### Admin delete user -----------------------------------
+URL & Method: POST /admin-delete-user
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",        // User session token of an admin
+  "id": "string"                    // User ID
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
