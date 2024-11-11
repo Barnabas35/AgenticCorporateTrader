@@ -176,10 +176,10 @@ def text_search_crypto():
 
 
 # Get top cryptos
-@app.route("/get-top-cryptos", methods=["POST"])
+@app.route("/get-top-cryptos", methods=["GET"])
 def get_top_cryptos():
     from yfinance_requests.get_top_cryptos import api_get_top_cryptos
-    return jsonify(api_get_top_cryptos(request.json)), 200
+    return jsonify(api_get_top_cryptos(request.args)), 200
 
 
 # Get crypto info
