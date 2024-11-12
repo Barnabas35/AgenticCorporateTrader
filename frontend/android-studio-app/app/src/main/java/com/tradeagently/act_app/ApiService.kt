@@ -273,6 +273,26 @@ data class CryptoAggregate(
     val volume: Double
 )
 
+// Data class for user response in the user list
+data class User(
+    val id: String,
+    val username: String,
+    val email: String,
+    val user_type: String
+)
+
+// Response class for user list
+data class UserListResponse(
+    val status: String,
+    val user_list: List<User>
+)
+
+// Request class for admin delete user
+data class AdminDeleteUserRequest(
+    val session_token: String,
+    val id: String
+)
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -371,4 +391,12 @@ interface ApiService {
     fun getCryptoAggregates(
         @Body request: CryptoAggregatesRequest
     ): Call<CryptoAggregatesResponse>
+
+    // Endpoint for getting the user list as an admin
+    @POST("/get-user-list")
+    fun getUserList(@Body tokenRequest: TokenRequest): Call<UserListResponse>
+
+    // Endpoint for deleting a user by admin
+    @POST("/admin-delete-user")
+    fun adminDeleteUser(@Body request: AdminDeleteUserRequest): Call<ApiResponse>
 }

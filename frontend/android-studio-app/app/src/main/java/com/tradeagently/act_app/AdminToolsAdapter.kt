@@ -5,52 +5,29 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 
 class AdminToolsAdapter(
-    private val tickets: List<SupportTicket>?,
-    private val reviews: List<Review>?,
-    private val onTicketClick: ((String, String, String, String, String, Long) -> Unit)? = null,
-    private val onReviewClick: ((Int, String) -> Unit)? = null
+    private val tickets: List<SupportTicket>? = null,
+    private val reviews: List<Review>? = null,
+    private val users: List<User>? = null,  // Add users list
+    private val message: String? = null,
+    private val context: Context,
+    private val onUserDeleteClick: ((String) -> Unit)? = null
 ) : RecyclerView.Adapter<AdminToolsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val subjectText: TextView = view.findViewById(R.id.subjectText)
         val descriptionText: TextView = view.findViewById(R.id.descriptionText)
+        val deleteButton: Button? = view.findViewById(R.id.deleteButton) // For deleting a user if needed
 
         init {
-            view.setOnClickListener {
-                val context = view.context
-
-                tickets?.get(adapterPosition)?.let { ticket ->
-                    onTicketClick?.invoke(
-                        ticket.issue_subject,
-                        ticket.issue_description,
-                        ticket.user_id,
-                        ticket.issue_status,
-                        ticket.ticket_id,
-                        ticket.unix_timestamp
-                    )
-                    val intent = Intent(context, TicketDetailsActivity::class.java)
-                    intent.putExtra("issue_subject", ticket.issue_subject)
-                    intent.putExtra("issue_description", ticket.issue_description)
-                    intent.putExtra("user_id", ticket.user_id)
-                    intent.putExtra("issue_status", ticket.issue_status)
-                    intent.putExtra("ticket_id", ticket.ticket_id)
-                    intent.putExtra("unix_timestamp", ticket.unix_timestamp)
-                    context.startActivity(intent)
-                    (context as? AppCompatActivity)?.overridePendingTransition(0, 0)
-                }
-
-                reviews?.get(adapterPosition)?.let { review ->
-                    onReviewClick?.invoke(review.score, review.comment)
-                    val intent = Intent(context, ReviewDetailsActivity::class.java)
-                    intent.putExtra("score", review.score)
-                    intent.putExtra("comment", review.comment)
-                    context.startActivity(intent)
-                    (context as? AppCompatActivity)?.overridePendingTransition(0, 0)
+            deleteButton?.setOnClickListener {
+                users?.get(adapterPosition)?.let { user ->
+                    onUserDeleteClick?.invoke(user.id)
                 }
             }
         }
@@ -62,18 +39,37 @@ class AdminToolsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (tickets != null) {
-            val ticket = tickets[position]
-            holder.subjectText.text = ticket.issue_subject
-            holder.descriptionText.text = ticket.issue_description
-        } else if (reviews != null) {
-            val review = reviews[position]
-            holder.subjectText.text = "Score: ${review.score}"
-            holder.descriptionText.text = review.comment
+        when {
+            message != null -> {
+                holder.subjectText.text = message
+                holder.descriptionText.text = ""
+            }
+            tickets != null -> {
+                val ticket = tickets[position]
+                holder.subjectText.text = ticket.issue_subject
+                holder.descriptionText.text = ticket.issue_description
+            }
+            reviews != null -> {
+                val review = reviews[position]
+                holder.subjectText.text = "Score: ${review.score}"
+                holder.descriptionText.text = review.comment
+            }
+            users != null -> {
+                val user = users[position]
+                holder.subjectText.text = "Username: ${user.username}"
+                holder.descriptionText.text = "Email: ${user.email}"
+                holder.deleteButton?.visibility = View.VISIBLE // Show delete button
+            }
         }
     }
 
     override fun getItemCount(): Int {
-        return tickets?.size ?: reviews?.size ?: 0
+        return when {
+            message != null -> 1
+            tickets != null -> tickets.size
+            reviews != null -> reviews.size
+            users != null -> users.size
+            else -> 0
+        }
     }
 }

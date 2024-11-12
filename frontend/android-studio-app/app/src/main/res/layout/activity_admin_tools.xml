@@ -31,10 +31,10 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Button Container with TICKET and REVIEW buttons -->
+    <!-- Button Container with TICKET, REVIEW, and USERS buttons -->
     <LinearLayout
         android:id="@+id/buttonContainer"
-        android:layout_width="180dp"
+        android:layout_width="240dp"
         android:layout_height="50dp"
         android:background="@drawable/btn_bg"
         android:backgroundTint="#E0E0E0"
@@ -47,22 +47,32 @@
 
         <Button
             android:id="@+id/buttonTicket"
-            android:layout_width="80dp"
+            android:layout_width="70dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/btn_bg"
             android:text="TICKETS"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/buttonReview"
-            android:layout_width="80dp"
+            android:layout_width="70dp"
             android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/btn_bg"
             android:text="REVIEWS"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/buttonUsers"
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_bg"
+            android:text="USERS"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <!-- Scrollable section for RecyclerView -->
@@ -74,7 +84,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- RecyclerView for displaying tickets or reviews -->
+        <!-- RecyclerView for displaying tickets, reviews, or users -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"

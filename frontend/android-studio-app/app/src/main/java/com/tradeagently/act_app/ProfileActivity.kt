@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.GlideException
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,8 +25,8 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        // Set up bottom navigation
-        setupBottomNavigation()
+        // Use -1 with NavigationHelper to prevent any item from showing as selected
+        NavigationHelper.setupBottomNavigation(this, -1)
 
         // Retrieve token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -55,15 +56,6 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupBottomNavigation() {
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        NavigationHelper.setupBottomNavigation(this, -1)
-        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
-            // Add handling for navigation items if needed
-            false
-        }
-    }
-
     private fun setupUserInfo(sharedPreferences: SharedPreferences) {
         val usernameTextView = findViewById<TextView>(R.id.username)
         val emailTextView = findViewById<TextView>(R.id.email)
@@ -79,12 +71,42 @@ class ProfileActivity : AppCompatActivity() {
         userTypeTextView.text = "User Type: ${getUserTypeDescription(userType)}"
 
         val profileIconUrl = sharedPreferences.getString("profile_icon_url", null)
-        profileIconUrl?.let {
+
+        // Load the profile image using Glide with enhanced error handling
+        profileIconUrl?.let { url ->
             Glide.with(this)
-                .load(it)
+                .load(url)
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .error(R.drawable.ic_error)
+                .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        e?.logRootCauses("GlideError")
+                        Toast.makeText(
+                            this@ProfileActivity,
+                            "Failed to load profile image",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: android.graphics.drawable.Drawable?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>?,
+                        dataSource: com.bumptech.glide.load.DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+                })
                 .into(profileImageView)
+        } ?: run {
+            profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
         }
     }
 

@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="16dp">
 
+    <!-- Main text area for subject or user name -->
     <TextView
         android:id="@+id/subjectText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
+        android:text="Subject/User Name"
         android:textSize="16sp"
-        android:textColor="@android:color/black" />
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="4dp" />
 
+    <!-- Secondary text area for description or email -->
     <TextView
         android:id="@+id/descriptionText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Description/Email"
         android:textSize="14sp"
         android:textColor="@android:color/darker_gray"
-        android:layout_marginTop="4dp" />
+        android:layout_marginBottom="8dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginTop="8dp"/>
+    <!-- Delete button, visible only for users -->
+    <Button
+        android:id="@+id/deleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:backgroundTint="@color/activeIconColor"
+        android:textColor="@android:color/white"
+        android:visibility="gone" /> <!-- Default visibility is gone -->
 </LinearLayout>
