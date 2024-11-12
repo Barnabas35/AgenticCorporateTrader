@@ -90,7 +90,7 @@ class CryptoProfileActivity : AppCompatActivity() {
             return
         }
 
-        val startDate = "2024-01-01"
+        val startDate = "2024-05-01"
         val endDate = "2024-11-13"
         val interval = "1d"
 
