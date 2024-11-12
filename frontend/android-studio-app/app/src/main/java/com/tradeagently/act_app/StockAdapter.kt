@@ -29,7 +29,7 @@ class StockAdapter(
         val stock = stockList[position]
         holder.symbolTextView.text = stock.symbol
         holder.companyNameTextView.text = stock.company_name
-        holder.priceTextView.text = "${stock.price} ${stock.currency}"
+        holder.priceTextView.text = "Price: ${stock.price} ${stock.currency}"
 
         holder.itemView.setOnClickListener {
             fetchTickerInfo(holder.itemView.context, stock.symbol)

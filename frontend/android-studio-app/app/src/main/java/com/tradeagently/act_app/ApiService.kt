@@ -197,6 +197,82 @@ data class TickerAggregate(
     val transactions: Int   // Number of trades
 )
 
+// Request data class for /text-search-crypto
+data class TextSearchCryptoRequest(
+    val search_query: String,
+    val limit: Int = 5,
+    val session_token: String,
+    val show_price: Boolean
+)
+
+// Response data class for /text-search-crypto
+data class TextSearchCryptoResponse(
+    val crypto_details: List<CryptoItem>,
+    val status: String
+)
+
+// Request for get crypto info
+data class CryptoInfoRequest(
+    val crypto: String,
+    val session_token: String
+)
+
+// Response for get crypto info
+data class CryptoInfoResponse(
+    val crypto_info: CryptoInfo?,
+    val status: String
+)
+
+// Response data class for individual crypto info
+data class CryptoInfo(
+    val description: String,
+    val high: Double,
+    val latest_price: Double,
+    val low: Double,
+    val name: String,
+    val open: Double,
+    val previous_close: Double,
+    val symbol: String,
+    val volume: Long
+)
+
+// Response for get top cryptos and get crypto aggregates
+data class TopCryptosResponse(
+    val crypto_details: List<CryptoItem>?,
+    val status: String
+)
+
+// Crypto item data class to hold individual ticker details
+data class CryptoItem(
+    val symbol: String,
+    val name: String,
+    val price: Double?
+)
+
+// Request for crypto aggregates
+data class CryptoAggregatesRequest(
+    val crypto: String,
+    val session_token: String,
+    val start_date: String,
+    val end_date: String,
+    val interval: String
+)
+
+// Response for crypto aggregates
+data class CryptoAggregatesResponse(
+    val crypto_aggregates: List<CryptoAggregate>,
+    val status: String
+)
+
+data class CryptoAggregate(
+    val close: Double,
+    val date: String,
+    val high: Double,
+    val low: Double,
+    val open: Double,
+    val volume: Double
+)
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -271,4 +347,28 @@ interface ApiService {
     // Endpoint for getting ticker aggregates
     @POST("/get-ticker-aggregates")
     fun getTickerAggregates(@Body request: TickerAggregatesRequest): Call<TickerAggregatesResponse>
+
+    // GET request for the top cryptos
+    @GET("/get-top-cryptos")
+    fun getTopCryptos(
+        @Query("limit") limit: Int = 10
+    ): Call<TopCryptosResponse>
+
+    // POST request for text search crypto
+    @POST("/text-search-crypto")
+    fun textSearchCrypto(
+        @Body request: TextSearchCryptoRequest
+    ): Call<TextSearchCryptoResponse>
+
+    // POST request to get crypto info
+    @POST("/get-crypto-info")
+    fun getCryptoInfo(
+        @Body request: CryptoInfoRequest
+    ): Call<CryptoInfoResponse>
+
+    // POST request to get crypto aggregates
+    @POST("/get-crypto-aggregates")
+    fun getCryptoAggregates(
+        @Body request: CryptoAggregatesRequest
+    ): Call<CryptoAggregatesResponse>
 }

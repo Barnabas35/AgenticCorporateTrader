@@ -77,6 +77,11 @@
             android:name=".StockProfileActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- Crypto Profile Activity -->
+        <activity
+            android:name=".CryptoProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
         <!-- Stock Profile Activity -->
         <activity
             android:name=".TicketDetailsActivity"

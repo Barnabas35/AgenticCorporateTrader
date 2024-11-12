@@ -91,7 +91,7 @@ class StockProfileActivity : AppCompatActivity() {
     private fun fetchTickerAggregates() {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
-        val ticker = intent.getStringExtra("symbol?") ?: "AAPL"  // Use symbol from Intent or a default
+        val ticker = intent.getStringExtra("symbol") ?: "AAPL"  // Use symbol from Intent or a default
 
         if (sessionToken == null) {
             Log.e("StockProfileActivity", "Session token is missing. User may need to log in.")
@@ -99,8 +99,8 @@ class StockProfileActivity : AppCompatActivity() {
             return
         }
 
-        val startDate = "2024-10-05"
-        val endDate = "2024-11-07"
+        val startDate = "2024-10-10"
+        val endDate = "2024-11-12"
         val interval = "day"
         val limit = 100
 

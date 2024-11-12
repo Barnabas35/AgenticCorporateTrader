@@ -2,13 +2,14 @@ package com.tradeagently.act_app
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Button
 import android.widget.Toast
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -23,37 +24,52 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        // Set up the bottom navigation
-        NavigationHelper.setupBottomNavigation(this, -1)
-
-        // Find the bottom navigation view
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-
-        // Explicitly deselect all menu items
-        bottomNavigationView.menu.setGroupCheckable(0, true, false)
-        for (i in 0 until bottomNavigationView.menu.size()) {
-            bottomNavigationView.menu.getItem(i).isChecked = false
-        }
+        // Set up bottom navigation
+        setupBottomNavigation()
 
         // Retrieve token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val token = sharedPreferences.getString("session_token", null)
 
-        // If token is null, redirect to login screen
+        // Redirect to login if token is null
         if (token == null) {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
+            navigateToLogin()
             return
         }
 
-        // Find TextViews for username, email, user type, and profile image
+        // Retrieve and display user information
+        setupUserInfo(sharedPreferences)
+
+        // Logout button functionality
+        findViewById<Button>(R.id.logoutButton).setOnClickListener {
+            clearUserDetails()
+            navigateToMainActivity()
+        }
+
+        // Delete account functionality with confirmation dialog
+        setupDeleteAccountButton(sharedPreferences, token)
+
+        // Fetch and save user type if not set
+        if (sharedPreferences.getString("user_type", "Unknown") == "Unknown") {
+            fetchAndSaveUserType(token)
+        }
+    }
+
+    private fun setupBottomNavigation() {
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        NavigationHelper.setupBottomNavigation(this, -1)
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            // Add handling for navigation items if needed
+            false
+        }
+    }
+
+    private fun setupUserInfo(sharedPreferences: SharedPreferences) {
         val usernameTextView = findViewById<TextView>(R.id.username)
         val emailTextView = findViewById<TextView>(R.id.email)
         val userTypeTextView = findViewById<TextView>(R.id.userType)
         val profileImageView = findViewById<ImageView>(R.id.profileImage)
 
-        // Retrieve and display user's email and username from SharedPreferences
         val userEmail = sharedPreferences.getString("user_email", "Unknown") ?: "Unknown"
         val userName = sharedPreferences.getString("user_name", "Unknown") ?: "Unknown"
         val userType = sharedPreferences.getString("user_type", "Unknown") ?: "Unknown"
@@ -62,48 +78,30 @@ class ProfileActivity : AppCompatActivity() {
         emailTextView.text = "Email: $userEmail"
         userTypeTextView.text = "User Type: ${getUserTypeDescription(userType)}"
 
-        // Retrieve and display profile icon URL
         val profileIconUrl = sharedPreferences.getString("profile_icon_url", null)
-        if (profileIconUrl != null) {
+        profileIconUrl?.let {
             Glide.with(this)
-                .load(profileIconUrl)
+                .load(it)
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .error(R.drawable.ic_error)
                 .into(profileImageView)
         }
+    }
 
-        // Find the Logout button
-        val logoutButton = findViewById<Button>(R.id.logoutButton)
-        logoutButton.setOnClickListener {
-            clearUserDetails()
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-        }
-
-        // Find the Delete Account button and set visibility based on user type
+    private fun setupDeleteAccountButton(sharedPreferences: SharedPreferences, token: String) {
         val deleteAccountButton = findViewById<Button>(R.id.deleteAccountButton)
-        if (userType == "admin") {
-            deleteAccountButton.visibility = View.GONE // Hide for admin
-        } else {
-            deleteAccountButton.visibility = View.VISIBLE // Show for "fa" and "fm"
-            deleteAccountButton.setOnClickListener {
-                // Show a confirmation dialog
-                AlertDialog.Builder(this)
-                    .setTitle("Delete Account")
-                    .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
-                    .setPositiveButton("Yes") { _, _ ->
-                        deleteAccount(token)
-                    }
-                    .setNegativeButton("No", null)
-                    .show()
-            }
-        }
+        val userType = sharedPreferences.getString("user_type", "Unknown")
 
-        // Fetch user type if it's not already set in SharedPreferences
-        if (userType == "Unknown") {
-            fetchAndSaveUserType(token)
+        deleteAccountButton.visibility = if (userType == "admin") View.GONE else View.VISIBLE
+        deleteAccountButton.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                .setPositiveButton("Yes") { _, _ ->
+                    deleteAccount(token)
+                }
+                .setNegativeButton("No", null)
+                .show()
         }
     }
 
@@ -114,10 +112,7 @@ class ProfileActivity : AppCompatActivity() {
             override fun onResponse(call: Call<DeleteUserResponse>, response: Response<DeleteUserResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     clearUserDetails()
-                    val intent = Intent(this@ProfileActivity, LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
+                    navigateToLogin()
                 } else {
                     Log.e("DELETE_ACCOUNT_ERROR", "Failed to delete account: ${response.errorBody()?.string()}")
                     Toast.makeText(this@ProfileActivity, "Failed to delete account. Please try again.", Toast.LENGTH_SHORT).show()
@@ -164,13 +159,18 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNavigationView.menu.setGroupCheckable(0, true, false)
-        for (i in 0 until bottomNavigationView.menu.size()) {
-            bottomNavigationView.menu.getItem(i).isChecked = false
-        }
+    private fun navigateToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun clearUserDetails() {

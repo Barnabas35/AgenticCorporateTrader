@@ -1,10 +1,9 @@
 package com.tradeagently.act_app
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,192 +17,268 @@ import retrofit2.Response
 class MarketActivity : AppCompatActivity() {
 
     private lateinit var stockRecyclerView: RecyclerView
-    private lateinit var stockAdapter: StockAdapter
-    private lateinit var suggestionRecyclerView: RecyclerView
-    private lateinit var suggestionAdapter: SuggestionAdapter
+    private lateinit var cryptoRecyclerView: RecyclerView
+    private lateinit var stockSuggestionRecyclerView: RecyclerView
+    private lateinit var cryptoSuggestionRecyclerView: RecyclerView
+    private lateinit var stockSuggestionAdapter: StockSuggestionAdapter
+    private lateinit var cryptoSuggestionAdapter: CryptoSuggestionAdapter
     private lateinit var stockSearchView: SearchView
+    private lateinit var cryptoSearchView: SearchView
     private lateinit var buttonStock: Button
     private lateinit var buttonCrypto: Button
-
-    // Store session token as a class variable
     private lateinit var sessionToken: String
+    private lateinit var stockAdapter: StockAdapter
+    private lateinit var cryptoAdapter: CryptoAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_market)
         NavigationHelper.setupBottomNavigation(this, R.id.nav_market)
 
-        // Prevent bottom navigation from moving with keyboard
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-
+        // Initialize RecyclerViews and buttons
         stockRecyclerView = findViewById(R.id.stockRecyclerView)
         stockRecyclerView.layoutManager = LinearLayoutManager(this)
+        cryptoRecyclerView = findViewById(R.id.cryptoRecyclerView)
+        cryptoRecyclerView.layoutManager = LinearLayoutManager(this)
+        cryptoRecyclerView.visibility = View.GONE
 
-        suggestionRecyclerView = findViewById(R.id.suggestionRecyclerView)
-        suggestionRecyclerView.layoutManager = LinearLayoutManager(this)
-        suggestionRecyclerView.visibility = View.GONE // Initially hidden
+        stockSuggestionRecyclerView = findViewById(R.id.stockSuggestionRecyclerView)
+        stockSuggestionRecyclerView.layoutManager = LinearLayoutManager(this)
+        stockSuggestionRecyclerView.visibility = View.GONE
+
+        cryptoSuggestionRecyclerView = findViewById(R.id.cryptoSuggestionRecyclerView)
+        cryptoSuggestionRecyclerView.layoutManager = LinearLayoutManager(this)
+        cryptoSuggestionRecyclerView.visibility = View.GONE
 
         stockSearchView = findViewById(R.id.stockSearchView)
+        cryptoSearchView = findViewById(R.id.cryptoSearchView)
         buttonStock = findViewById(R.id.buttonStock)
         buttonCrypto = findViewById(R.id.buttonCrypto)
 
-        // Retrieve session token from shared preferences
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        sessionToken = sharedPreferences.getString("session_token", "") ?: ""
+        // Fetch session token
+        sessionToken = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            .getString("session_token", "") ?: ""
 
-        // Set initial button states
-        buttonStock.isSelected = true
-        buttonCrypto.isSelected = false
+        // Initialize adapters
+        stockAdapter = StockAdapter(emptyList(), RetrofitClient.apiService, sessionToken)
+        cryptoAdapter = CryptoAdapter(emptyList())
 
-        // Set click listeners for the buttons
+        stockRecyclerView.adapter = stockAdapter
+        cryptoRecyclerView.adapter = cryptoAdapter
+
+        // Set STOCK as the default selected option
+        setButtonSelected(buttonStock, true)
+        setButtonSelected(buttonCrypto, false)
+        loadTopStocks()  // Load stocks by default
+
+        // Set up button listeners
         buttonStock.setOnClickListener {
-            setButtonSelected(buttonStock)
-            setButtonUnselected(buttonCrypto)
-            loadTopStocks() // Load stocks when "STOCK" button is selected
+            setButtonSelected(buttonStock, true)
+            setButtonSelected(buttonCrypto, false)
+            loadTopStocks()
         }
 
         buttonCrypto.setOnClickListener {
-            setButtonSelected(buttonCrypto)
-            setButtonUnselected(buttonStock)
-            loadTopCryptos() // Load cryptos when "CRYPTO" button is selected
+            setButtonSelected(buttonStock, false)
+            setButtonSelected(buttonCrypto, true)
+            loadTopCryptos()
         }
 
-        loadTopStocks() // Load stocks by default
-
-        setupSearchView()
+        setupStockSearchView()
+        setupCryptoSearchView()
     }
 
-    // Function to style the selected button
-    private fun setButtonSelected(button: Button) {
-        button.isSelected = true
+    private fun setButtonSelected(button: Button, isSelected: Boolean) {
+        button.isSelected = isSelected
+        if (isSelected) {
+            button.setBackgroundResource(R.drawable.btn_bg) // Active background (green or selected color)
+            button.setTextColor(Color.WHITE)
+            if (button == buttonStock) {
+                stockRecyclerView.visibility = View.VISIBLE
+                cryptoRecyclerView.visibility = View.GONE
+                stockSearchView.visibility = View.VISIBLE
+                cryptoSearchView.visibility = View.GONE
+                stockSuggestionRecyclerView.visibility = View.GONE // Hide crypto suggestions
+                cryptoSuggestionRecyclerView.visibility = View.GONE
+            } else {
+                stockRecyclerView.visibility = View.GONE
+                cryptoRecyclerView.visibility = View.VISIBLE
+                stockSearchView.visibility = View.GONE
+                cryptoSearchView.visibility = View.VISIBLE
+                stockSuggestionRecyclerView.visibility = View.GONE
+                cryptoSuggestionRecyclerView.visibility = View.GONE // Hide stock suggestions
+            }
+        } else {
+            button.setBackgroundResource(R.drawable.btn_bg) // Inactive background (gray or deselected color)
+            button.setTextColor(Color.WHITE)
+        }
     }
 
-    // Function to style the unselected button
-    private fun setButtonUnselected(button: Button) {
-        button.isSelected = false
-    }
-
-    // Load the top stocks
     private fun loadTopStocks() {
-        RetrofitClient.apiService.getTopStocks(limit = 10).enqueue(object : Callback<TopStocksResponse> {
+        RetrofitClient.apiService.getTopStocks(10).enqueue(object : Callback<TopStocksResponse> {
             override fun onResponse(call: Call<TopStocksResponse>, response: Response<TopStocksResponse>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { topStocksResponse ->
-                        if (topStocksResponse.status == "Success") {
-                            displayStocks(topStocksResponse.ticker_details)
-                        } else {
-                            Log.e("MarketActivity", "API returned error: ${topStocksResponse.status}")
-                        }
-                    }
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val stockItems = response.body()!!.ticker_details
+                    stockAdapter = StockAdapter(stockItems, RetrofitClient.apiService, sessionToken)
+                    stockRecyclerView.adapter = stockAdapter
                 } else {
-                    Log.e("MarketActivity", "Response failed with code: ${response.code()}")
+                    showToast("Error loading stocks")
                 }
             }
 
             override fun onFailure(call: Call<TopStocksResponse>, t: Throwable) {
-                Log.e("MarketActivity", "Network error: ${t.message}", t)
+                showToast("Network error loading stocks")
             }
         })
     }
 
     private fun loadTopCryptos() {
-        Toast.makeText(this, "Loading top cryptos (not implemented)", Toast.LENGTH_SHORT).show()
+        RetrofitClient.apiService.getTopCryptos(10).enqueue(object : Callback<TopCryptosResponse> {
+            override fun onResponse(call: Call<TopCryptosResponse>, response: Response<TopCryptosResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val cryptoItems = response.body()!!.crypto_details ?: emptyList()
+                    cryptoAdapter.updateData(cryptoItems)
+                } else {
+                    showToast("Error loading cryptos")
+                }
+            }
+
+            override fun onFailure(call: Call<TopCryptosResponse>, t: Throwable) {
+                showToast("Network error loading cryptos")
+            }
+        })
     }
 
-    private fun setupSearchView() {
+    private fun setupStockSearchView() {
         stockSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     performStockSearch(it)
-                    suggestionRecyclerView.visibility = View.GONE
+                    stockSuggestionRecyclerView.visibility = View.GONE
                 }
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText.isNullOrBlank()) {
-                    suggestionRecyclerView.visibility = View.GONE
+                    stockSuggestionRecyclerView.visibility = View.GONE
                 } else {
-                    fetchSuggestions(newText)
+                    fetchStockSuggestions(newText)
                 }
                 return true
             }
         })
     }
 
-    private fun fetchSuggestions(query: String) {
-        val searchRequest = SearchRequest(
-            search_query = query,
-            limit = 3,
-            session_token = sessionToken,
-            show_price = false
-        )
+    private fun setupCryptoSearchView() {
+        cryptoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    performCryptoSearch(it)
+                    cryptoSuggestionRecyclerView.visibility = View.GONE
+                }
+                return true
+            }
 
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrBlank()) {
+                    cryptoSuggestionRecyclerView.visibility = View.GONE
+                } else {
+                    fetchCryptoSuggestions(newText)
+                }
+                return true
+            }
+        })
+    }
+
+    private fun fetchStockSuggestions(query: String) {
+        val searchRequest = SearchRequest(query, limit = 3, sessionToken, show_price = false)
         RetrofitClient.apiService.searchStocks(searchRequest).enqueue(object : Callback<StockSearchResponse> {
             override fun onResponse(call: Call<StockSearchResponse>, response: Response<StockSearchResponse>) {
                 if (response.isSuccessful) {
                     response.body()?.let { stockSearchResponse ->
                         if (stockSearchResponse.status == "Success") {
-                            showSuggestions(stockSearchResponse.ticker_details.take(3))
-                        } else {
-                            Log.e("MarketActivity", "API returned error: ${stockSearchResponse.status}")
+                            stockSuggestionAdapter = StockSuggestionAdapter(stockSearchResponse.ticker_details.take(3)) { suggestion ->
+                                performStockSearch(suggestion.symbol)
+                                stockSuggestionRecyclerView.visibility = View.GONE
+                            }
+                            stockSuggestionRecyclerView.adapter = stockSuggestionAdapter
+                            stockSuggestionRecyclerView.visibility = View.VISIBLE
                         }
                     }
-                } else {
-                    Log.e("MarketActivity", "Search response failed with code: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<StockSearchResponse>, t: Throwable) {
-                Log.e("MarketActivity", "Network error during search: ${t.message}", t)
+                showToast("Error fetching stock suggestions")
             }
         })
     }
 
-    private fun showSuggestions(suggestions: List<StockItem>) {
-        if (suggestions.isNotEmpty()) {
-            suggestionAdapter = SuggestionAdapter(suggestions) { suggestion ->
-                performStockSearch(suggestion.symbol)
-                suggestionRecyclerView.visibility = View.GONE
+    private fun fetchCryptoSuggestions(query: String) {
+        val searchRequest = TextSearchCryptoRequest(query, limit = 3, sessionToken, show_price = false)
+        RetrofitClient.apiService.textSearchCrypto(searchRequest).enqueue(object : Callback<TextSearchCryptoResponse> {
+            override fun onResponse(call: Call<TextSearchCryptoResponse>, response: Response<TextSearchCryptoResponse>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { cryptoSearchResponse ->
+                        if (cryptoSearchResponse.status == "Success") {
+                            cryptoSuggestionAdapter = CryptoSuggestionAdapter(cryptoSearchResponse.crypto_details.take(3)) { suggestion ->
+                                performCryptoSearch(suggestion.symbol)
+                                cryptoSuggestionRecyclerView.visibility = View.GONE
+                            }
+                            cryptoSuggestionRecyclerView.adapter = cryptoSuggestionAdapter
+                            cryptoSuggestionRecyclerView.visibility = View.VISIBLE
+                        }
+                    }
+                }
             }
-            suggestionRecyclerView.adapter = suggestionAdapter
-            suggestionRecyclerView.visibility = View.VISIBLE
-        } else {
-            suggestionRecyclerView.visibility = View.GONE
-        }
+
+            override fun onFailure(call: Call<TextSearchCryptoResponse>, t: Throwable) {
+                showToast("Error fetching crypto suggestions")
+            }
+        })
     }
 
     private fun performStockSearch(query: String) {
-        val searchRequest = SearchRequest(
-            search_query = query,
-            limit = 50,
-            session_token = sessionToken,
-            show_price = true
-        )
-
+        val searchRequest = SearchRequest(query, limit = 50, sessionToken, show_price = false)
         RetrofitClient.apiService.searchStocks(searchRequest).enqueue(object : Callback<StockSearchResponse> {
             override fun onResponse(call: Call<StockSearchResponse>, response: Response<StockSearchResponse>) {
                 if (response.isSuccessful) {
                     response.body()?.let { stockSearchResponse ->
                         if (stockSearchResponse.status == "Success") {
-                            displayStocks(stockSearchResponse.ticker_details)
-                        } else {
-                            Log.e("MarketActivity", "API returned error: ${stockSearchResponse.status}")
+                            stockAdapter = StockAdapter(stockSearchResponse.ticker_details, RetrofitClient.apiService, sessionToken)
+                            stockRecyclerView.adapter = stockAdapter
                         }
                     }
-                } else {
-                    Log.e("MarketActivity", "Search response failed with code: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<StockSearchResponse>, t: Throwable) {
-                Log.e("MarketActivity", "Network error during search: ${t.message}", t)
+                showToast("Error during stock search")
             }
         })
     }
 
-    private fun displayStocks(stocks: List<StockItem>) {
-        stockAdapter = StockAdapter(stocks, RetrofitClient.apiService, sessionToken)
-        stockRecyclerView.adapter = stockAdapter
+    private fun performCryptoSearch(query: String) {
+        val searchRequest = TextSearchCryptoRequest(query, limit = 50, sessionToken, show_price = true)
+        RetrofitClient.apiService.textSearchCrypto(searchRequest).enqueue(object : Callback<TextSearchCryptoResponse> {
+            override fun onResponse(call: Call<TextSearchCryptoResponse>, response: Response<TextSearchCryptoResponse>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { cryptoSearchResponse ->
+                        if (cryptoSearchResponse.status == "Success") {
+                            cryptoAdapter.updateData(cryptoSearchResponse.crypto_details ?: emptyList())
+                        }
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<TextSearchCryptoResponse>, t: Throwable) {
+                showToast("Error during crypto search")
+            }
+        })
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

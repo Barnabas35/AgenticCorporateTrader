@@ -6,19 +6,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class SuggestionAdapter(
+class StockSuggestionAdapter(
     private val suggestions: List<StockItem>,
     private val onSuggestionClick: (StockItem) -> Unit
-) : RecyclerView.Adapter<SuggestionAdapter.SuggestionViewHolder>() {
+) : RecyclerView.Adapter<StockSuggestionAdapter.SuggestionViewHolder>() {
 
     inner class SuggestionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val symbolText: TextView = view.findViewById(R.id.symbolText)
-        val companyNameText: TextView = view.findViewById(R.id.companyNameText)
+        val companyNameText: TextView = view.findViewById(R.id.companyName)
         val bottomDivider: View = view.findViewById(R.id.bottomDivider)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuggestionViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_suggestion, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.`item_suggestion_stock`, parent, false)
         return SuggestionViewHolder(view)
     }
 

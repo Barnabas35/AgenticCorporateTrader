@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/CryptoProfileLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundLight">
+
+    <!-- Toolbar with Crypto Symbol and Name -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/cryptoProfileToolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/symbolTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="BTC"
+            android:textColor="@color/white"
+            android:textSize="34sp"
+            android:textStyle="bold" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="5dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cryptoProfileToolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/nameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Bitcoin"
+                android:textSize="24sp" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/cryptoLineChart"
+                android:layout_width="match_parent"
+                android:layout_height="224dp"
+                android:layout_marginTop="16dp"
+                android:background="#E0E0E0" />
+
+            <!-- Crypto Details (Open, Close, High, Low, Volume) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/cryptoDetailsTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Crypto Details"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/buyCryptoButton"
+                    android:layout_width="120dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="16dp"
+                    android:backgroundTint="@color/primary"
+                    android:text="BUY"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:padding="8dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/openPriceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Open: 68746.79" />
+
+            <TextView
+                android:id="@+id/latestPriceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Latest Price: 68899.84" />
+
+            <TextView
+                android:id="@+id/highPriceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="High: 68873.02" />
+
+            <TextView
+                android:id="@+id/lowPriceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Low: 68261.33" />
+
+            <TextView
+                android:id="@+id/volumeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Volume: 36003250176" />
+
+            <!-- Sell Button aligned to the right, like the Buy Button -->
+            <Button
+                android:id="@+id/sellCryptoButton"
+                android:layout_width="120dp"
+                android:layout_height="44dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/primary"
+                android:text="SELL"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/descriptionTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Description: Bitcoin (BTC) is a cryptocurrency launched in 2010..." />
+
+            <TextView
+                android:id="@+id/homepageTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Homepage: www.bitcoin.org" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:itemIconSize="24dp"
+        app:itemIconTint="@color/activeIconColor"
+        app:itemRippleColor="@color/activeIconColor"
+        app:itemTextColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

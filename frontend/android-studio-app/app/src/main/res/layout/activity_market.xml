@@ -31,10 +31,7 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Container with STOCK and CRYPTO buttons -->
-
-    <!-- SearchView for stock search -->
-
+    <!-- Button container for STOCK and CRYPTO buttons -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="180dp"
@@ -44,7 +41,6 @@
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/marketToolbar">
 
@@ -68,36 +64,76 @@
             android:textSize="16sp" />
     </LinearLayout>
 
+    <!-- SearchView for searching stocks -->
     <androidx.appcompat.widget.SearchView
         android:id="@+id/stockSearchView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/btn_bg"
-        android:backgroundTint="#CAB8B8B8"
+        android:backgroundTint="#B6B6B6"
         android:queryHint="Search stocks"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonContainer" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonContainer"
+        android:visibility="visible" />
 
-    <!-- RecyclerView for displaying search suggestions -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/suggestionRecyclerView"
+    <!-- SearchView for searching cryptos -->
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/cryptoSearchView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/stockSearchView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
         android:background="@drawable/btn_bg"
-        android:backgroundTint="#E0E0E0"/>
+        android:backgroundTint="#B6B6B6"
+        android:queryHint="Search cryptos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonContainer"
+        android:visibility="gone" />
 
-    <!-- Main RecyclerView for displaying stock list -->
+    <!-- RecyclerView for displaying stock search suggestions -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/stockSuggestionRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="#A4A4A4"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stockSearchView" />
+
+    <!-- RecyclerView for displaying crypto search suggestions -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/cryptoSuggestionRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="#A4A4A4"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cryptoSearchView" />
+
+    <!-- RecyclerView for displaying stock list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/stockRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/suggestionRecyclerView"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/stockSuggestionRecyclerView"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- RecyclerView for displaying crypto list (initially hidden) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/cryptoRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/cryptoSuggestionRecyclerView"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
