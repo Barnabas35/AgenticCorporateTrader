@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../components/userContext'; // Adjust the path as needed
+import { useSessionToken, useUser } from '../components/userContext'; // Adjust the path as needed
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -50,6 +50,7 @@ const Login: React.FC = () => {
       if (data.session_token != null) {
         // Store the session token in context
         setSessionToken(data.session_token);
+        console.log('Session Token:', data.session_token);
 
         // Fetch username with the session token
         const usernameResponse = await fetch('https://tradeagently.dev/get-username', {

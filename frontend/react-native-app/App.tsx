@@ -10,7 +10,6 @@ import Register from './app/register';
 import UserAccount from './app/userAccount';
 import CryptoSearch from './app/cryptoSearch';
 import StockSearch from './app/stock-search';
-import StockDetails from './app/stock-details';
 import About from './app/about'
 import ClientManagement from './app/client-management';
 import { View, StyleSheet } from 'react-native'; // Import View and StyleSheet for layout
@@ -31,9 +30,8 @@ const App: React.FC = () => {
               <Route path="/user-account" element={<UserAccount />} />
               <Route path="/about" element={<About />} />
               <Route path="/client-management" element={<ClientManagement />} />
-              <Route path="crypto-search" element={<CryptoSearch />} />
+              <Route path="/crypto-search" element={<CryptoSearch />} />
               <Route path="/stock-search" element={<StockSearch />} />
-              <Route path="/stock-details" element={<StockDetails />} />
             </Routes>
           </View>
         </View>

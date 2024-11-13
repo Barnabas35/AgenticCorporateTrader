@@ -10,7 +10,7 @@ const Menu: React.FC = () => {
   useEffect(() => {
     const fetchUserType = async () => {
       try {
-        const response = await fetch('/get-user-type', {
+        const response = await fetch('https://tradeagently.dev/get-user-type', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -21,6 +21,7 @@ const Menu: React.FC = () => {
         const data = await response.json();
         if (data.status === 'Success') {
           setUserType(data.user_type); // Set user type if request is successful
+          console.log(data.user_type);
         } else {
           console.error('Failed to fetch user type');
         }
@@ -60,20 +61,6 @@ const Menu: React.FC = () => {
           About
         </NavLink>
         <View style={styles.spacer} />
-        <NavLink
-          to="/crypto-search"
-          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-        >
-          Crypto Search
-        </NavLink>
-        <View style={styles.spacer} />
-        <NavLink
-          to="/stock-search"
-          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-        >
-          Stock Search
-        </NavLink>
-        <View style={styles.spacer} />
         {sessionToken ? (
           <>
             {/* Conditionally render Client Management for 'fa' user type only */}
@@ -88,6 +75,20 @@ const Menu: React.FC = () => {
                 <View style={styles.spacer} />
               </>
             )}
+            <NavLink
+              to="/crypto-search"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              Crypto Search
+            </NavLink>
+            <View style={styles.spacer} />
+            <NavLink
+              to="/stock-search"
+              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+            >
+              Stock Search
+            </NavLink>
+            <View style={styles.spacer} />
             <NavLink
               to="/user-account"
               style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}

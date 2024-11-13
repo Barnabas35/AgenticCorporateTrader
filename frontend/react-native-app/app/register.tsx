@@ -98,6 +98,7 @@ const Register: React.FC = () => {
           onChange={(e) => setUserType(e.target.value)}
           style={styles.dropdown}
         >
+          <option value="default">Select user type</option>
           <option value="fa">Fund Administrator</option>
           <option value="fm">Fund Manager</option>
         </select>
