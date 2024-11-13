@@ -1,14 +1,14 @@
 
 import yfinance as yf
 
-def api_get_top_cryptos(request_json):
+def api_get_top_cryptos(request_args):
 
     # Check if limit is in request
-    if "limit" not in request_json:
+    if "limit" not in request_args:
         limit = 10
     else:
         # Get limit from request arguments
-        limit = str(request_json["limit"])
+        limit = str(request_args.get("limit"))
 
         # Make sure limit is an integer
         if not limit.isnumeric():

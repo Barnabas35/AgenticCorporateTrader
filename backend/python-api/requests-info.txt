@@ -463,7 +463,7 @@ WARNING: When show_price is true, some cryptos may not show up due to them not b
 
 
 ### Get top cryptos -------------------------------------
-URL & Method: GET /get-top-cryptos
+URL & Method: GET /get-top-cryptos?limit=10
 Parameters:
  - limit: integer (optional) - Number of top cryptos to return (default 10)
 Response: JSON - List of top cryptos

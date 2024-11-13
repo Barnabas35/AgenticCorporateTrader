@@ -37,3 +37,4 @@ frontend/android-studio-app/.gradle/8.7/dependencies-accessors/d4b6d22156583c8b7
 frontend/android-studio-app/.gradle/8.7/dependencies-accessors/d4b6d22156583c8b7b55c4fd04fbb4c58c762f42-bed4c8cd-58f1-4015-92aa-0924bd197ced/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$KotlinPluginAccessors.class
 frontend/android-studio-app/.gradle/8.7/dependencies-accessors/d4b6d22156583c8b7b55c4fd04fbb4c58c762f42-bed4c8cd-58f1-4015-92aa-0924bd197ced/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$PluginAccessors.class
 frontend/android-studio-app/.gradle/8.7/dependencies-accessors/d4b6d22156583c8b7b55c4fd04fbb4c58c762f42-bed4c8cd-58f1-4015-92aa-0924bd197ced/classes/org/gradle/accessors/dm/LibrariesForLibsInPluginsBlock$VersionAccessors.class
+*.class
