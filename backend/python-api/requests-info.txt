@@ -196,7 +196,7 @@ Example:
     {"issue_subject": "subject2",
      "user_id": "AgSO2FnIP46FB",
      "issue_description": "description2",
-     "issue_status": "closed",
+     "issue_status": "resolved",
      "ticket_id": "AgSO2FnIP46FB",
      "unix_timestamp": 1234567890}
   ],
