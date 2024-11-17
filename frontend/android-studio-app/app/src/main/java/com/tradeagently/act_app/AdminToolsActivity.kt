@@ -2,7 +2,6 @@ package com.tradeagently.act_app
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -18,9 +17,12 @@ class AdminToolsActivity : AppCompatActivity() {
     private lateinit var ticketButton: Button
     private lateinit var reviewButton: Button
     private lateinit var usersButton: Button
+    private lateinit var filterOpenButton: Button
+    private lateinit var filterClosedButton: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AdminToolsAdapter
     private var sessionToken: String? = null
+    private var ticketFilter: String = "OPEN"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,29 +33,48 @@ class AdminToolsActivity : AppCompatActivity() {
         ticketButton = findViewById(R.id.buttonTicket)
         reviewButton = findViewById(R.id.buttonReview)
         usersButton = findViewById(R.id.buttonUsers)
+        filterOpenButton = findViewById(R.id.buttonFilterOpen)
+        filterClosedButton = findViewById(R.id.buttonFilterClosed)
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Fetch session token from SharedPreferences
+        // Fetch session token
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         sessionToken = sharedPreferences.getString("session_token", null)
 
-        // Set default selection
+        // Default selection for TICKETS and OPEN TICKETS
         setButtonSelected(ticketButton, true)
+        setFilterButtonSelected(filterOpenButton, true)
+        showFilterButtons(true) // Show filter buttons when in the TICKETS section
         fetchSupportTickets()
 
-        // Set up button listeners
+        // Button listeners
         ticketButton.setOnClickListener {
             setButtonSelected(ticketButton, true)
+            showFilterButtons(true) // Show filter buttons when in the TICKETS section
             fetchSupportTickets()
         }
         reviewButton.setOnClickListener {
             setButtonSelected(reviewButton, true)
+            showFilterButtons(false) // Hide filter buttons when in the REVIEWS section
             fetchReviews()
         }
         usersButton.setOnClickListener {
             setButtonSelected(usersButton, true)
+            showFilterButtons(false) // Hide filter buttons when in the USERS section
             fetchUsers()
+        }
+
+        filterOpenButton.setOnClickListener {
+            ticketFilter = "OPEN"
+            setFilterButtonSelected(filterOpenButton, true)
+            fetchSupportTickets()
+        }
+
+        filterClosedButton.setOnClickListener {
+            ticketFilter = "RESOLVED"
+            setFilterButtonSelected(filterClosedButton, true)
+            fetchSupportTickets()
         }
     }
 
@@ -64,13 +85,36 @@ class AdminToolsActivity : AppCompatActivity() {
         button.isSelected = isSelected
     }
 
+    private fun showFilterButtons(show: Boolean) {
+        if (show) {
+            filterOpenButton.visibility = Button.VISIBLE
+            filterClosedButton.visibility = Button.VISIBLE
+        } else {
+            filterOpenButton.visibility = Button.GONE
+            filterClosedButton.visibility = Button.GONE
+        }
+    }
+
+    private fun setFilterButtonSelected(button: Button, isClicked: Boolean) {
+        filterOpenButton.isSelected = false
+        filterClosedButton.isSelected = false
+        button.isSelected = isClicked
+    }
+
     private fun fetchSupportTickets() {
         sessionToken?.let { token ->
             RetrofitClient.apiService.getSupportTicketList(TokenRequest(token)).enqueue(object : Callback<SupportTicketResponse> {
                 override fun onResponse(call: Call<SupportTicketResponse>, response: Response<SupportTicketResponse>) {
                     if (response.isSuccessful && response.body()?.status == "Success") {
-                        val tickets = response.body()?.support_tickets ?: emptyList()
-                        adapter = AdminToolsAdapter(tickets = tickets, context = this@AdminToolsActivity)
+                        val allTickets = response.body()?.support_tickets ?: emptyList()
+                        val filteredTickets = when (ticketFilter) {
+                            "OPEN" -> allTickets.filter { it.issue_status.equals("OPEN", ignoreCase = true) }
+                            "RESOLVED" -> allTickets.filter { it.issue_status.equals("RESOLVED", ignoreCase = true) }
+                            else -> allTickets
+                        }
+
+                        // Set filtered tickets in the adapter
+                        adapter = AdminToolsAdapter(tickets = filteredTickets, context = this@AdminToolsActivity)
                         recyclerView.adapter = adapter
                     } else {
                         Toast.makeText(this@AdminToolsActivity, "Failed to fetch tickets", Toast.LENGTH_SHORT).show()
@@ -83,6 +127,7 @@ class AdminToolsActivity : AppCompatActivity() {
             })
         }
     }
+
 
     private fun fetchReviews() {
         sessionToken?.let { token ->
@@ -109,9 +154,9 @@ class AdminToolsActivity : AppCompatActivity() {
             RetrofitClient.apiService.getUserList(TokenRequest(token)).enqueue(object : Callback<UserListResponse> {
                 override fun onResponse(call: Call<UserListResponse>, response: Response<UserListResponse>) {
                     if (response.isSuccessful && response.body()?.status == "Success") {
-                        val users = response.body()?.user_list ?: emptyList()
+                        val users = response.body()?.user_list?.filter { it.user_type != "admin" } ?: emptyList()
                         adapter = AdminToolsAdapter(users = users, context = this@AdminToolsActivity) { userId ->
-                            confirmUserDeletion(userId)
+                            confirmUserDeletion(userId) // Call confirmUserDeletion here
                         }
                         recyclerView.adapter = adapter
                     } else {
@@ -127,13 +172,13 @@ class AdminToolsActivity : AppCompatActivity() {
     }
 
     private fun confirmUserDeletion(userId: String) {
-        AlertDialog.Builder(this)
-            .setTitle("Delete User")
-            .setMessage("Are you sure you want to delete this user?")
-            .setPositiveButton("Yes") { _, _ -> deleteUser(userId) }
-            .setNegativeButton("No", null)
-            .show()
-    }
+            AlertDialog.Builder(this)
+                .setTitle("Delete User")
+                .setMessage("Are you sure you want to delete this user?")
+                .setPositiveButton("Yes") { _, _ -> deleteUser(userId) }
+                .setNegativeButton("No", null)
+                .show()
+        }
 
     private fun deleteUser(userId: String) {
         sessionToken?.let { token ->

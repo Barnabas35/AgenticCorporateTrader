@@ -356,6 +356,10 @@ interface ApiService {
     @POST("/get-support-ticket-list")
     fun getSupportTicketList(@Body tokenRequest: TokenRequest): Call<SupportTicketResponse>
 
+    // Endpoint for sending support ticket solution
+    @POST("/resolve-support-ticket")
+    fun resolveSupportTicket(@Body request: Map<String, String>): Call<ApiResponse>
+
     // Endpoint for getting review list
     @POST("/get-review-list")
     fun getReviewList(@Body tokenRequest: TokenRequest): Call<ReviewListResponse>
