@@ -4,7 +4,12 @@ import android.content.Context
 import android.graphics.Color.BLUE
 import android.graphics.Color.RED
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
@@ -32,6 +37,10 @@ class StockProfileActivity : AppCompatActivity() {
     private lateinit var volumeTextView: TextView
     private lateinit var homepageTextView: TextView
     private lateinit var lineChart: LineChart
+    private lateinit var startDateInput: EditText
+    private lateinit var endDateInput: EditText
+    private lateinit var intervalSpinner: Spinner
+    private lateinit var submitButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,11 +52,17 @@ class StockProfileActivity : AppCompatActivity() {
         // Initialize TextViews and LineChart
         initializeViews()
 
+        // Add TextWatcher to format dates
+        setupDateInputFormatters()
+
         // Display stock information from the Intent
         displayStockInfoFromIntent()
 
         // Fetch and display the ticker aggregates in the chart
         fetchTickerAggregates()
+
+        // Handle user-submitted date ranges and intervals
+        setupSubmitButton()
     }
 
     private fun initializeViews() {
@@ -62,7 +77,69 @@ class StockProfileActivity : AppCompatActivity() {
         volumeTextView = findViewById(R.id.volumeTextView)
         homepageTextView = findViewById(R.id.homepageTextView)
         lineChart = findViewById(R.id.lineChart)
+        startDateInput = findViewById(R.id.startDateInput)
+        endDateInput = findViewById(R.id.endDateInput)
+        intervalSpinner = findViewById(R.id.intervalSpinner)
+        submitButton = findViewById(R.id.submitButton)
     }
+
+    private fun setupDateInputFormatters() {
+        val dateTextWatcher = object : TextWatcher {
+            private var isUpdating = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating || s.isNullOrEmpty()) return
+                isUpdating = true
+
+                val input = s.toString().replace("-", "")
+                val formatted = StringBuilder()
+
+                try {
+                    if (input.length > 4) {
+                        formatted.append(input.substring(0, 4)).append("-")
+                        if (input.length > 6) {
+                            formatted.append(input.substring(4, 6)).append("-")
+                            formatted.append(input.substring(6))
+                        } else {
+                            formatted.append(input.substring(4))
+                        }
+                    } else {
+                        formatted.append(input)
+                    }
+
+                    s.replace(0, s.length, formatted.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    isUpdating = false
+                }
+            }
+        }
+
+        startDateInput.addTextChangedListener(dateTextWatcher)
+        endDateInput.addTextChangedListener(dateTextWatcher)
+    }
+
+    private fun setupSubmitButton() {
+        submitButton.setOnClickListener {
+            val startDate = startDateInput.text.toString()
+            val endDate = endDateInput.text.toString()
+            val interval = intervalSpinner.selectedItem.toString()
+
+            if (startDate.isBlank() || endDate.isBlank()) {
+                Log.e("StockProfileActivity", "Start date and end date must be filled.")
+                return@setOnClickListener
+            }
+
+            // Fetch data based on user input
+            fetchTickerAggregates(startDate, endDate, interval)
+        }
+    }
+
 
     private fun displayStockInfoFromIntent() {
         val companyName = intent.getStringExtra("company_name")
@@ -88,49 +165,49 @@ class StockProfileActivity : AppCompatActivity() {
         homepageTextView.text = homepage ?: "No homepage available"
     }
 
-    private fun fetchTickerAggregates() {
+    private fun fetchTickerAggregates(startDate: String = "2024-11-15", endDate: String = "2024-11-17", interval: String = "1h") {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
-        val ticker = intent.getStringExtra("symbol") ?: "AAPL"  // Use symbol from Intent or a default
+        val ticker = intent.getStringExtra("symbol") ?: "AAPL" // Default to "AAPL"
 
         if (sessionToken == null) {
-            Log.e("StockProfileActivity", "Session token is missing. User may need to log in.")
+            Log.e("StockProfileActivity", "Session token is missing.")
             lineChart.setNoDataText("Please log in to view this data.")
             return
         }
 
-        val startDate = "2024-10-10"
-        val endDate = "2024-11-12"
-        val interval = "day"
-        val limit = 100
-
-        val request = TickerAggregatesRequest(ticker, sessionToken, startDate, endDate, interval, limit)
+        val request = TickerAggregatesRequest(
+            ticker = ticker,
+            session_token = sessionToken,
+            start_date = startDate,
+            end_date = endDate,
+            interval = interval,
+            limit = 100 // Arbitrary limit value
+        )
 
         val apiService = RetrofitClient.createService(ApiService::class.java)
         apiService.getTickerAggregates(request).enqueue(object : Callback<TickerAggregatesResponse> {
-            override fun onResponse(call: Call<TickerAggregatesResponse>, response: Response<TickerAggregatesResponse>) {
+            override fun onResponse(
+                call: Call<TickerAggregatesResponse>,
+                response: Response<TickerAggregatesResponse>
+            ) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     val data = response.body()?.ticker_info
                     if (data.isNullOrEmpty()) {
-                        Log.e("StockProfileActivity", "No data available in ticker_info.")
-                        lineChart.setNoDataText("No chart data available.")
+                        lineChart.setNoDataText("No data available for the selected range.")
                     } else {
-                        Log.d("StockProfileActivity", "Received data: $data")
                         updateChartWithData(data)
                     }
                 } else {
-                    val errorMessage = response.body()?.status ?: "Unknown error"
-                    Log.e("StockProfileActivity", "Failed to fetch data: $errorMessage")
-                    lineChart.setNoDataText("Error: $errorMessage")
-                    if (errorMessage == "Incorrect session token.") {
-                        Log.e("StockProfileActivity", "Invalid session token. Please log in again.")
-                    }
+                    lineChart.setNoDataText("Failed to fetch data. Try again later.")
                 }
+                lineChart.invalidate()
             }
 
             override fun onFailure(call: Call<TickerAggregatesResponse>, t: Throwable) {
-                Log.e("StockProfileActivity", "Network request failed: ${t.message}")
-                lineChart.setNoDataText("Failed to load data. Please try again.")
+                Log.e("StockProfileActivity", "Error: ${t.message}")
+                lineChart.setNoDataText("Error fetching data. Check your connection.")
+                lineChart.invalidate()
             }
         })
     }

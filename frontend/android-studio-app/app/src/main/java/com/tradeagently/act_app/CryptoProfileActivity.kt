@@ -5,6 +5,8 @@ import android.graphics.Color.BLUE
 import android.graphics.Color.RED
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
@@ -16,8 +18,10 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.Spinner
 
 class CryptoProfileActivity : AppCompatActivity() {
 
@@ -30,21 +34,32 @@ class CryptoProfileActivity : AppCompatActivity() {
     private lateinit var volumeTextView: TextView
     private lateinit var openPriceTextView: TextView
     private lateinit var lineChart: LineChart
+    private lateinit var startDateInput: EditText
+    private lateinit var endDateInput: EditText
+    private lateinit var intervalSpinner: Spinner
+    private lateinit var submitButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_crypto_profile)
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Initialize TextViews and LineChart variables
+        // Initialize TextViews, EditTexts, and LineChart variables
         initializeViews()
+
+        // Add TextWatcher to format dates
+        setupDateInputFormatters()
 
         // Display crypto information from the Intent
         displayCryptoInfoFromIntent()
 
         // Fetch and display crypto aggregates in the chart
         fetchCryptoAggregates()
+
+        // Handle user-submitted date ranges and intervals
+        setupSubmitButton()
     }
+
 
     private fun initializeViews() {
         symbolTextView = findViewById(R.id.symbolTextView)
@@ -55,8 +70,57 @@ class CryptoProfileActivity : AppCompatActivity() {
         lowPriceTextView = findViewById(R.id.lowPriceTextView)
         volumeTextView = findViewById(R.id.volumeTextView)
         openPriceTextView = findViewById(R.id.openPriceTextView)
-        lineChart = findViewById(R.id.cryptoLineChart) // Ensure the ID matches with the layout
+        lineChart = findViewById(R.id.cryptoLineChart)
+        startDateInput = findViewById(R.id.startDateInput)
+        endDateInput = findViewById(R.id.endDateInput)
+        intervalSpinner = findViewById(R.id.intervalSpinner)
+        submitButton = findViewById(R.id.submitButton)
     }
+
+
+    private fun setupDateInputFormatters() {
+        val dateTextWatcher = object : TextWatcher {
+            private var isUpdating = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isUpdating || s.isNullOrEmpty()) return
+                isUpdating = true
+
+                val input = s.toString().replace("-", "") // Remove any existing dashes
+                val formatted = StringBuilder()
+
+                try {
+                    if (input.length > 4) {
+                        formatted.append(input.substring(0, 4)).append("-")
+                        if (input.length > 6) {
+                            formatted.append(input.substring(4, 6)).append("-")
+                            formatted.append(input.substring(6))
+                        } else {
+                            formatted.append(input.substring(4))
+                        }
+                    } else {
+                        formatted.append(input)
+                    }
+
+                    // Update the text without resetting the cursor
+                    s.replace(0, s.length, formatted.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    isUpdating = false
+                }
+            }
+        }
+
+        // Attach the TextWatcher to both date input fields
+        startDateInput.addTextChangedListener(dateTextWatcher)
+        endDateInput.addTextChangedListener(dateTextWatcher)
+    }
+
 
     private fun displayCryptoInfoFromIntent() {
         val symbol = intent.getStringExtra("symbol")
@@ -78,21 +142,32 @@ class CryptoProfileActivity : AppCompatActivity() {
         openPriceTextView.text = "Open: ${String.format("%.6f", open)}"
     }
 
-    private fun fetchCryptoAggregates() {
+    private fun setupSubmitButton() {
+        submitButton.setOnClickListener {
+            val startDate = startDateInput.text.toString()
+            val endDate = endDateInput.text.toString()
+            val interval = intervalSpinner.selectedItem.toString()
+
+            if (startDate.isEmpty() || endDate.isEmpty()) {
+                Log.e("CryptoProfileActivity", "Start date and end date must be filled.")
+                return@setOnClickListener
+            }
+
+            // Fetch and update chart with user-defined parameters
+            fetchCryptoAggregates(startDate, endDate, interval)
+        }
+    }
+
+    private fun fetchCryptoAggregates(startDate: String = "2024-11-15", endDate: String = "2024-11-17", interval: String = "1h") {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
-        val cryptoSymbol =
-            intent.getStringExtra("symbol") ?: "BTC"  // Use symbol from Intent or a default
+        val cryptoSymbol = intent.getStringExtra("symbol") ?: "BTC"
 
         if (sessionToken == null) {
             Log.e("CryptoProfileActivity", "Session token is missing. User may need to log in.")
             lineChart.setNoDataText("Please log in to view this data.")
             return
         }
-
-        val startDate = "2024-05-01"
-        val endDate = "2024-11-13"
-        val interval = "1d"
 
         Log.d(
             "CryptoProfileActivity",
@@ -117,57 +192,36 @@ class CryptoProfileActivity : AppCompatActivity() {
                     if (response.isSuccessful && response.body()?.status == "Success") {
                         val data = response.body()?.crypto_aggregates
                         if (data.isNullOrEmpty()) {
-                            Log.e(
-                                "CryptoProfileActivity",
-                                "No data available in crypto_aggregates."
-                            )
                             lineChart.setNoDataText("No available data for this period. Try adjusting the date range.")
-                            lineChart.invalidate()  // Refresh the chart to show the no-data message
+                            lineChart.invalidate()
                         } else {
-                            Log.d("CryptoProfileActivity", "Received data: $data")
                             updateChartWithData(data)
                         }
                     } else {
-                        val errorMessage = response.body()?.status ?: "Unknown error"
-                        Log.e("CryptoProfileActivity", "Failed to fetch data: $errorMessage")
-                        lineChart.setNoDataText("Error fetching data: $errorMessage")
+                        lineChart.setNoDataText("Error fetching data.")
                         lineChart.invalidate()
                     }
                 }
 
                 override fun onFailure(call: Call<CryptoAggregatesResponse>, t: Throwable) {
-                    Log.e("CryptoProfileActivity", "Network request failed: ${t.message}")
                     lineChart.setNoDataText("Failed to load data. Please check your network connection and try again.")
                     lineChart.invalidate()
                 }
             })
     }
 
-
     private fun updateChartWithData(aggregates: List<CryptoAggregate>) {
         val entries = mutableListOf<Entry>()
         val dateLabels = mutableListOf<String>()
 
-        // Adjust date format to match the API response format exactly
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val displayDateFormat =
-            SimpleDateFormat("dd/MM", Locale.getDefault()) // For displaying on the x-axis
+        val displayDateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
 
-        val reversedAggregates = aggregates.reversed()
-
-        reversedAggregates.forEachIndexed { index, aggregate ->
+        aggregates.reversed().forEachIndexed { index, aggregate ->
             val closePrice = aggregate.close.toFloat()
-
-            try {
-                // Parse the date string to Date object
-                val parsedDate = dateFormat.parse(aggregate.date)
-                val formattedDate = displayDateFormat.format(parsedDate)
-                dateLabels.add(formattedDate)
-
-                entries.add(Entry(index.toFloat(), closePrice))
-            } catch (e: Exception) {
-                Log.e("CryptoProfileActivity", "Date parsing failed for ${aggregate.date}", e)
-            }
+            val date = dateFormat.parse(aggregate.date) ?: return@forEachIndexed
+            dateLabels.add(displayDateFormat.format(date))
+            entries.add(Entry(index.toFloat(), closePrice))
         }
 
         val lineDataSet = LineDataSet(entries, "Close Price").apply {
@@ -177,21 +231,11 @@ class CryptoProfileActivity : AppCompatActivity() {
             circleRadius = 3f
         }
 
-        val lineData = LineData(lineDataSet)
-        lineChart.data = lineData
-
+        lineChart.data = LineData(lineDataSet)
         lineChart.xAxis.apply {
             valueFormatter = IndexAxisValueFormatter(dateLabels)
-            labelRotationAngle = 0f
             granularity = 1f
-            setLabelCount(4, true)
-            textSize = 10f
-            isGranularityEnabled = true
-            axisMinimum = 0f
-            axisMaximum = (entries.size - 1).toFloat()
         }
-
-        lineChart.description.text = "Close Price Over Time"
         lineChart.invalidate()
     }
 }
