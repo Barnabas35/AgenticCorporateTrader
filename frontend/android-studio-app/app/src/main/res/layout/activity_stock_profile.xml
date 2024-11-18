@@ -105,7 +105,7 @@
                     android:background="@drawable/input_field_background"
                     android:padding="8dp"
                     android:spinnerMode="dropdown"
-                    android:entries="@array/interval_options" />
+                    android:entries="@array/int_options" />
 
             </LinearLayout>
 

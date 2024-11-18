@@ -165,7 +165,7 @@ class StockProfileActivity : AppCompatActivity() {
         homepageTextView.text = homepage ?: "No homepage available"
     }
 
-    private fun fetchTickerAggregates(startDate: String = "2024-11-15", endDate: String = "2024-11-17", interval: String = "1h") {
+    private fun fetchTickerAggregates(startDate: String = "2024-11-15", endDate: String = "2024-11-17", interval: String = "hour") {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
         val ticker = intent.getStringExtra("symbol") ?: "AAPL" // Default to "AAPL"

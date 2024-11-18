@@ -216,7 +216,7 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun fetchCryptoSuggestions(query: String) {
-        val searchRequest = TextSearchCryptoRequest(query, limit = 3, sessionToken, show_price = false)
+        val searchRequest = TextSearchCryptoRequest(query, limit = 3, sessionToken, show_price = true)
         RetrofitClient.apiService.textSearchCrypto(searchRequest).enqueue(object : Callback<TextSearchCryptoResponse> {
             override fun onResponse(call: Call<TextSearchCryptoResponse>, response: Response<TextSearchCryptoResponse>) {
                 if (response.isSuccessful) {
@@ -240,7 +240,7 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun performStockSearch(query: String) {
-        val searchRequest = SearchRequest(query, limit = 50, sessionToken, show_price = false)
+        val searchRequest = SearchRequest(query, limit = 50, sessionToken, show_price = true)
         RetrofitClient.apiService.searchStocks(searchRequest).enqueue(object : Callback<StockSearchResponse> {
             override fun onResponse(call: Call<StockSearchResponse>, response: Response<StockSearchResponse>) {
                 if (response.isSuccessful) {
