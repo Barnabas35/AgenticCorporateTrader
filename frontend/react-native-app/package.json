@@ -46,7 +46,8 @@
     "react-native-webview": "^13.12.3",
     "react-navigation": "^5.0.0",
     "react-router-dom": "^6.27.0",
-    "victory-native": "^41.9.0"
+    "victory-native": "^41.9.0",
+    "expo-linear-gradient": "~13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
