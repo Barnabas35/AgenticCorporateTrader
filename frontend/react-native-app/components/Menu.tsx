@@ -1,11 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { View, Image, StyleSheet } from 'react-native';
+import {
+  View,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Button,
+} from 'react-native';
 import { useUser } from './userContext'; // Import the user context
+import { FontAwesome } from '@expo/vector-icons';
 
 const Menu: React.FC = () => {
-  const { sessionToken } = useUser(); // Access sessionToken from userContext
+  const { sessionToken } = useUser();
   const [userType, setUserType] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
+  const [showMobileAppModal, setShowMobileAppModal] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -20,8 +33,7 @@ const Menu: React.FC = () => {
 
         const data = await response.json();
         if (data.status === 'Success') {
-          setUserType(data.user_type); // Set user type if request is successful
-          console.log(data.user_type);
+          setUserType(data.user_type);
         } else {
           console.error('Failed to fetch user type');
         }
@@ -33,130 +45,345 @@ const Menu: React.FC = () => {
     if (sessionToken) {
       fetchUserType();
     }
+
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 800;
+      setIsMobileView(isMobile);
+      if (isMobile) {
+        setShowMobileAppModal(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [sessionToken]);
 
   return (
-    <View style={styles.container}>
-      {/* Left-aligned logo */}
-      <NavLink to="/" style={styles.title}>
-        <Image
-          source={require('../assets/images/logo.png')} // Replace with your logo path
-          style={styles.logo}
-        />
-      </NavLink>
+    <View style={[styles.container, isMenuOpen && styles.menuOpen]}>
+      <View style={styles.navbar}>
+        {/* Logo */}
+        <NavLink to="/" style={styles.title}>
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+          />
+        </NavLink>
 
-      {/* Centered menu items */}
-      <View style={styles.menuContainer}>
-        <NavLink
-          to="/"
-          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-        >
-          Home
-        </NavLink>
-        <View style={styles.spacer} />
-        <NavLink
-          to="/about"
-          style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-        >
-          About
-        </NavLink>
-        <View style={styles.spacer} />
-        {sessionToken ? (
-          <>
-            {/* Conditionally render Client Management for 'fa' user type only */}
-            {userType === 'fa' && (
+        {/* Mobile View - Burger Menu */}
+        {isMobileView ? (
+          <TouchableOpacity
+            onPress={() => setIsMenuOpen((prev) => !prev)}
+            style={styles.burgerButton}
+          >
+            <FontAwesome name="bars" size={32} color="white" />
+            {isMenuOpen && (
+              <ScrollView style={styles.dropdownMenu}>
+                {sessionToken ? (
+                  <>
+                    {userType === 'admin' && (
+                      <NavLink
+                        to="/admin"
+                        style={({ isActive }) =>
+                          isActive ? styles.activeDropdownItem : styles.dropdownItem
+                        }
+                      >
+                        <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
+                      </NavLink>
+                    )}
+                    {userType === 'fa' && (
+                      <NavLink
+                        to="/client-management"
+                        style={({ isActive }) =>
+                          isActive ? styles.activeDropdownItem : styles.dropdownItem
+                        }
+                      >
+                        <FontAwesome name="users" size={16} color="white" /> Client Management
+                      </NavLink>
+                    )}
+                    <NavLink
+                      to="/crypto-search"
+                      style={({ isActive }) =>
+                        isActive ? styles.activeDropdownItem : styles.dropdownItem
+                      }
+                    >
+                      <FontAwesome name="bitcoin" size={16} color="white" /> Crypto Search
+                    </NavLink>
+                    <NavLink
+                      to="/stock-search"
+                      style={({ isActive }) =>
+                        isActive ? styles.activeDropdownItem : styles.dropdownItem
+                      }
+                    >
+                      <FontAwesome name="line-chart" size={16} color="white" /> Stock Search
+                    </NavLink>
+                    <NavLink
+                      to="/user-account"
+                      style={({ isActive }) =>
+                        isActive ? styles.activeDropdownItem : styles.dropdownItem
+                      }
+                    >
+                      <FontAwesome name="user" size={16} color="white" /> User Account
+                    </NavLink>
+                  </>
+                ) : (
+                  <NavLink
+                    to="/login-register"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeDropdownItem : styles.dropdownItem
+                    }
+                  >
+                    <FontAwesome name="sign-in" size={16} color="white" /> Login/Register
+                  </NavLink>
+                )}
+              </ScrollView>
+            )}
+          </TouchableOpacity>
+        ) : (
+          /* Desktop View - Horizontal Menu */
+          <View style={styles.menuContainer}>
+            <NavLink
+              to="/"
+              style={({ isActive }) =>
+                isActive ? styles.activeMenuItem : styles.menuItem
+              }
+            >
+              <FontAwesome name="home" size={18} color="white" /> Home
+            </NavLink>
+            <View style={styles.spacer} />
+            <NavLink
+              to="/about"
+              style={({ isActive }) =>
+                isActive ? styles.activeMenuItem : styles.menuItem
+              }
+            >
+              <FontAwesome name="info-circle" size={18} color="white" /> About
+            </NavLink>
+            <View style={styles.spacer} />
+            {sessionToken ? (
               <>
+                {userType === 'admin' && (
+                  <>
+                    <NavLink
+                      to="/admin"
+                      style={({ isActive }) =>
+                        isActive ? styles.activeMenuItem : styles.menuItem
+                      }
+                    >
+                      <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
+                    </NavLink>
+                    <View style={styles.spacer} />
+                  </>
+                )}
+                {userType === 'fa' && (
+                  <>
+                    <NavLink
+                      to="/client-management"
+                      style={({ isActive }) =>
+                        isActive ? styles.activeMenuItem : styles.menuItem
+                      }
+                    >
+                      <FontAwesome name="users" size={18} color="white" /> Client Management
+                    </NavLink>
+                    <View style={styles.spacer} />
+                  </>
+                )}
                 <NavLink
-                  to="/client-management"
-                  style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
+                  to="/crypto-search"
+                  style={({ isActive }) =>
+                    isActive ? styles.activeMenuItem : styles.menuItem
+                  }
                 >
-                  Client Management
+                  <FontAwesome name="bitcoin" size={18} color="white" /> Crypto Search
                 </NavLink>
                 <View style={styles.spacer} />
+                <NavLink
+                  to="/stock-search"
+                  style={({ isActive }) =>
+                    isActive ? styles.activeMenuItem : styles.menuItem
+                  }
+                >
+                  <FontAwesome name="line-chart" size={18} color="white" /> Stock Search
+                </NavLink>
+                <View style={styles.spacer} />
+                <NavLink
+                  to="/user-account"
+                  style={({ isActive }) =>
+                    isActive ? styles.activeMenuItem : styles.menuItem
+                  }
+                >
+                  <FontAwesome name="user" size={18} color="white" /> User Account
+                </NavLink>
               </>
+            ) : (
+              <NavLink
+                to="/login-register"
+                style={({ isActive }) =>
+                  isActive ? styles.activeMenuItem : styles.menuItem
+                }
+              >
+                <FontAwesome name="sign-in" size={18} color="white" /> Login/Register
+              </NavLink>
             )}
-            <NavLink
-              to="/crypto-search"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              Crypto Search
-            </NavLink>
-            <View style={styles.spacer} />
-            <NavLink
-              to="/stock-search"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              Stock Search
-            </NavLink>
-            <View style={styles.spacer} />
-            <NavLink
-              to="/user-account"
-              style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-            >
-              User Account
-            </NavLink>
-          </>
-        ) : (
-          <NavLink
-            to="/login-register"
-            style={({ isActive }) => (isActive ? styles.activeMenuItem : styles.menuItem)}
-          >
-            Login/Register
-          </NavLink>
+          </View>
         )}
       </View>
+
+      {/* Mobile App Modal */}
+      {isMobileView && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showMobileAppModal}
+          onRequestClose={() => {
+            setShowMobileAppModal(false);
+          }}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>
+                For a better experience, we recommend using our mobile app on
+                your mobile device.
+              </Text>
+              <Button
+                title="OK"
+                onPress={() => setShowMobileAppModal(false)}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    height: '8%',
-    padding: 10,
-    backgroundColor: '#272727', // Background color of the menu
-    flexDirection: 'row', // Align items horizontally
-    alignItems: 'center', // Center items vertically
-    justifyContent: 'space-between', // Space between title and menu
-    paddingHorizontal: 20, // Add horizontal padding to center content
+    backgroundColor: '#282424', // Gray color
+    height: 105, // Reduced height of the navbar
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    zIndex: 1,
+  },
+  navbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  menuOpen: {
+    height: 400, // Expands the height when burger menu is open
   },
   title: {
-    textDecorationLine: 'none', // No underline for the link
+    textDecorationLine: 'none',
   },
   logo: {
-    width: 350, // Adjust the size of the logo as needed
+    width: 400,
     height: 120,
-    resizeMode: 'contain', // Ensures the logo maintains aspect ratio
+    resizeMode: 'contain',
   },
   menuContainer: {
-    flexDirection: 'row', // Align menu items horizontally
-    alignItems: 'center', // Center vertically
-    justifyContent: 'center', // Center horizontally
-    position: 'absolute', // Position it absolute to center on the screen
-    left: '50%', // Position it in the center of the screen
-    transform: [{ translateX: '-50%' }], // Adjust for proper centering
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: '-50%' }],
   },
   menuItem: {
-    backgroundColor: '#4CAF50', // Solid green background for menu items
-    color: 'white', // Text color for menu items
-    borderRadius: 20, // Rounded edges
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    borderRadius: 10,
     fontSize: 20,
+    letterSpacing: 2,
     fontFamily: 'sans-serif',
-    padding: 15, // Padding around the text
-    textDecorationLine: 'none', // No underline for links
+    padding: 15,
+    textDecorationLine: 'none',
     fontWeight: 'bold',
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5, // Adding shadow for visual effect
   },
   activeMenuItem: {
-    backgroundColor: '#E85759', // Light red for active link
+    backgroundColor: '#E85759',
     fontSize: 20,
-    color: 'white', // White text for active link
-    borderRadius: 20, // Keep rounded edges for active item
-    padding: 15, // Padding around the text
+    color: 'white',
+    borderRadius: 10,
+    padding: 15,
+    letterSpacing: 2,
     fontFamily: 'sans-serif',
-    textDecorationLine: 'none', // No underline for active link
+    textDecorationLine: 'none',
     fontWeight: 'bold',
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  dropdownItem: {
+    padding: 15,
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    marginVertical: 5,
+    color: 'white',
+    fontWeight: 'bold',
+    textDecorationLine: 'none',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  activeDropdownItem: {
+    padding: 15,
+    backgroundColor: '#E85759',
+    borderRadius: 10,
+    marginVertical: 5,
+    color: 'white',
+    fontWeight: 'bold',
+    textDecorationLine: 'none',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
   spacer: {
     width: 15,
+  },
+  burgerButton: {
+    padding: 10,
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: '#272727',
+    padding: 10,
+    borderRadius: 10,
+    width: 200,
+    zIndex: 1000,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: 300,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
 
