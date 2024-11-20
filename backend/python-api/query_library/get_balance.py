@@ -36,5 +36,14 @@ def q_get_balance(request_json):
         elif transaction.to_dict()["transaction_type"] == "sell":
             balance -= transaction.to_dict()["asset_quantity"]
 
+    transaction_log = db.collection("users").document(result[0].id).collection("transaction_log").where(field_path="market", op_string="!=", value="currency").stream()
+
+    for transaction in transaction_log:
+        if transaction.to_dict()["transaction_type"] == "purchase":
+            balance -= transaction.to_dict()["usd_quantity"]
+
+        elif transaction.to_dict()["transaction_type"] == "sell":
+            balance += transaction.to_dict()["usd_quantity"]
+
     # Return balance
     return {"balance": balance, "status": "Success"}
