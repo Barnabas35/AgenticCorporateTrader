@@ -82,6 +82,7 @@ const Menu: React.FC = () => {
             <FontAwesome name="bars" size={32} color="white" />
             {isMenuOpen && (
               <ScrollView style={styles.dropdownMenu}>
+                
                 {sessionToken ? (
                   <>
                     {userType === 'admin' && (
@@ -93,7 +94,9 @@ const Menu: React.FC = () => {
                       >
                         <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
                       </NavLink>
+                      
                     )}
+                    <View style={styles.spacer} />
                     {userType === 'fa' && (
                       <NavLink
                         to="/client-management"
@@ -104,6 +107,7 @@ const Menu: React.FC = () => {
                         <FontAwesome name="users" size={16} color="white" /> Client Management
                       </NavLink>
                     )}
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/crypto-search"
                       style={({ isActive }) =>
@@ -112,6 +116,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="bitcoin" size={16} color="white" /> Crypto Search
                     </NavLink>
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/stock-search"
                       style={({ isActive }) =>
@@ -120,6 +125,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="line-chart" size={16} color="white" /> Stock Search
                     </NavLink>
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/user-account"
                       style={({ isActive }) =>
@@ -128,6 +134,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="user" size={16} color="white" /> User Account
                     </NavLink>
+                    <View style={styles.spacer} />
                   </>
                 ) : (
                   <NavLink

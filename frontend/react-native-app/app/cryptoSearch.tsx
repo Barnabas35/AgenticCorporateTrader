@@ -24,7 +24,12 @@ const CryptoSearch: React.FC = () => {
   const [interval, setInterval] = useState<string>('1d');
 
   useEffect(() => { fetchTopCryptos(); }, []);
-  useEffect(() => { if (selectedCrypto) fetchCryptoAggregates(selectedCrypto.symbol); }, [interval, selectedCrypto]);
+  useEffect(() => {
+    if (selectedCrypto) {
+      fetchCryptoAggregates(selectedCrypto.symbol);
+    }
+  }, [interval, historyWindow, selectedCrypto]); // Include historyWindow as a dependency
+  
 
   const fetchTopCryptos = async (limit = 10) => {
     setLoading(true); setError(null);

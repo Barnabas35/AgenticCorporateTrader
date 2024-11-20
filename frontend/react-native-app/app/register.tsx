@@ -42,11 +42,11 @@ const Register: React.FC = () => {
         setModalMessage('Registration successful!');
         setModalVisible(true);
         navigate('/'); // Navigate to login or another page after a successful registration
-      } else if (data.message === 'Email already exists.') {
+      } else if (data.status === 'Email already exists.') {
         setModalMessage('Email already exists. Please use a different email.');
         setModalVisible(true);
       } else {
-        setModalMessage(data.message || 'Registration failed. Please try again.');
+        setModalMessage(data.status && 'Registration failed. Please try again.');
         setModalVisible(true);
       }
     } catch (error) {

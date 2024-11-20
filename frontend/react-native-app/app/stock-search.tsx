@@ -48,7 +48,7 @@ const StockSearch: React.FC = () => {
     if (selectedStock) {
       fetchStockAggregates(selectedStock.symbol);
     }
-  }, [interval, selectedStock]);
+  }, [interval, historyWindow, selectedStock]);  
 
   const fetchTopStocks = async (limit = 10) => {
     setLoading(true);
@@ -247,35 +247,8 @@ const StockSearch: React.FC = () => {
             <Picker.Item label="Last Year" value="year" />
           </Picker>
           <Line
-            data={{
-              labels: historicalData.labels,
-              datasets: [
-                {
-                  label: 'Price',
-                  data: historicalData.prices,
-                  borderColor: 'rgba(75,192,192,1)',
-                  borderWidth: 1,
-                  fill: false,
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              plugins: {
-                title: {
-                  display: true,
-                  text: 'Price History',
-                },
-              },
-              scales: {
-                x: {
-                  type: historyWindow === 'hour' ? 'time' : 'category',
-                  time: {
-                    unit: historyWindow === 'hour' ? 'minute' : 'day',
-                  },
-                },
-              },
-            }}
+            data={{ labels: historicalData.labels, datasets: [{ label: 'Price', data: historicalData.prices, borderColor: 'rgba(75,192,192,1)', borderWidth: 1, fill: false }] }}
+            options={{ responsive: true, plugins: { title: { display: true, text: 'Price History' } }, scales: { x: { type: historyWindow === 'hour' ? 'time' : 'category', time: { unit: historyWindow === 'hour' ? 'minute' : 'day' } } } }}
           />
         </View>
       ) : (
