@@ -1,7 +1,7 @@
 
 from db_access import DBAccess
 from function_library.security_string_parsing import firestore_safe
-from get_balance import q_get_balance
+from query_library.get_balance import q_get_balance
 from stock_api_access import StockAPIAccess
 import yfinance as yf
 import time
@@ -27,7 +27,7 @@ def q_purchase_asset(request_json):
 
     # Parse asset quantity to be safe for Firestore
     try:
-        usd_quantity = int(firestore_safe(usd_quantity))
+        usd_quantity = float(usd_quantity)
     except ValueError:
         return {"status": "Invalid usd quantity."}
 
@@ -70,21 +70,33 @@ def q_purchase_asset(request_json):
             return {"status": "Ticker not supported by yfinance."}
 
         # Get ticker history
-        latest_price = ticker_info.history(period="1d", interval="1m").tail(1)['Close'].iloc[0]
-
-        asset_price = latest_price.info["previousClose"]
+        asset_price = ticker_info.history(period="1d", interval="1m").tail(1)['Close'].iloc[0]
+    else:
+        return {"status": "Invalid market."}
 
     # Getting user ID
     user_id = result[0].id
 
+    # Getting user type
+    user_type = result[0].to_dict()["user_type"]
+
     # Validating client id
     if user_id == client_id:
-        log_id = user_id
-    else:
-        # Finding client in database
-        result = db.collection("clients").document(client_id).get()
 
-        if len(result) == 0:
+        if user_type != "fa":
+            return {"status": "Fund Manager cannot purchase assets for themselves."}
+
+        log_id = user_id
+
+    else:
+
+        if user_type != "fm":
+            return {"status": "Fund Administrator cannot purchase assets for clients."}
+
+        # Finding client in database
+        result = (db.collection("clients").document(client_id).get())
+
+        if not result.exists:
             return {"status": "Invalid client id."}
 
         log_id = client_id

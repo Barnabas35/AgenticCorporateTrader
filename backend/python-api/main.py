@@ -238,5 +238,18 @@ def add_balance():
     return jsonify(q_add_balance(request.json)), 200
 
 
+# Get asset transactions log
+@app.route("/get-asset-transaction-log", methods=["POST"])
+def get_asset_transactions_log():
+    from query_library.get_asset_transaction_log import q_get_asset_transaction_log
+    return jsonify(q_get_asset_transaction_log(request.json)), 200
+
+
+# Get asset report
+@app.route("/get-asset-report", methods=["POST"])
+def get_asset_report():
+    from query_library.get_asset_report import q_get_asset_report
+    return jsonify(q_get_asset_report(request.json)), 200
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
