@@ -92,7 +92,10 @@
             android:name=".ReviewDetailsActivity"
             android:exported="false" /> <!-- Internal activity -->
 
-
+        <!-- Add Balance Activity -->
+        <activity
+            android:name=".AddBalanceActivity"
+            android:exported="false" /> <!-- Internal activity -->
 
     </application>
 

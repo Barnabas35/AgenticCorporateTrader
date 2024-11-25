@@ -293,6 +293,79 @@ data class AdminDeleteUserRequest(
     val id: String
 )
 
+// Response for balance
+data class BalanceResponse(
+    val balance: Double,
+    val status: String
+)
+
+// Request for adding balance
+data class AddBalanceRequest(
+    val session_token: String,
+    val usd_quantity: Double
+)
+
+// Request for purchasing an asset
+data class PurchaseAssetRequest(
+    val session_token: String,
+    val usd_quantity: Double,
+    val market: String,
+    val ticker: String,
+    val client_id: String
+)
+
+// Request for getting user assets
+data class GetUserAssetsRequest(
+    val session_token: String,
+    val client_id: String,
+    val market: String
+)
+
+// Response for user assets
+data class UserAssetsResponse(
+    val status: String,
+    val ticker_symbols: List<String>
+)
+
+// Request for getting a specific asset
+data class GetAssetRequest(
+    val session_token: String,
+    val market: String,
+    val ticker: String,
+    val client_id: String
+)
+
+// Response for getting an asset
+data class AssetResponse(
+    val status: String,
+    val total_asset_quantity: Double
+)
+
+// Request for selling an asset
+data class SellAssetRequest(
+    val session_token: String,
+    val asset_quantity: Double,
+    val market: String,
+    val ticker: String,
+    val client_id: String
+)
+
+// Request for asset report
+data class AssetReportRequest(
+    val session_token: String,
+    val market: String,
+    val client_id: String,
+    val ticker_symbol: String
+)
+
+// Response for asset report
+data class AssetReportResponse(
+    val profit: Double,
+    val status: String,
+    val total_usd_invested: Double
+)
+
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -403,4 +476,32 @@ interface ApiService {
     // Endpoint for deleting a user by admin
     @POST("/admin-delete-user")
     fun adminDeleteUser(@Body request: AdminDeleteUserRequest): Call<ApiResponse>
+
+    // Endpoint for getting the balance
+    @POST("/get-balance")
+    fun getBalance(@Body tokenRequest: TokenRequest): Call<BalanceResponse>
+
+    // Endpoint for adding balance
+    @POST("/add-balance")
+    fun addBalance(@Body addBalanceRequest: AddBalanceRequest): Call<ApiResponse>
+
+    // Endpoint for purchasing an asset
+    @POST("/purchase-asset")
+    fun purchaseAsset(@Body purchaseAssetRequest: PurchaseAssetRequest): Call<ApiResponse>
+
+    // Endpoint for getting user assets
+    @POST("/get-user-assets")
+    fun getUserAssets(@Body getUserAssetsRequest: GetUserAssetsRequest): Call<UserAssetsResponse>
+
+    // Endpoint for getting a specific asset
+    @POST("/get-asset")
+    fun getAsset(@Body getAssetRequest: GetAssetRequest): Call<AssetResponse>
+
+    // Endpoint for selling an asset
+    @POST("/sell-asset")
+    fun sellAsset(@Body sellAssetRequest: SellAssetRequest): Call<ApiResponse>
+
+    // Endpoint for getting an asset report
+    @POST("/get-asset-report")
+    fun getAssetReport(@Body assetReportRequest: AssetReportRequest): Call<AssetReportResponse>
 }
