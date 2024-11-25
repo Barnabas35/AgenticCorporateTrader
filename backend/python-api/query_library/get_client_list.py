@@ -1,6 +1,7 @@
 
 from db_access import DBAccess
 from function_library.security_string_parsing import firestore_safe
+from function_library.security_string_parsing import firestore_unsafe
 
 
 def q_get_client_list(request_json):
@@ -28,13 +29,20 @@ def q_get_client_list(request_json):
     # Get document ID
     doc_id = result[0].id
 
+    # Get user type
+    user_type = result[0].to_dict()["user_type"]
+
+    # Check if user is a fund administrator
+    if user_type == "fa":
+        return {"clients": doc_id, "status": "Success"}
+
     # Get clients for user
     clients = db.collection("clients").where(field_path="user_id", op_string="==", value=doc_id).stream()
 
     # Looping through clients to get client names and IDs and adding them to a json list
     client_list = []
     for client in clients:
-        client_list.append({"client_name": client.to_dict()["client_name"], "client_id": client.id})
+        client_list.append({"client_name": firestore_unsafe(client.to_dict()["client_name"]), "client_id": client.id})
 
     # Check if list is empty
     if len(client_list) == 0:
