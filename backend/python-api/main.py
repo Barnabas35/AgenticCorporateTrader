@@ -251,5 +251,12 @@ def get_asset_report():
     from query_library.get_asset_report import q_get_asset_report
     return jsonify(q_get_asset_report(request.json)), 200
 
+
+# Payment webhook
+@app.route("/payment-webhook", methods=["POST"])
+def payment_webhook():
+    from stripe_webhooks.payment_webhook import q_payment_webhook
+    return jsonify(q_payment_webhook(request)), 200
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
