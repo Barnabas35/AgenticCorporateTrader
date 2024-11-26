@@ -71,7 +71,7 @@ class AdminToolsAdapter(
 
                 // Handle delete button click
                 holder.deleteButton.setOnClickListener {
-                    onUserDeleteClick?.invoke(user.id)
+                    onUserDeleteClick?.invoke(user.client_id)
                 }
             }
         }

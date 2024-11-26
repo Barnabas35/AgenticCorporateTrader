@@ -102,7 +102,6 @@ class LoginActivity : AppCompatActivity() {
         fetchAndSaveEmail(token)
         fetchAndSaveProfileIcon(token)
         fetchAndSaveUserType(token)
-        fetchAndSaveClientList(token)
         fetchTopStocks(token)
         fetchAndSaveSupportTickets(token)
         fetchAndSaveReviews(token)
@@ -210,34 +209,6 @@ class LoginActivity : AppCompatActivity() {
         val editor = sharedPreferences.edit()
         editor.putString("user_type", userType)
         editor.apply()
-    }
-
-    // Fetch and save client list
-    private fun fetchAndSaveClientList(token: String) {
-        RetrofitClient.apiService.getClientList(TokenRequest(token)).enqueue(object : Callback<ClientListResponse> {
-            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val clients = response.body()?.clients ?: emptyList()
-                    Log.d("CLIENT_LIST_FETCHED", "Fetched clients: $clients")
-                    saveClientList(clients)
-                } else {
-                    Log.e("API_ERROR", "Failed to fetch client list: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Error fetching client list: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveClientList(clients: List<Client>) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val clientNames = clients.joinToString(",") { it.client_name }
-        editor.putString("client_list", clientNames)
-        editor.apply()
-        Log.d("CLIENT_LIST_SAVED", "Saved clients: $clientNames")
     }
 
     // Fetch top stocks

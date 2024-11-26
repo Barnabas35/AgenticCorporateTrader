@@ -1,14 +1,13 @@
-package com.tradeagently.act_app
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.tradeagently.act_app.R
 
 class AssetsAdapter(private var assets: List<String>) : RecyclerView.Adapter<AssetsAdapter.AssetViewHolder>() {
 
-    inner class AssetViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class AssetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val assetName: TextView = view.findViewById(R.id.assetName)
     }
 
@@ -28,4 +27,3 @@ class AssetsAdapter(private var assets: List<String>) : RecyclerView.Adapter<Ass
         notifyDataSetChanged()
     }
 }
-

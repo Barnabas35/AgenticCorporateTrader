@@ -78,7 +78,7 @@ data class ClientListResponse(
 
 data class Client(
     val client_name: String,
-    val id: String
+    val client_id: String
 )
 
 // Unified StockItem class for both top stocks and search results
@@ -275,7 +275,7 @@ data class CryptoAggregate(
 
 // Data class for user response in the user list
 data class User(
-    val id: String,
+    val client_id: String,
     val username: String,
     val email: String,
     val user_type: String
@@ -302,7 +302,7 @@ data class BalanceResponse(
 // Request for adding balance
 data class AddBalanceRequest(
     val session_token: String,
-    val usd_quantity: Double
+    val usd_quantity: Int
 )
 
 // Request for purchasing an asset
