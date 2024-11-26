@@ -47,8 +47,11 @@ class MyAssetsActivity : AppCompatActivity() {
         userBalanceTextView = findViewById(R.id.userBalance)
         addBalanceButton = findViewById(R.id.addBalanceButton)
 
+        // Initialize RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
-        assetsAdapter = AssetsAdapter(listOf())
+        assetsAdapter = AssetsAdapter(listOf()) { clickedUser ->
+            openClientProfile(clickedUser)
+        }
         recyclerView.adapter = assetsAdapter
 
         // Fetch data
@@ -59,6 +62,9 @@ class MyAssetsActivity : AppCompatActivity() {
         addBalanceButton.setOnClickListener {
             navigateToAddBalance()
         }
+
+
+
     }
 
     private fun fetchUserBalance() {
@@ -127,9 +133,18 @@ class MyAssetsActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
     }
 
+    private fun openClientProfile(clientName: String) {
+        val intent = Intent(this, ClientProfileActivity::class.java).apply {
+            putExtra("CLIENT_NAME", clientName)
+        }
+        startActivity(intent)
+        overridePendingTransition(0, 0)
+    }
+
     private fun logApiError(response: Response<*>) {
         val errorBody = response.errorBody()?.string()
         Log.e("API_ERROR", "Status: ${response.code()}, Error: $errorBody")
     }
+
 }
 

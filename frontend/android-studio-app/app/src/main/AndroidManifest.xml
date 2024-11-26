@@ -97,6 +97,11 @@
             android:name=".AddBalanceActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- CLient Profile Activity -->
+        <activity
+            android:name=".ClientProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
     </application>
 
 </manifest>

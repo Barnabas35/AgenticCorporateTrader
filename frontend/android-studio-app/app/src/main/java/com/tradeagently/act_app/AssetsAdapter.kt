@@ -5,7 +5,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.tradeagently.act_app.R
 
-class AssetsAdapter(private var assets: List<String>) : RecyclerView.Adapter<AssetsAdapter.AssetViewHolder>() {
+class AssetsAdapter(
+    private var assets: List<String>,
+    private val onItemClick: (String) -> Unit
+) : RecyclerView.Adapter<AssetsAdapter.AssetViewHolder>() {
 
     inner class AssetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val assetName: TextView = view.findViewById(R.id.assetName)
@@ -17,7 +20,13 @@ class AssetsAdapter(private var assets: List<String>) : RecyclerView.Adapter<Ass
     }
 
     override fun onBindViewHolder(holder: AssetViewHolder, position: Int) {
-        holder.assetName.text = assets[position]
+        val asset = assets[position]
+        holder.assetName.text = asset
+
+        // Set click listener for the item
+        holder.itemView.setOnClickListener {
+            onItemClick(asset)
+        }
     }
 
     override fun getItemCount() = assets.size
@@ -27,3 +36,4 @@ class AssetsAdapter(private var assets: List<String>) : RecyclerView.Adapter<Ass
         notifyDataSetChanged()
     }
 }
+
