@@ -141,8 +141,8 @@ Example 1 (when fm):
 }
 Example 2 (when fa):
 {
-  "clients": "AI27hgb3iG6hia",                               // If user type is "fa" then the user id is returned
-  "status": "Success"                                        //// This user id should be used as client id in other requests
+  "clients": "AI27hgb3iG6hia",                           // If user type is "fa" then the user id is returned
+  "status": "Success"                                    // This user id should be used as client id in other requests
 }
 
 
