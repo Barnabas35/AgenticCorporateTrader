@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Modal,
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 
@@ -24,9 +25,12 @@ const MyAssets: React.FC = () => {
   const [market, setMarket] = useState<'stocks' | 'crypto'>('stocks'); // Default to "stocks"
   const [ticker, setTicker] = useState<string>(''); // Ticker symbol for purchase
   const [usdQuantity, setUsdQuantity] = useState<string>(''); // Amount in USD for purchase
-  const [balance, setBalance] = useState<number | null>(null); // User balance
+  const [sellModalVisible, setSellModalVisible] = useState(false);
+  const [sellQuantity, setSellQuantity] = useState<string>('');
+  const [selectedTicker, setSelectedTicker] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
 
   // Fetch client list to get the client_id
   const fetchClientId = async () => {
@@ -54,29 +58,6 @@ const MyAssets: React.FC = () => {
       setError('An error occurred while fetching the client list.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Fetch user balance
-  const fetchBalance = async () => {
-    try {
-      const response = await fetch('https://tradeagently.dev/get-balance', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ session_token: sessionToken }),
-      });
-
-      const data = await response.json();
-
-      if (data.status === 'Success') {
-        setBalance(data.balance);
-      } else {
-        console.error('Failed to fetch balance');
-      }
-    } catch (err) {
-      console.error('Error fetching balance:', err);
     }
   };
 
@@ -122,6 +103,28 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Fetch balance
+  const fetchBalance = async () => {
+    try {
+      const response = await fetch('https://tradeagently.dev/get-balance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'Success') {
+        setBalance(data.balance);
+      } else {
+        setError('Failed to fetch balance.');
+      }
+    } catch (err) {
+      console.error('Error fetching balance:', err);
+      setError('An error occurred while fetching balance.');
+    }
+  };
   // Fetch individual asset quantity
   const fetchAssetQuantity = async (ticker: string): Promise<number | null> => {
     try {
@@ -167,13 +170,13 @@ const MyAssets: React.FC = () => {
           ticker_symbol: ticker,
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (data.status === 'Success') {
         return { profit: data.profit, total_usd_invested: data.total_usd_invested };
       } else {
-        console.error(`Failed to fetch asset report for ${ticker}:`, data);
+        console.error(`Failed to fetch asset report for ${ticker}`);
         return { profit: null, total_usd_invested: null };
       }
     } catch (err) {
@@ -181,62 +184,29 @@ const MyAssets: React.FC = () => {
       return { profit: null, total_usd_invested: null };
     }
   };
-  
 
-  // Sell an asset
-  const sellAsset = async (ticker: string) => {
-    Alert.prompt(
-      'Sell Asset',
-      `Enter the quantity of ${ticker} to sell:`,
-      async (quantity: string | undefined) => {
-        if (!quantity || isNaN(parseFloat(quantity))) {
-          Alert.alert('Error', 'Please enter a valid quantity.');
-          return;
-        }
-
-        try {
-          const response = await fetch('https://tradeagently.dev/sell-asset', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              session_token: sessionToken,
-              client_id: clientId,
-              market,
-              ticker,
-              asset_quantity: parseFloat(quantity),
-            }),
-          });
-
-          const data = await response.json();
-
-          if (data.status === 'Success') {
-            Alert.alert('Success', `${quantity} of ${ticker} sold successfully.`);
-            fetchUserAssets();
-          } else {
-            console.error('Failed to sell asset.');
-            Alert.alert('Error', 'Failed to sell asset.');
-          }
-        } catch (err) {
-          console.error('Error selling asset:', err);
-          Alert.alert('Error', 'An error occurred while selling the asset.');
-        }
-      }
-    );
+  // Open sell modal
+  const openSellModal = (ticker: string) => {
+    setSelectedTicker(ticker);
+    setSellModalVisible(true);
   };
 
-  // Purchase an asset
-  const purchaseAsset = async () => {
-    if (!clientId || !ticker.trim() || !usdQuantity.trim() || isNaN(parseFloat(usdQuantity))) {
-      Alert.alert('Error', 'Please enter a valid ticker and amount.');
+  // Close sell modal
+  const closeSellModal = () => {
+    setSellModalVisible(false);
+    setSellQuantity('');
+    setSelectedTicker('');
+  };
+
+  // Handle asset selling
+  const handleSellAsset = async () => {
+    if (!sellQuantity || isNaN(parseFloat(sellQuantity))) {
+      Alert.alert('Error', 'Please enter a valid quantity.');
       return;
     }
 
-    setLoading(true);
-
     try {
-      const response = await fetch('https://tradeagently.dev/purchase-asset', {
+      const response = await fetch('https://tradeagently.dev/sell-asset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -245,31 +215,26 @@ const MyAssets: React.FC = () => {
           session_token: sessionToken,
           client_id: clientId,
           market,
-          ticker,
-          usd_quantity: parseFloat(usdQuantity),
+          ticker: selectedTicker,
+          asset_quantity: parseFloat(sellQuantity),
         }),
       });
 
       const data = await response.json();
 
       if (data.status === 'Success') {
-        Alert.alert('Success', `Purchased ${ticker} for $${usdQuantity} in ${market}.`);
-        setTicker('');
-        setUsdQuantity('');
-        fetchUserAssets(); // Refresh asset list
-        fetchBalance(); // Update balance
+        Alert.alert('Success', `${sellQuantity} of ${selectedTicker} sold successfully.`);
+        fetchUserAssets(); // Refresh the assets
+        closeSellModal();
       } else {
-        setError('Failed to purchase asset.');
+        console.error('Failed to sell asset.', data);
+        Alert.alert('Error', 'Failed to sell asset.');
       }
     } catch (err) {
-      console.error('Error purchasing asset:', err);
-      setError('An error occurred while purchasing the asset.');
-    } finally {
-      setLoading(false);
+      console.error('Error selling asset:', err);
+      Alert.alert('Error', 'An error occurred while selling the asset.');
     }
   };
-
-  // Fetch client ID and balance on component mount
   useEffect(() => {
     if (sessionToken) {
       fetchClientId();
@@ -283,22 +248,11 @@ const MyAssets: React.FC = () => {
       fetchUserAssets();
     }
   }, [clientId, market]);
-
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       {/* Balance Display */}
       <View style={styles.balanceContainer}>
-        <Text style={styles.balanceText}>
-          Balance: ${balance !== null ? balance.toFixed(2) : 'N/A'}
-        </Text>
+        <Text style={styles.balanceText}>Balance: ${balance?.toFixed(2) ?? 'N/A'}</Text>
       </View>
 
       <Text style={styles.title}>My Assets</Text>
@@ -308,43 +262,16 @@ const MyAssets: React.FC = () => {
       {/* Market Switch */}
       <View style={styles.marketSwitchContainer}>
         <TouchableOpacity
-          style={[
-            styles.marketButton,
-            market === 'stocks' && styles.activeMarketButton,
-          ]}
+          style={[styles.marketButton, market === 'stocks' && styles.activeMarketButton]}
           onPress={() => setMarket('stocks')}
         >
           <Text style={styles.marketButtonText}>Stocks</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.marketButton,
-            market === 'crypto' && styles.activeMarketButton,
-          ]}
+          style={[styles.marketButton, market === 'crypto' && styles.activeMarketButton]}
           onPress={() => setMarket('crypto')}
         >
           <Text style={styles.marketButtonText}>Crypto</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Purchase Section */}
-      <View style={styles.purchaseContainer}>
-        <Text style={styles.purchaseTitle}>Purchase Asset</Text>
-        <TextInput
-          style={styles.input}
-          placeholder={`Enter ticker (${market === 'crypto' ? 'e.g., BTC' : 'e.g., AAPL'})`}
-          value={ticker}
-          onChangeText={setTicker}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Amount in USD"
-          keyboardType="numeric"
-          value={usdQuantity}
-          onChangeText={setUsdQuantity}
-        />
-        <TouchableOpacity style={styles.purchaseButton} onPress={purchaseAsset}>
-          <Text style={styles.purchaseButtonText}>Purchase</Text>
         </TouchableOpacity>
       </View>
 
@@ -367,7 +294,7 @@ const MyAssets: React.FC = () => {
             </View>
             <TouchableOpacity
               style={styles.sellButton}
-              onPress={() => sellAsset(item.ticker)}
+              onPress={() => openSellModal(item.ticker)}
             >
               <Text style={styles.sellButtonText}>Sell</Text>
             </TouchableOpacity>
@@ -375,6 +302,39 @@ const MyAssets: React.FC = () => {
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>No assets found.</Text>}
       />
+
+      {/* Sell Modal */}
+      <Modal
+        visible={sellModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeSellModal}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Sell Asset</Text>
+            <Text style={styles.modalText}>Enter the quantity of {selectedTicker} to sell:</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Quantity"
+              keyboardType="numeric"
+              value={sellQuantity}
+              onChangeText={setSellQuantity}
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleSellAsset}>
+                <Text style={styles.modalButtonText}>Sell</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={closeSellModal}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -386,25 +346,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     width: '100%',
   },
+  balanceContainer: {
+    padding: 15,
+    backgroundColor: '#007bff',
+    borderRadius: 10,
+    marginBottom: 20,
+    alignSelf: 'flex-start',
+  },
+  balanceText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
     color: '#333',
-  },
-  balanceContainer: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-    alignSelf: 'flex-start',
-  },
-  balanceText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
   },
   marketSwitchContainer: {
     flexDirection: 'row',
@@ -420,43 +379,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeMarketButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#007bff',
   },
   marketButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  purchaseContainer: {
-    marginBottom: 20,
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-  purchaseTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  purchaseButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  purchaseButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
@@ -502,6 +427,56 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 10,
     textAlign: 'center',
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  modalInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    width: '100%',
+    marginBottom: 10,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  modalButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    width: '40%',
+    alignItems: 'center',
+  },
+  modalCancelButton: {
+    backgroundColor: '#ccc',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

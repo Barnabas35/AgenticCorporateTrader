@@ -82,6 +82,7 @@ const Menu: React.FC = () => {
             <FontAwesome name="bars" size={32} color="white" />
             {isMenuOpen && (
               <ScrollView style={styles.dropdownMenu}>
+                
                 {sessionToken ? (
                   <>
                     {userType === 'admin' && (
@@ -93,8 +94,10 @@ const Menu: React.FC = () => {
                       >
                         <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
                       </NavLink>
+                      
                     )}
-                    {userType === 'fm' && (
+                    <View style={styles.spacer} />
+                    {userType === 'fa' && (
                       <NavLink
                         to="/client-management"
                         style={({ isActive }) =>
@@ -104,16 +107,7 @@ const Menu: React.FC = () => {
                         <FontAwesome name="users" size={16} color="white" /> Client Management
                       </NavLink>
                     )}
-                    {userType === 'fa' && (
-                      <NavLink
-                        to="/my-assets"
-                        style={({ isActive }) =>
-                          isActive ? styles.activeDropdownItem : styles.dropdownItem
-                        }
-                      >
-                        <FontAwesome name="list-alt" size={16} color="white" /> My Assets
-                      </NavLink>
-                    )}
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/crypto-search"
                       style={({ isActive }) =>
@@ -122,6 +116,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="bitcoin" size={16} color="white" /> Crypto Search
                     </NavLink>
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/stock-search"
                       style={({ isActive }) =>
@@ -130,6 +125,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="line-chart" size={16} color="white" /> Stock Search
                     </NavLink>
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/user-account"
                       style={({ isActive }) =>
@@ -138,6 +134,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="user" size={16} color="white" /> User Account
                     </NavLink>
+                    <View style={styles.spacer} />
                   </>
                 ) : (
                   <NavLink
@@ -185,7 +182,6 @@ const Menu: React.FC = () => {
                     <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
                   </NavLink>
                 )}
-                <View style={styles.spacer} />
                 {userType === 'fm' && (
                   <NavLink
                     to="/client-management"
@@ -307,8 +303,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    left: '50%',
+    left: '55%',
     transform: [{ translateX: '-50%' }],
+    width: '100%',
   },
   menuItem: {
     backgroundColor: '#4CAF50',
