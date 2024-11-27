@@ -173,19 +173,6 @@ const Menu: React.FC = () => {
             {sessionToken ? (
               <>
                 {userType === 'admin' && (
-<<<<<<< Updated upstream
-                  <>
-                    <NavLink
-                      to="/admin"
-                      style={({ isActive }) =>
-                        isActive ? styles.activeMenuItem : styles.menuItem
-                      }
-                    >
-                      <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
-                    </NavLink>
-                    <View style={styles.spacer} />
-                  </>
-=======
                   <NavLink
                     to="/admin"
                     style={({ isActive }) =>
@@ -204,7 +191,6 @@ const Menu: React.FC = () => {
                   >
                     <FontAwesome name="users" size={18} color="white" /> Client Management
                   </NavLink>
->>>>>>> Stashed changes
                 )}
                 {userType === 'fa' && (
                   <>
