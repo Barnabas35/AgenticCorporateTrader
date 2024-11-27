@@ -10,7 +10,7 @@ import {
   Modal,
   Button,
 } from 'react-native';
-import { useUser } from './userContext'; // Import the user context
+import { useUser } from './userContext';
 import { FontAwesome } from '@expo/vector-icons';
 
 const Menu: React.FC = () => {
@@ -94,7 +94,7 @@ const Menu: React.FC = () => {
                         <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
                       </NavLink>
                     )}
-                    {userType === 'fa' && (
+                    {userType === 'fm' && (
                       <NavLink
                         to="/client-management"
                         style={({ isActive }) =>
@@ -102,6 +102,16 @@ const Menu: React.FC = () => {
                         }
                       >
                         <FontAwesome name="users" size={16} color="white" /> Client Management
+                      </NavLink>
+                    )}
+                    {userType === 'fa' && (
+                      <NavLink
+                        to="/my-assets"
+                        style={({ isActive }) =>
+                          isActive ? styles.activeDropdownItem : styles.dropdownItem
+                        }
+                      >
+                        <FontAwesome name="list-alt" size={16} color="white" /> My Assets
                       </NavLink>
                     )}
                     <NavLink
@@ -166,31 +176,37 @@ const Menu: React.FC = () => {
             {sessionToken ? (
               <>
                 {userType === 'admin' && (
-                  <>
-                    <NavLink
-                      to="/admin"
-                      style={({ isActive }) =>
-                        isActive ? styles.activeMenuItem : styles.menuItem
-                      }
-                    >
-                      <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
-                    </NavLink>
-                    <View style={styles.spacer} />
-                  </>
+                  <NavLink
+                    to="/admin"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
+                  </NavLink>
+                )}
+                <View style={styles.spacer} />
+                {userType === 'fm' && (
+                  <NavLink
+                    to="/client-management"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="users" size={18} color="white" /> Client Management
+                  </NavLink>
                 )}
                 {userType === 'fa' && (
-                  <>
-                    <NavLink
-                      to="/client-management"
-                      style={({ isActive }) =>
-                        isActive ? styles.activeMenuItem : styles.menuItem
-                      }
-                    >
-                      <FontAwesome name="users" size={18} color="white" /> Client Management
-                    </NavLink>
-                    <View style={styles.spacer} />
-                  </>
+                  <NavLink
+                    to="/my-assets"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="list-alt" size={18} color="white" /> My Assets
+                  </NavLink>
                 )}
+                <View style={styles.spacer} />
                 <NavLink
                   to="/crypto-search"
                   style={({ isActive }) =>
@@ -261,9 +277,10 @@ const Menu: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  // Styles remain the same as provided.
   container: {
-    backgroundColor: '#282424', // Gray color
-    height: 105, // Reduced height of the navbar
+    backgroundColor: '#282424',
+    height: 105,
     flexDirection: 'column',
     justifyContent: 'flex-start',
     zIndex: 1,
@@ -275,7 +292,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   menuOpen: {
-    height: 400, // Expands the height when burger menu is open
+    height: 400,
   },
   title: {
     textDecorationLine: 'none',
@@ -307,7 +324,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 5, // Adding shadow for visual effect
+    shadowRadius: 5,
   },
   activeMenuItem: {
     backgroundColor: '#E85759',
