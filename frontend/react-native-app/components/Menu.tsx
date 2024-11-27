@@ -173,6 +173,7 @@ const Menu: React.FC = () => {
             {sessionToken ? (
               <>
                 {userType === 'admin' && (
+<<<<<<< Updated upstream
                   <>
                     <NavLink
                       to="/admin"
@@ -184,6 +185,26 @@ const Menu: React.FC = () => {
                     </NavLink>
                     <View style={styles.spacer} />
                   </>
+=======
+                  <NavLink
+                    to="/admin"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
+                  </NavLink>
+                )}
+                {userType === 'fm' && (
+                  <NavLink
+                    to="/client-management"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="users" size={18} color="white" /> Client Management
+                  </NavLink>
+>>>>>>> Stashed changes
                 )}
                 {userType === 'fa' && (
                   <>
@@ -297,8 +318,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    left: '50%',
+    left: '55%',
     transform: [{ translateX: '-50%' }],
+    width: '100%',
   },
   menuItem: {
     backgroundColor: '#4CAF50',
