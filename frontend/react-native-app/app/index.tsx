@@ -1,11 +1,75 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { useUser } from '../components/userContext';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TextInput, Button, Alert } from 'react-native';
+import { useSessionToken, useUser } from '../components/userContext';
 import BitcoinChart from '../components/BitcoinChart';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 
 const Home: React.FC = () => {
-  const { username } = useUser();
+  const { username } = useUser(); // Get username from user context
+  const [sessionToken] = useSessionToken(); // Get sessionToken from user context
+  const [balance, setBalance] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [addAmount, setAddAmount] = useState<string>(''); // Amount to add
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!sessionToken) {
+        setLoading(false); // Stop loading if there's no session token
+        return;
+      }
+
+      try {
+        const response = await fetch('https://tradeagently.dev/get-balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_token: sessionToken }),
+        });
+        const data = await response.json();
+
+        if (data.status === 'Success') {
+          setBalance(data.balance);
+        } else {
+          console.error('Failed to fetch balance:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBalance();
+  }, [sessionToken]);
+
+  const handleAddBalance = async () => {
+    if (!addAmount || isNaN(Number(addAmount))) {
+      Alert.alert('Invalid Amount', 'Please enter a valid number.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/add-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          usd_quantity: Number(addAmount),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'Success') {
+        Alert.alert('Success', `Added $${addAmount} to your balance.`);
+        setBalance((prev) => (prev !== null ? prev + Number(addAmount) : Number(addAmount)));
+        setAddAmount('');
+      } else {
+        Alert.alert('Error', 'Failed to add balance. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error adding balance:', error);
+      Alert.alert('Error', 'An error occurred while adding balance.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -51,6 +115,33 @@ const Home: React.FC = () => {
 
       {/* Right Side - Charts and More */}
       <View style={styles.rightContainer}>
+        {/* Conditionally Render Balance Box */}
+        {sessionToken && (
+          <View style={styles.balanceContainer}>
+            {loading ? (
+              <ActivityIndicator size="large" color="#2e86de" />
+            ) : (
+              <>
+                <Text style={styles.balanceText}>
+                  Balance: ${balance?.toFixed(2) ?? '0.00'}
+                </Text>
+                {/* Add Balance Section */}
+                <View style={styles.addBalanceContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Amount to add"
+                    keyboardType="numeric"
+                    value={addAmount}
+                    onChangeText={setAddAmount}
+                  />
+                  <Button title="Add Balance" onPress={handleAddBalance} />
+                </View>
+              </>
+            )}
+          </View>
+        )}
+
+        {/* Bitcoin Chart */}
         <BitcoinChart />
         <View style={styles.chartInfoContainer}>
           <Text style={styles.chartTitle}>Bitcoin Market Overview</Text>
@@ -84,13 +175,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  headerImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 10,
-    resizeMode: 'cover',
-  },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
@@ -119,6 +203,34 @@ const styles = StyleSheet.create({
     flex: 1, // Occupy half the width
     alignItems: 'center',
     justifyContent: 'flex-start',
+  },
+  balanceContainer: {
+    width: '90%',
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#2e86de',
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  balanceText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  addBalanceContainer: {
+    marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    width: '80%',
   },
   chartInfoContainer: {
     marginTop: 20,

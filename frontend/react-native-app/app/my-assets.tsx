@@ -125,7 +125,6 @@ const MyAssets: React.FC = () => {
       setError('An error occurred while fetching balance.');
     }
   };
-
   // Fetch individual asset quantity
   const fetchAssetQuantity = async (ticker: string): Promise<number | null> => {
     try {
@@ -236,8 +235,6 @@ const MyAssets: React.FC = () => {
       Alert.alert('Error', 'An error occurred while selling the asset.');
     }
   };
-
-  // Fetch client ID on component mount
   useEffect(() => {
     if (sessionToken) {
       fetchClientId();
@@ -251,7 +248,6 @@ const MyAssets: React.FC = () => {
       fetchUserAssets();
     }
   }, [clientId, market]);
-
   return (
     <View style={styles.container}>
       {/* Balance Display */}

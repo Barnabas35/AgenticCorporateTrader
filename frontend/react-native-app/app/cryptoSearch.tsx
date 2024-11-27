@@ -46,10 +46,7 @@ const CryptoSearch: React.FC = () => {
   
     setLoading(true);
     setError(null);
-    console.log("Search query:", query);
-  
     try {
-      console.log("Sending request to search API...");
       const response = await fetch('https://tradeagently.dev/text-search-crypto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,26 +58,18 @@ const CryptoSearch: React.FC = () => {
         }),
       });
   
-      console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("API response data:", data);
-  
       if (data.status === 'Success' && data.crypto_details) {
         setSearchResults(data.crypto_details);
-        console.log("Search results:", data.crypto_details);
       } else {
         setError('No matching cryptocurrencies found');
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
       setError('Error searching cryptocurrencies');
     } finally {
       setLoading(false);
-      console.log("Loading state set to false");
     }
   };
-  
-  
 
   const fetchCryptoDetails = async (symbol: string) => {
     setLoading(true); setError(null);
@@ -127,7 +116,9 @@ const CryptoSearch: React.FC = () => {
 
   const renderCryptoItem = ({ item }: { item: Crypto }) => (
     <TouchableOpacity style={styles.cryptoItem} onPress={() => fetchCryptoDetails(item.symbol)}>
-      <Text style={styles.cryptoSymbol}>{item.symbol}</Text><Text>{item.name}</Text><Text style={styles.priceText}>{item.price} USD</Text>
+      <Text style={styles.cryptoSymbol}>{item.symbol}</Text>
+      <Text>{item.name}</Text>
+      <Text style={styles.priceText}>{item.price} USD</Text>
     </TouchableOpacity>
   );
 
@@ -166,15 +157,46 @@ const CryptoSearch: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 10, width: '100%' },
-  searchInput: { marginVertical: 10, padding: 10, borderColor: '#ccc', borderWidth: 1, borderRadius: 5 },
-  errorText: { color: 'red', marginBottom: 10 },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginVertical: 10 },
-  cryptoItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 10, borderBottomWidth: 1, borderBottomColor: '#ccc' },
-  cryptoSymbol: { fontSize: 18, fontWeight: 'bold' },
-  cryptoDetails: { padding: 10, borderColor: '#ccc', borderWidth: 1, borderRadius: 5 },
-  description: { fontSize: 14, marginBottom: 5 },
-  priceText: { fontSize: 16, color: '#1a73e8', fontWeight: 'bold' },
+  container: {
+    flex: 1,
+    padding: 16,
+    width: '100%',
+  },
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  cryptoItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  cryptoSymbol: {
+    fontWeight: 'bold',
+  },
+  priceText: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  cryptoDetails: {
+    padding: 16,
+  },
+  description: {
+    marginVertical: 8,
+    fontStyle: 'italic',
+  },
 });
 
 export default CryptoSearch;
