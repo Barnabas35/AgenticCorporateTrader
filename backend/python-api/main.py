@@ -196,6 +196,20 @@ def get_crypto_aggregates():
     return jsonify(api_get_crypto_aggregates(request.json)), 200
 
 
+# Admin get user list
+@app.route("/get-user-list", methods=["POST"])
+def admin_get_user_list():
+    from query_library.get_user_list import q_get_user_list
+    return jsonify(q_get_user_list(request.json)), 200
+
+
+# Admin delete user
+@app.route("/admin-delete-user", methods=["POST"])
+def admin_delete_user():
+    from query_library.admin_delete_user import q_admin_delete_user
+    return jsonify(q_admin_delete_user(request.json)), 200
+
+
 # Get balance
 @app.route("/get-balance", methods=["POST"])
 def get_balance():
@@ -251,5 +265,6 @@ def get_asset_report():
     from query_library.get_asset_report import q_get_asset_report
     return jsonify(q_get_asset_report(request.json)), 200
 
+  
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
