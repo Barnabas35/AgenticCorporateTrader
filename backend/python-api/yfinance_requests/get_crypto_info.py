@@ -53,6 +53,7 @@ def api_get_crypto_info(request_json):
         "high": ticker_details["dayHigh"],
         "low": ticker_details["dayLow"],
         "volume": ticker_details["volume"],
+        "market": "crypto"
     }
 
     return {"crypto_info": crypto_info, "status": "Success"}

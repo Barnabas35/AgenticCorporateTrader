@@ -1,194 +1,156 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  Image,
-} from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { useSessionToken } from '../components/userContext';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Picker } from '@react-native-picker/picker';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale } from 'chart.js';
+import 'chartjs-adapter-date-fns';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale);
+
+interface Crypto { symbol: string; name: string; price: number; }
+interface CryptoDetails extends Crypto { high: number; low: number; volume: number; description: string; }
 
 const CryptoSearch: React.FC = () => {
-  const [cryptoSymbol, setCryptoSymbol] = useState('');
-  const [filteredCryptoList, setFilteredCryptoList] = useState<any[]>([]);
-  const [selectedCrypto, setSelectedCrypto] = useState<any>({ id: 'bitcoin', name: 'Bitcoin' });
-  const [currency, setCurrency] = useState('usd');
-  const [priceData, setPriceData] = useState<number[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [topCryptos, setTopCryptos] = useState<Crypto[]>([]);
+  const [searchResults, setSearchResults] = useState<Crypto[]>([]);
+  const [selectedCrypto, setSelectedCrypto] = useState<CryptoDetails | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [timeInterval, setTimeInterval] = useState<string>('7');
+  const [sessionToken] = useSessionToken();
+  const [historicalData, setHistoricalData] = useState<{ labels: string[], prices: number[] }>({ labels: [], prices: [] });
+  const [historyWindow, setHistoryWindow] = useState<string>('month'); 
+  const [interval, setInterval] = useState<string>('1d');
 
-  const cryptoList = [
-    { id: 'bitcoin', name: 'Bitcoin', symbol: 'btc' },
-    { id: 'ethereum', name: 'Ethereum', symbol: 'eth' },
-    { id: 'dogecoin', name: 'Doge', symbol: 'doge' },
-    { id: 'ripple', name: 'Ripple', symbol: 'xrp' },
-    { id: 'solana', name: 'Solana', symbol: 'sol' },
-    { id: 'litecoin', name: 'Litecoin', symbol: 'ltc' },
-    { id: 'tron', name: 'Tron', symbol: 'trx' },
-    { id: 'tether', name: 'Tether', symbol: 'usdt' },
-    { id: 'cardano', name: 'Cardano', symbol: 'ada' },
-  ];
-
+  useEffect(() => { fetchTopCryptos(); }, []);
   useEffect(() => {
-    if (cryptoSymbol) {
-      const filteredList = cryptoList.filter(
-        (coin) =>
-          coin.name.toLowerCase().includes(cryptoSymbol.toLowerCase()) ||
-          coin.symbol.toLowerCase().includes(cryptoSymbol.toLowerCase())
-      );
-      setFilteredCryptoList(filteredList);
-    } else {
-      setFilteredCryptoList([]);
+    if (selectedCrypto) {
+      fetchCryptoAggregates(selectedCrypto.symbol);
     }
-  }, [cryptoSymbol]);
+  }, [interval, historyWindow, selectedCrypto]); // Include historyWindow as a dependency
+  
 
-  const fetchCryptoData = async (crypto: any) => {
+  const fetchTopCryptos = async (limit = 10) => {
+    setLoading(true); setError(null);
+    try {
+      const response = await fetch(`https://tradeagently.dev/get-top-cryptos?limit=${limit}`);
+      const data = await response.json();
+      data.status === 'Success' ? setTopCryptos(data.crypto_details) : setError('Failed to fetch top cryptos');
+    } catch { setError('Failed to fetch top cryptos'); } finally { setLoading(false); }
+  };
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim()) return setSearchResults([]);
+  
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${crypto.id}/market_chart?vs_currency=${currency}&days=${timeInterval}&interval=daily`
-      );
-      if (!response.ok) throw new Error('Failed to fetch data');
+      const response = await fetch('https://tradeagently.dev/text-search-crypto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          search_query: query,
+          limit: 5,
+          session_token: sessionToken,
+          show_price: true,
+        }),
+      });
+  
       const data = await response.json();
-      const prices = data.prices.map((pricePoint: any) => pricePoint[1]);
-      const timeLabels = data.prices.map((pricePoint: any) =>
-        new Date(pricePoint[0]).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        })
-      );
-      setPriceData(prices);
-      setLabels(timeLabels);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      if (data.status === 'Success' && data.crypto_details) {
+        setSearchResults(data.crypto_details);
+      } else {
+        setError('No matching cryptocurrencies found');
+      }
+    } catch (error) {
+      setError('Error searching cryptocurrencies');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCryptoData(selectedCrypto);
-  }, [selectedCrypto, timeInterval]);
+  const fetchCryptoDetails = async (symbol: string) => {
+    setLoading(true); setError(null);
+    try {
+      const response = await fetch('https://tradeagently.dev/get-crypto-info', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ crypto: symbol, session_token: sessionToken || '' }),
+      });
+      const data = await response.json();
+      if (data.status === 'Success') {
+        setSelectedCrypto(data.crypto_info); fetchCryptoAggregates(symbol);
+      } else { setError(data.message || 'Failed to fetch crypto details'); }
+    } catch { setError('Failed to fetch crypto details'); } finally { setLoading(false); }
+  };
 
-  const renderCryptoItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.cryptoItem}
-      onPress={() => {
-        setSelectedCrypto(item);
-        setCryptoSymbol(item.name);
-        setFilteredCryptoList([]);
-      }}
-    >
-      <Image
-        source={{ uri: `https://assets.coingecko.com/coins/images/${item.id}/small.png` }}
-        style={styles.cryptoLogo}
-      />
-      <View>
-        <Text style={styles.cryptoName}>{item.name}</Text>
-        <Text style={styles.cryptoSymbol}>{item.symbol.toUpperCase()}</Text>
-      </View>
+  const fetchCryptoAggregates = async (symbol: string) => {
+    setLoading(true); setError(null);
+    let startDate = ''; let endDate = new Date().toISOString().split('T')[0];
+    switch (historyWindow) {
+      case 'hour': setInterval('1m'); startDate = new Date(Date.now() - 3600 * 1000).toISOString(); break;
+      case 'day': setInterval('1h'); startDate = new Date(Date.now() - 86400 * 1000).toISOString().split('T')[0]; break;
+      case 'week': setInterval('1d'); startDate = new Date(Date.now() - 7 * 86400 * 1000).toISOString().split('T')[0]; break;
+      case 'month': setInterval('1d'); startDate = new Date(Date.now() - 30 * 86400 * 1000).toISOString().split('T')[0]; break;
+      case 'year': setInterval('1mo'); startDate = new Date(Date.now() - 30 * 86400 * 1000 * 12).toISOString().split('T')[0]; break;
+      default: startDate = '2024-01-01';
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/get-crypto-aggregates', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ crypto: symbol, session_token: sessionToken, start_date: startDate, end_date: endDate, interval }),
+      });
+      const data = await response.json();
+      const validData = data.crypto_aggregates.filter((item: any) => item.close !== undefined);
+      setHistoricalData({
+        labels: validData.map((item: any) =>
+          historyWindow === 'hour' ? new Date(item.date).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) :
+            new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+        ),
+        prices: validData.map((item: any) => item.close),
+      });
+    } catch { setError('Failed to fetch crypto aggregates'); } finally { setLoading(false); }
+  };
+
+  const renderCryptoItem = ({ item }: { item: Crypto }) => (
+    <TouchableOpacity style={styles.cryptoItem} onPress={() => fetchCryptoDetails(item.symbol)}>
+      <Text style={styles.cryptoSymbol}>{item.symbol}</Text>
+      <Text>{item.name}</Text>
+      <Text style={styles.priceText}>{item.price} USD</Text>
     </TouchableOpacity>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Cryptocurrency Price Tracker</Text>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search cryptocurrency..."
-        value={cryptoSymbol}
-        onChangeText={setCryptoSymbol}
-      />
-      {filteredCryptoList.length > 0 && (
-        <FlatList
-          data={filteredCryptoList}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCryptoItem}
-        />
-      )}
-
-      <View style={styles.pickerContainer}>
-        <RNPickerSelect
-          onValueChange={(value) => setCurrency(value)}
-          items={[
-            { label: 'USD', value: 'usd' },
-            { label: 'EUR', value: 'eur' },
-          ]}
-          value={currency}
-          placeholder={{ label: 'Select currency', value: null }}
-        />
-        <RNPickerSelect
-          onValueChange={(value) => setTimeInterval(value)}
-          items={[
-            { label: '1 Day', value: '1' },
-            { label: '7 Days', value: '7' },
-            { label: '30 Days', value: '30' },
-            { label: '90 Days', value: '90' },
-            { label: '1 Year', value: '365' },
-          ]}
-          value={timeInterval}
-          placeholder={{ label: 'Select time range', value: '7' }}
-        />
-      </View>
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />
-      ) : error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : (
-        <View style={styles.chartContainer}>
+      <TextInput style={styles.searchInput} placeholder="Search for a crypto..." value={searchQuery} onChangeText={handleSearch} />
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      <Text style={styles.sectionTitle}>Top Cryptos</Text>
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      {selectedCrypto ? (
+        <View style={styles.cryptoDetails}>
+          <Text style={styles.cryptoSymbol}>{selectedCrypto.symbol} - {selectedCrypto.name}</Text>
+          <Text style={styles.description}>Market Cap: {selectedCrypto.volume}</Text>
+          <Text style={styles.description}>Volume: {selectedCrypto.volume}</Text>
+          <Text style={styles.description}>High: {selectedCrypto.high}</Text>
+          <Text style={styles.description}>Low: {selectedCrypto.low}</Text>
+          <Text style={styles.description}>{selectedCrypto.description}</Text>
+          <Text style={styles.sectionTitle}>Historical Data</Text>
+          <Picker selectedValue={historyWindow} onValueChange={(value) => setHistoryWindow(value)}>
+            <Picker.Item label="Last Hour" value="hour" />
+            <Picker.Item label="Last Day" value="day" />
+            <Picker.Item label="Last Week" value="week" />
+            <Picker.Item label="Last Month" value="month" />
+            <Picker.Item label="Last Year" value="year" />
+          </Picker>
           <Line
-            data={{
-              labels: labels,
-              datasets: [
-                {
-                  label: `Price in ${currency.toUpperCase()}`,
-                  data: priceData,
-                  borderColor: 'rgba(75, 192, 192, 1)',
-                  backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                  borderWidth: 1,
-                  fill: true,
-                  tension: 0.1,
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { position: 'top' },
-                title: {
-                  display: true,
-                  text: `${selectedCrypto.name} Price Over the Last ${timeInterval} Days`,
-                },
-              },
-              scales: {
-                x: { title: { display: true, text: 'Date' } },
-                y: { title: { display: true, text: `Price (${currency.toUpperCase()})` } },
-              },
-            }}
+            data={{ labels: historicalData.labels, datasets: [{ label: 'Price', data: historicalData.prices, borderColor: 'rgba(75,192,192,1)', borderWidth: 1, fill: false }] }}
+            options={{ responsive: true, plugins: { title: { display: true, text: 'Price History' } }, scales: { x: { type: historyWindow === 'hour' ? 'time' : 'category', time: { unit: historyWindow === 'hour' ? 'minute' : 'day' } } } }}
           />
         </View>
+      ) : (
+        <FlatList data={searchQuery ? searchResults : topCryptos} renderItem={renderCryptoItem} keyExtractor={(item) => item.symbol} />
       )}
     </ScrollView>
   );
@@ -198,67 +160,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f9f9f9',
     width: '100%',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
   },
   searchInput: {
-    height: 50,
-    borderColor: '#ccc',
+    height: 40,
+    borderColor: 'gray',
     borderWidth: 1,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  cryptoItem: {
-    flexDirection: 'row',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    backgroundColor: '#fff',
-    marginBottom: 10,
-  },
-  cryptoLogo: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
-  },
-  cryptoName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  cryptoSymbol: {
-    fontSize: 16,
-    color: '#555',
-  },
-  chartContainer: {
-    width: '100%',
-    padding: 32,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    marginVertical: 10,
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   errorText: {
     color: 'red',
-    textAlign: 'center',
-    marginVertical: 10,
+    marginBottom: 16,
   },
-  loading: {
-    marginVertical: 20,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  cryptoItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  cryptoSymbol: {
+    fontWeight: 'bold',
+  },
+  priceText: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  cryptoDetails: {
+    padding: 16,
+  },
+  description: {
+    marginVertical: 8,
+    fontStyle: 'italic',
   },
 });
 

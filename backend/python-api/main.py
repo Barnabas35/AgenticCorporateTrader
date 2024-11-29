@@ -210,5 +210,61 @@ def admin_delete_user():
     return jsonify(q_admin_delete_user(request.json)), 200
 
 
+# Get balance
+@app.route("/get-balance", methods=["POST"])
+def get_balance():
+    from query_library.get_balance import q_get_balance
+    return jsonify(q_get_balance(request.json)), 200
+
+
+# Purchase asset
+@app.route("/purchase-asset", methods=["POST"])
+def purchase_asset():
+    from query_library.purchase_asset import q_purchase_asset
+    return jsonify(q_purchase_asset(request.json)), 200
+
+
+# Sell asset
+@app.route("/sell-asset", methods=["POST"])
+def sell_asset():
+    from query_library.sell_asset import q_sell_asset
+    return jsonify(q_sell_asset(request.json)), 200
+
+
+# Get user assets
+@app.route("/get-user-assets", methods=["POST"])
+def get_user_assets():
+    from query_library.get_user_assets import q_get_user_assets
+    return jsonify(q_get_user_assets(request.json)), 200
+
+
+# Get asset
+@app.route("/get-asset", methods=["POST"])
+def get_asset():
+    from query_library.get_asset import q_get_asset
+    return jsonify(q_get_asset(request.json)), 200
+
+
+# Add balance
+@app.route("/add-balance", methods=["POST"])
+def add_balance():
+    from query_library.add_balance import q_add_balance
+    return jsonify(q_add_balance(request.json)), 200
+
+
+# Get asset transactions log
+@app.route("/get-asset-transaction-log", methods=["POST"])
+def get_asset_transactions_log():
+    from query_library.get_asset_transaction_log import q_get_asset_transaction_log
+    return jsonify(q_get_asset_transaction_log(request.json)), 200
+
+
+# Get asset report
+@app.route("/get-asset-report", methods=["POST"])
+def get_asset_report():
+    from query_library.get_asset_report import q_get_asset_report
+    return jsonify(q_get_asset_report(request.json)), 200
+
+  
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)

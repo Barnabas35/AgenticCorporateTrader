@@ -19,7 +19,9 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.4.1",
-    "chart.js": "^4.4.5",
+    "axios": "^1.7.7",
+    "chart.js": "^4.4.6",
+    "chartjs-adapter-date-fns": "^3.0.0",
     "expo": "~51.0.28",
     "expo-constants": "~16.0.2",
     "expo-font": "~12.0.9",
@@ -44,7 +46,8 @@
     "react-native-webview": "^13.12.3",
     "react-navigation": "^5.0.0",
     "react-router-dom": "^6.27.0",
-    "victory-native": "^41.9.0"
+    "victory-native": "^41.9.0",
+    "expo-linear-gradient": "~13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

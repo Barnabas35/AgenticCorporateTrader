@@ -54,6 +54,7 @@ def api_get_ticker_info(request_json):
         "low_price": ticker_snapshot.day.low,
         "volume": ticker_snapshot.day.volume,
         "change_percentage": ticker_snapshot.todays_change_percent,
+        "market": "stocks"
     }
 
     return {"ticker_info": ticker_info, "status": "Success"}

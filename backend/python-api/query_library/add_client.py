@@ -34,6 +34,12 @@ def q_add_client(request_json):
     # Get document ID
     doc_id = result[0].id
 
+    # Making sure user type is not fa
+    user_type = result[0].to_dict()["user_type"]
+
+    if user_type == "fa":
+        return {"status": "Fund Administrator cannot have clients."}
+
     # Making sure client with same name and user ID does not already exist
     result = (db.collection("clients").where(field_path="user_id", op_string="==", value=doc_id)
               .where(field_path="client_name", op_string="==", value=client_name).get())

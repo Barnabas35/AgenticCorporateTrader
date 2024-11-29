@@ -1,30 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 import { Line } from 'react-chartjs-2';
-import { Picker } from '@react-native-picker/picker'; // Updated import
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Picker } from '@react-native-picker/picker';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale } from 'chart.js';
+import 'chartjs-adapter-date-fns';
 
 // Register necessary components for Chart.js
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, TimeScale);
 
 interface Stock {
   symbol: string;
@@ -33,11 +16,7 @@ interface Stock {
   currency: string;
 }
 
-interface StockDetails {
-  symbol: string;
-  company_name: string;
-  price: number;
-  currency: string;
+interface StockDetails extends Stock {
   change_percentage: number;
   close_price: number;
   company_description: string;
@@ -57,12 +36,19 @@ const StockSearch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessionToken] = useSessionToken();
-  const [historicalData, setHistoricalData] = useState<number[]>([]); // Placeholder for historical prices
-  const [interval, setInterval] = useState<string>('day'); // Default interval
+  const [historicalData, setHistoricalData] = useState<{ labels: string[], prices: number[] }>({ labels: [], prices: [] });
+  const [historyWindow, setHistoryWindow] = useState<string>('month');
+  const [interval, setIntervalValue] = useState<string>('day');
 
   useEffect(() => {
     fetchTopStocks();
   }, []);
+
+  useEffect(() => {
+    if (selectedStock) {
+      fetchStockAggregates(selectedStock.symbol);
+    }
+  }, [interval, historyWindow, selectedStock]);  
 
   const fetchTopStocks = async (limit = 10) => {
     setLoading(true);
@@ -70,7 +56,6 @@ const StockSearch: React.FC = () => {
     try {
       const response = await fetch(`https://tradeagently.dev/get-top-stocks?limit=${limit}`);
       const data = await response.json();
-
       if (data.status === 'Success') {
         setTopStocks(data.ticker_details);
       } else {
@@ -94,22 +79,25 @@ const StockSearch: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      const requestBody = {
+        search_query: query,
+        limit: 5,
+        session_token: sessionToken || '',
+        show_price: true,
+      };
+      console.log('Sending search request:', requestBody);
+
       const response = await fetch('https://tradeagently.dev/text-search-stock', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          search_query: query,
-          limit: 5,
-          session_token: sessionToken || '',
-          show_price: true,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
-
+      console.log('Search response:', data);
       if (data.status === 'Success') {
         setSearchResults(data.ticker_details);
-        setSelectedStock(null); // Clear previous stock details
+        setSelectedStock(null);
       } else {
         setError(data.message || 'No matching stocks found');
       }
@@ -125,13 +113,17 @@ const StockSearch: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      const requestBody = { ticker, session_token: sessionToken || '' };
+      console.log('Fetching stock details with request:', requestBody);
+
       const response = await fetch('https://tradeagently.dev/get-ticker-info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticker, session_token: sessionToken || '' }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
+      console.log('Stock details response:', data);
       if (data.status === 'Success') {
         setSelectedStock(data.ticker_info);
         fetchStockAggregates(data.ticker_info.symbol);
@@ -149,32 +141,64 @@ const StockSearch: React.FC = () => {
   const fetchStockAggregates = async (ticker: string) => {
     setLoading(true);
     setError(null);
-    const startDate = '2024-01-01'; // Placeholder date
-    const endDate = '2024-12-31'; // Placeholder date
+    let startDate = '';
+    const endDate = new Date().toISOString().split('T')[0];
+    switch (historyWindow) {
+      case 'hour':
+        setIntervalValue('minute');
+        startDate = new Date(Date.now() - 3600 * 1000).toISOString();
+        break;
+      case 'day':
+        setIntervalValue('hour');
+        startDate = new Date(Date.now() - 86400 * 1000).toISOString().split('T')[0];
+        break;
+      case 'week':
+        setIntervalValue('day');
+        startDate = new Date(Date.now() - 7 * 86400 * 1000).toISOString().split('T')[0];
+        break;
+      case 'month':
+        setIntervalValue('day');
+        startDate = new Date(Date.now() - 30 * 86400 * 1000).toISOString().split('T')[0];
+        break;
+      case 'year':
+        setIntervalValue('day');
+        startDate = new Date(Date.now() - 30 * 86400 * 1000 * 12).toISOString().split('T')[0];
+        break;
+      default:
+        startDate = '2024-01-01';
+    }
+
+    const requestBody = {
+      ticker,
+      session_token: sessionToken,
+      start_date: startDate,
+      end_date: endDate,
+      interval,
+      limit: 100,
+    };
+    console.log('Fetching stock aggregates with request:', requestBody);
 
     try {
       const response = await fetch('https://tradeagently.dev/get-ticker-aggregates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticker,
-          session_token: sessionToken || '',
-          start_date: startDate,
-          end_date: endDate,
-          interval, // Interval is dynamic based on user selection
-          limit: 100,
-        }),
+        body: JSON.stringify(requestBody),
       });
-
       const data = await response.json();
-      if (data.status === 'Success' && data.aggregates) {
-        // Prepare data for chart
-        const labels = data.aggregates.map((item: any) => new Date(item.t).toLocaleDateString());
-        const prices = data.aggregates.map((item: any) => item.c); // Use closing price for the graph
+      console.log('Stock aggregates response:', data);
 
-        setHistoricalData(prices);
+      if (data.status === 'Success' && Array.isArray(data.ticker_info)) {
+        const validData = data.ticker_info.filter((item: any) => item.close !== undefined);
+        setHistoricalData({
+          labels: validData.map((item: any) =>
+            historyWindow === 'hour'
+              ? new Date(item.t).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+              : new Date(item.t).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+          ),
+          prices: validData.map((item: any) => item.close), // Using close price for the chart
+        });
       } else {
-        setError('Failed to fetch stock aggregates');
+        setError(data.message || 'Failed to fetch stock aggregates');
       }
     } catch (error) {
       console.error('Error fetching stock aggregates:', error);
@@ -185,10 +209,7 @@ const StockSearch: React.FC = () => {
   };
 
   const renderStockItem = ({ item }: { item: Stock }) => (
-    <TouchableOpacity
-      style={styles.stockItem}
-      onPress={() => fetchStockDetails(item.symbol)}
-    >
+    <TouchableOpacity style={styles.stockItem} onPress={() => fetchStockDetails(item.symbol)}>
       <Text style={styles.stockSymbol}>{item.symbol}</Text>
       <Text>{item.company_name}</Text>
       <Text style={styles.priceText}>{item.price} {item.currency}</Text>
@@ -203,12 +224,9 @@ const StockSearch: React.FC = () => {
         value={searchQuery}
         onChangeText={handleSearch}
       />
-
       {error && <Text style={styles.errorText}>{error}</Text>}
-      
       <Text style={styles.sectionTitle}>Top Stocks</Text>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
-
       {selectedStock ? (
         <View style={styles.stockDetails}>
           <Text style={styles.stockSymbol}>{selectedStock.symbol} - {selectedStock.company_name}</Text>
@@ -217,56 +235,25 @@ const StockSearch: React.FC = () => {
           <Text style={styles.detailText}>Open: {selectedStock.open_price}, High: {selectedStock.high_price}, Low: {selectedStock.low_price}</Text>
           <Text style={styles.detailText}>Volume: {selectedStock.volume}</Text>
           <Text style={styles.detailText}>Employee Count: {selectedStock.employee_count}</Text>
-
-          {/* Interval Picker */}
+          <Text style={styles.sectionTitle}>Historical Data</Text>
           <Picker
-            selectedValue={interval}
-            style={styles.picker}
-            onValueChange={(itemValue) => setInterval(itemValue)}
+            selectedValue={historyWindow}
+            onValueChange={(value) => setHistoryWindow(value)}
           >
-            <Picker.Item label="Hourly" value="hour" />
-            <Picker.Item label="Daily" value="day" />
-            <Picker.Item label="Weekly" value="week" />
-            <Picker.Item label="Monthly" value="month" />
+            <Picker.Item label="Last Hour" value="hour" />
+            <Picker.Item label="Last Day" value="day" />
+            <Picker.Item label="Last Week" value="week" />
+            <Picker.Item label="Last Month" value="month" />
+            <Picker.Item label="Last Year" value="year" />
           </Picker>
-
-          {/* Line Chart for historical prices */}
-          <View style={styles.chartContainer}>
-            <Line
-              data={{
-                labels: historicalData.length > 0 ? historicalData.map((_, index) => index + 1) : [], // Placeholder labels
-                datasets: [
-                  {
-                    label: `Price in ${selectedStock.currency}`,
-                    data: historicalData,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderWidth: 1,
-                    fill: true,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                plugins: {
-                  title: {
-                    display: true,
-                    text: `${selectedStock.symbol} Price History`,
-                  },
-                },
-                scales: {
-                  x: {
-                    type: 'linear',
-                    position: 'bottom',
-                  },
-                },
-              }}
-            />
-          </View>
+          <Line
+            data={{ labels: historicalData.labels, datasets: [{ label: 'Price', data: historicalData.prices, borderColor: 'rgba(75,192,192,1)', borderWidth: 1, fill: false }] }}
+            options={{ responsive: true, plugins: { title: { display: true, text: 'Price History' } }, scales: { x: { type: historyWindow === 'hour' ? 'time' : 'category', time: { unit: historyWindow === 'hour' ? 'minute' : 'day' } } } }}
+          />
         </View>
       ) : (
         <FlatList
-          data={searchQuery.trim() ? searchResults : topStocks}
+          data={searchQuery ? searchResults : topStocks}
           renderItem={renderStockItem}
           keyExtractor={(item) => item.symbol}
         />
@@ -278,70 +265,49 @@ const StockSearch: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f4f4f4',
+    padding: 16,
     width: '100%',
   },
   searchInput: {
-    padding: 10,
+    height: 40,
+    borderColor: 'gray',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  stockItem: {
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-  stockSymbol: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  priceText: {
-    fontSize: 16,
-    color: '#007bff',
-  },
-  stockDetails: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-  description: {
-    marginVertical: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  detailText: {
-    marginVertical: 4,
-    fontSize: 16,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  chartContainer: {
-    width: '100%',
-    height: 300,
-    marginVertical: 20,
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   errorText: {
     color: 'red',
-    textAlign: 'center',
-    marginVertical: 10,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  stockItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  stockSymbol: {
+    fontWeight: 'bold',
+  },
+  priceText: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  stockDetails: {
+    padding: 16,
+  },
+  description: {
+    marginVertical: 8,
+    fontStyle: 'italic',
+  },
+  detailText: {
+    marginVertical: 4,
+  },
+  picker: {
+    marginVertical: 16,
   },
 });
 

@@ -131,13 +131,18 @@ Body (JSON):
   "session_token": "string"
 }
 Response: JSON - List of clients and status message
-Example:
+Example 1 (when fm):
 {
   "clients": [
-    {"client_name": "client1", "id": "AgSO2FnIP46FA"},
-    {"client_name": "client2", "id": "AgSO2FnIP46FB"}
+    {"client_name": "client1", "client_id": "AgSO2FnIP46FA"},
+    {"client_name": "client2", "client_id": "AgSO2FnIP46FB"}
   ],
   "status": "Success"
+}
+Example 2 (when fa):
+{
+  "clients": [{"client_name": "Fund Administrator", "client_id": "AgSO2FnIP46FA"}],   // If user type is "fa" then the user id is returned
+  "status": "Success"                                                                 // This user id should be used as client id in other requests
 }
 
 
@@ -196,7 +201,7 @@ Example:
     {"issue_subject": "subject2",
      "user_id": "AgSO2FnIP46FB",
      "issue_description": "description2",
-     "issue_status": "closed",
+     "issue_status": "resolved",
      "ticket_id": "AgSO2FnIP46FB",
      "unix_timestamp": 1234567890}
   ],
@@ -550,6 +555,22 @@ Example:
 }
 
 
+# Get balance -----------------------------------------
+URL & Method: POST /get-balance
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Balance and status message
+Example:
+{
+  "balance": 123.45,       // Balance in USD
+  "status": "Success"
+}
+
+
 ### Get user list as admin ------------------------------
 URL & Method: POST /get-user-list
 Headers:
@@ -601,15 +622,125 @@ Example:
 
 ### Admin delete user -----------------------------------
 URL & Method: POST /admin-delete-user
+{
+  "session_token": "string",        // User session token of an admin
+  "id": "string"                    // User ID
+}
+Example:
+{
+  "status": "Success"
+}
+
+
+### Add balance -----------------------------------------
+URL & Method: POST /add-balance
 Headers:
  - Content-Type: application/json
 Body (JSON):
 {
-  "session_token": "string",        // User session token of an admin
-  "id": "string"                    // User ID
+  "session_token": "string",
+  "usd_quantity": 123.45        // Amount to add in USD
 }
 Response: JSON - Status message
 Example:
 {
   "status": "Success"
+}
+
+
+### Purchase asset --------------------------------------
+URL & Method: POST /purchase-asset
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "usd_quantity": "float",       // Amount to purchase in USD
+  "market": "string"             // "stocks" or "crypto"
+  "ticker": "string"             // Ticker symbol with no -USD suffix
+  "client_id": "string"          // Client id (or user id for "fa" user type)
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get user assets -------------------------------------
+URL & Method: POST /get-user-assets
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+  "client_id": "string"          // Client id (or user id for "fa" user type)
+  "market": "string"             // "stocks" or "crypto"
+}
+Response: JSON - List of assets and status message
+Example:
+{
+    "status": "Success",
+    "ticker_symbols": [
+        "ETH",
+        "BTC"
+    ]
+}
+
+
+### Get asset -------------------------------------------
+URL & Method: POST /get-asset
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "market": "string",            // "stocks" or "crypto"
+  "ticker": "string".            // Ticker symbol with no -USD suffix
+  "client_id": "string"          // Client id (or user id for "fa" user type)
+}
+Response: JSON - Asset info and status message
+Example:
+{
+    "status": "Success",
+    "total_asset_quantity": 0.07044734061289187     // Maximum of 5 decimal places (0.00001)
+}
+
+
+### Sell asset ------------------------------------------
+URL & Method: POST /sell-asset
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "asset_quantity": "float",     // Amount to sell in asset quantity (0.01)
+  "market": "string"             // "stocks" or "crypto"
+  "ticker": "string"             // Ticker symbol with no -USD suffix
+  "client_id": "string"          // Client id (or user id for "fa" user type)
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get asset report ------------------------------------
+URL & Method: POST /get-asset-report
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "market": "string",            // "stocks" or "crypto"
+  "client_id": "string"          // Client id (or user id for "fa" user type)
+  "ticker_symbol": "string"      // Ticker symbol with no -USD suffix
+}
+Response: JSON - Asset report and status message
+Example:
+{
+    "profit": -0.006719999999999615,    // Profit in USD over all transactions including past ones already withdrawn
+    "status": "Success",
+    "total_usd_invested": 10            // USD invested - withdrawn
 }
