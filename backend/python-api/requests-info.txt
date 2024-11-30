@@ -744,3 +744,39 @@ Example:
     "status": "Success",
     "total_usd_invested": 10            // USD invested - withdrawn
 }
+
+
+### Exchange tokens -------------------------------------
+URL & Method: POST /exchange-tokens
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "auth_token": "string"               // Auth token from firebase
+}
+Response: JSON - Session token and status message
+Example 1 (When user already exists):
+{
+    "session_token": "yh1vtDb71lexRhXJJW2gnQhzv",
+    "status": "Success"
+}
+Example 2 (When user does not exist):
+{
+    "status": "Success: Register User"
+}
+
+
+### Register with token ---------------------------------
+URL & Method: POST /register-with-token
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "auth_token": "string",              // Auth token from firebase
+  "user_type": "string"                // "fa" or "fm"
+}
+Response: JSON - Session token and status message
+Example:
+{
+    "status": "Success"
+}

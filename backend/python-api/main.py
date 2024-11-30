@@ -265,6 +265,19 @@ def get_asset_report():
     from query_library.get_asset_report import q_get_asset_report
     return jsonify(q_get_asset_report(request.json)), 200
 
+
+# Exchange tokens
+@app.route("/exchange-tokens", methods=["POST"])
+def exchange_tokens():
+    from query_library.exchange_tokens import q_exchange_tokens
+    return jsonify(q_exchange_tokens(request.json)), 200
+
+
+# Register with token
+@app.route("/register-with-token", methods=["POST"])
+def register_with_token():
+    from query_library.register_with_token import q_register_with_token
+    return jsonify(q_register_with_token(request.json)), 200
   
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=80)
