@@ -1,7 +1,9 @@
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+import smtplib
 
-def send_email(dest_email, from_email, subject, body):
+
+def send_email_aws(dest_email, from_email, subject, body):
 
     try:
         client = boto3.client(
@@ -34,3 +36,19 @@ def send_email(dest_email, from_email, subject, body):
         return {"status": "Partial AWS credentials found."}
     except Exception as e:
         return {"status": str(e)}
+
+
+def send_email_smtp(dest_email, subject, body):
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login("tradeagently@gmail.com", "kjlnxgxcvhwefmep")
+        message = 'Subject: {}\n\n{}'.format(subject, body)
+        server.sendmail("tradeagently@gmail.com", dest_email, message)
+        server.quit()
+
+    except Exception as e:
+        return {"status": str(e)}
+
+    return {"status": "Success"}
