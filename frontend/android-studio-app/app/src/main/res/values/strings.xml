@@ -1,4 +1,20 @@
 <resources>
     <string name="app_name">TradeAgently</string>
     <string name="remove_client">Remove Client</string>
+<string-array name="interval_options">
+    <item>1m</item>
+    <item>1h</item>
+    <item>1w</item>
+    <item>1mo</item>
+    <item>1y</item>
+</string-array>
+    <string-array name="int_options">
+        <item>minute</item>
+        <item>hour</item>
+        <item>day</item>
+        <item>week</item>
+        <item>month</item>
+        <item>quarter</item>
+        <item>year</item>
+    </string-array>
 </resources>
