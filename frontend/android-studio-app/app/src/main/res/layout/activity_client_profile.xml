@@ -29,19 +29,54 @@
     </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- Content Placeholder -->
-    <TextView
-        android:id="@+id/contentPlaceholder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Client Details Go Here"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/assetsToolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="#E0E0E0"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/assetsToolbar">
+
+        <!-- Stock Button -->
+        <Button
+            android:id="@+id/buttonStock"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/btn_bg"
+            android:text="STOCK"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+
+        <!-- Crypto Button -->
+        <Button
+            android:id="@+id/buttonCrypto"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_bg"
+            android:text="CRYPTO"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewClientAssets"
+        android:layout_width="414dp"
+        android:layout_height="558dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/assetsToolbar"
+        app:layout_constraintVertical_bias="1.0" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

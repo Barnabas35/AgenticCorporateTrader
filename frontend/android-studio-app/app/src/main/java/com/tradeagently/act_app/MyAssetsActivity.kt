@@ -232,9 +232,13 @@ class MyAssetsActivity : AppCompatActivity() {
 
                 holder.itemView.setOnClickListener {
                     val selectedClient = clients[position]
-                    client_id = selectedClient.client_id
-                    client_name = selectedClient.client_name
-                    fetchUserAssetsForSelf()
+
+                    // Start ClientProfileActivity
+                    val intent = Intent(this@MyAssetsActivity, ClientProfileActivity::class.java)
+                    intent.putExtra("client_id", selectedClient.client_id)
+                    intent.putExtra("client_name", selectedClient.client_name)
+                    startActivity(intent)
+                    overridePendingTransition(0, 0)
                 }
             }
 
