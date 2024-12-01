@@ -102,16 +102,18 @@ class MyAssetsActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
+        val buttonContainer: View = findViewById(R.id.buttonContainer)
         if (userType == "fm") {
-            // Hide Stock and Crypto buttons for FM
-            buttonStock.visibility = View.GONE
-            buttonCrypto.visibility = View.GONE
+            // Hide the button container for FM users
+            buttonContainer.visibility = View.GONE
         } else {
-            // Set STOCK as the default selected option for FA and Admin
+            // Show the button container and set STOCK as the default selected option for FA and Admin
+            buttonContainer.visibility = View.VISIBLE
             setButtonSelected(buttonStock, true)
             setButtonSelected(buttonCrypto, false)
         }
     }
+
 
     private fun fetchInitialData() {
         // Fetch user balance

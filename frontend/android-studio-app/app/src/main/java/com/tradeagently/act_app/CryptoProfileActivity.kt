@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
 
@@ -43,6 +44,7 @@ class CryptoProfileActivity : AppCompatActivity() {
 
     private var userType: String = ""
     private var clientId: String = ""
+    private var clients: List<Client> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -311,7 +313,60 @@ class CryptoProfileActivity : AppCompatActivity() {
         lineChart.invalidate()
     }
 
+    // Open the buy dialog for crypto
     private fun openBuyDialog(ticker: String) {
+        if (userType == "fm") {
+            // Open buy dialog for Fund Managers
+            openBuyManagerDialog(ticker)
+        } else {
+            // Open regular buy dialog for other users
+            openRegularBuyDialog(ticker)
+        }
+    }
+
+    // Buy dialog for Fund Managers
+    private fun openBuyManagerDialog(ticker: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_buy_manager, null)
+        val clientSpinner = dialogView.findViewById<Spinner>(R.id.clientSpinner)
+
+        // Populate the spinner with client names
+        fetchClientList { clients ->
+            this.clients = clients // Save the client list
+            val clientNames = clients.map { it.client_name }
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, clientNames)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            clientSpinner.adapter = adapter
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Buy $ticker for Client")
+            .setView(dialogView)
+            .setPositiveButton("Buy") { _, _ ->
+                // Retrieve user inputs
+                val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuyManager)
+                val quantity = quantityInput.text.toString().toDoubleOrNull()
+                val selectedClient = clientSpinner.selectedItem?.toString()
+
+                if (quantity != null && selectedClient != null) {
+                    // Find the selected client and proceed with the transaction
+                    val client = clients.find { it.client_name == selectedClient }
+                    if (client != null) {
+                        executeBuyTransaction(ticker, quantity, client.client_id)
+                    } else {
+                        Toast.makeText(this, "Client not found. Please select a valid client.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "Invalid input. Please check your entries.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    // Buy dialog for regular users
+    private fun openRegularBuyDialog(ticker: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_buy, null)
         val dialog = AlertDialog.Builder(this)
             .setTitle("Buy $ticker")
@@ -320,7 +375,7 @@ class CryptoProfileActivity : AppCompatActivity() {
                 val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuy)
                 val quantity = quantityInput.text.toString().toDoubleOrNull()
                 if (quantity != null) {
-                    executeBuyTransaction(ticker, quantity)
+                    executeBuyTransaction(ticker, quantity, clientId)
                 } else {
                     Toast.makeText(this, "Invalid quantity.", Toast.LENGTH_SHORT).show()
                 }
@@ -331,66 +386,71 @@ class CryptoProfileActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun executeBuyTransaction(ticker: String, quantity: Double) {
+    // Execute the buy transaction
+    private fun executeBuyTransaction(ticker: String, quantity: Double, clientId: String) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
 
         if (sessionToken.isNullOrEmpty()) {
-            Toast.makeText(
-                this,
-                "Session token is missing. Please log in again.",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Ensure client_id is provided for Fund Administrators
-        if (userType == "fa" && clientId.isNullOrEmpty()) {
-            Toast.makeText(
-                this,
-                "Fund Administrator must select a client to purchase assets.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
+        // Debug logs for confirmation
+        Log.d("CryptoProfileActivity", "Executing Buy Transaction:")
+        Log.d("CryptoProfileActivity", "Ticker: $ticker")
+        Log.d("CryptoProfileActivity", "Quantity: $quantity")
+        Log.d("CryptoProfileActivity", "Client ID: $clientId")
+        Log.d("CryptoProfileActivity", "Session Token: $sessionToken")
 
         val request = PurchaseAssetRequest(
             session_token = sessionToken,
             usd_quantity = quantity,
             market = "crypto",
             ticker = ticker,
-            client_id = clientId ?: "" // Empty if not required
+            client_id = clientId
         )
 
         RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) {
-                    val message = response.body()?.status ?: "Unknown response"
-                    Toast.makeText(this@CryptoProfileActivity, message, Toast.LENGTH_SHORT).show()
-
-                    if (message.contains("Success", ignoreCase = true)) {
-                        Log.d("CryptoProfileActivity", "Purchase successful for $ticker")
-                    }
+                Log.d("CryptoProfileActivity", "Response code: ${response.code()}")
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@CryptoProfileActivity, "Successfully bought $ticker!", Toast.LENGTH_SHORT).show()
                 } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("CryptoProfileActivity", "Error Response: $errorBody")
                     Toast.makeText(
                         this@CryptoProfileActivity,
-                        "Failed to complete purchase.",
+                        "Failed to buy $ticker. Server response: $errorBody",
                         Toast.LENGTH_SHORT
                     ).show()
-                    Log.e(
-                        "CryptoProfileActivity",
-                        "Error response: ${response.errorBody()?.string()}"
-                    )
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Log.e("CryptoProfileActivity", "API call failed: ${t.message}")
-                Toast.makeText(
-                    this@CryptoProfileActivity,
-                    "Failed to connect. Please try again.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Log.e("CryptoProfileActivity", "API Failure: ${t.message}")
+                Toast.makeText(this@CryptoProfileActivity, "Failed to connect. Please try again.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // Fetch client list
+    private fun fetchClientList(callback: (List<Client>) -> Unit) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) return
+
+        RetrofitClient.apiService.getClientList(TokenRequest(sessionToken)).enqueue(object : Callback<ClientListResponse> {
+            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val clients = response.body()?.clients ?: emptyList()
+                    callback(clients)
+                }
+            }
+
+            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
+                Toast.makeText(this@CryptoProfileActivity, "Failed to fetch client list.", Toast.LENGTH_SHORT).show()
             }
         })
     }

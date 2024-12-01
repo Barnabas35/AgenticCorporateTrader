@@ -3,6 +3,7 @@ package com.tradeagently.act_app
 import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
@@ -52,6 +53,11 @@ class ClientProfileActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewClientAssets)
         buttonStock = findViewById(R.id.buttonStock)
         buttonCrypto = findViewById(R.id.buttonCrypto)
+        val assetsInfoTextView: TextView = findViewById(R.id.assetsInfoTextView)
+
+        // Set client name
+        clientNameTextView.text = clientName
+        assetsInfoTextView.text = "Assets owned by $clientName"
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -103,6 +109,22 @@ class ClientProfileActivity : AppCompatActivity() {
     }
 
     private fun updateRecyclerViewWithAssets(assets: List<String>) {
+        val noAssetsTextView: TextView = findViewById(R.id.noAssetsTextView) // Find the TextView for no assets message
+
+        if (assets.isEmpty()) {
+            // Show the no assets message and hide the RecyclerView
+            noAssetsTextView.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+
+            // Set the text based on the selected market
+            val selectedMarket = if (buttonStock.isSelected) "stocks" else "crypto"
+            noAssetsTextView.text = "This client doesn't own any $selectedMarket."
+        } else {
+            // Hide the no assets message and show the RecyclerView
+            noAssetsTextView.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+        }
+
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                 val view = layoutInflater.inflate(R.layout.asset_item, parent, false)
@@ -133,7 +155,7 @@ class ClientProfileActivity : AppCompatActivity() {
 
                     override fun onFailure(call: Call<AssetResponse>, t: Throwable) {
                         assetQuantity.text = "Owned: 0.00000"
-                        Log.e("API_ERROR", "Error fetching $selectedMarket asset quantity: ${t.message}")
+                        Log.e("API_ERROR", "Error fetching asset quantity: ${t.message}")
                     }
                 })
 

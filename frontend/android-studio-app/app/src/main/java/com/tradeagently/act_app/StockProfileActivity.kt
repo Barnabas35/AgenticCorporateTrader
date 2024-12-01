@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
@@ -46,6 +47,8 @@ class StockProfileActivity : AppCompatActivity() {
 
     private var userType: String = ""
     private var clientId: String = ""
+    private var clients: List<Client> = emptyList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -330,6 +333,59 @@ class StockProfileActivity : AppCompatActivity() {
     }
 
     private fun openBuyDialog(ticker: String) {
+        if (userType == "fm") {
+            // Open dialog_buy_manager for fund managers
+            openBuyManagerDialog(ticker)
+        } else {
+            // Open dialog_buy for others
+            openRegularBuyDialog(ticker)
+        }
+    }
+
+    // Method to open dialog_buy_manager
+    private fun openBuyManagerDialog(ticker: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_buy_manager, null)
+        val clientSpinner = dialogView.findViewById<Spinner>(R.id.clientSpinner)
+
+        // Populate the spinner with client names
+        fetchClientList { clients ->
+            this.clients = clients // Save clients to the class property for later use
+            val clientNames = clients.map { it.client_name }
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, clientNames)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            clientSpinner.adapter = adapter
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Buy $ticker for Client")
+            .setView(dialogView)
+            .setPositiveButton("Buy") { _, _ ->
+                // Retrieve user input
+                val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuyManager)
+                val quantity = quantityInput.text.toString().toDoubleOrNull()
+                val selectedClient = clientSpinner.selectedItem?.toString()
+
+                if (quantity != null && selectedClient != null) {
+                    // Find the selected client from the clients list
+                    val client = clients.find { it.client_name == selectedClient }
+                    if (client != null) {
+                        // Execute transaction with the correct client_id
+                        executeBuyTransaction(ticker, quantity, client.client_id)
+                    } else {
+                        Toast.makeText(this, "Selected client not found.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "Invalid input. Please check your entries.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    // Method to open dialog_buy for other user types
+    private fun openRegularBuyDialog(ticker: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_buy, null)
         val dialog = AlertDialog.Builder(this)
             .setTitle("Buy $ticker")
@@ -338,7 +394,7 @@ class StockProfileActivity : AppCompatActivity() {
                 val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuy)
                 val quantity = quantityInput.text.toString().toDoubleOrNull()
                 if (quantity != null) {
-                    executeBuyTransaction(ticker, quantity)
+                    executeBuyTransaction(ticker, quantity, clientId)
                 } else {
                     Toast.makeText(this, "Invalid quantity.", Toast.LENGTH_SHORT).show()
                 }
@@ -349,7 +405,8 @@ class StockProfileActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun executeBuyTransaction(ticker: String, quantity: Double) {
+    // Execute transaction with client ID
+    private fun executeBuyTransaction(ticker: String, quantity: Double, clientId: String) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
 
@@ -362,48 +419,40 @@ class StockProfileActivity : AppCompatActivity() {
             return
         }
 
-        // Ensure client_id is provided for Fund Administrators
-        if (userType == "fa" && clientId.isNullOrEmpty()) {
-            Toast.makeText(
-                this,
-                "Fund Administrator must select a client to purchase assets.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
+        // Debug logs for parameters
+        Log.d("StockProfileActivity", "Executing Buy Transaction:")
+        Log.d("StockProfileActivity", "Ticker: $ticker")
+        Log.d("StockProfileActivity", "Quantity: $quantity")
+        Log.d("StockProfileActivity", "Client ID: $clientId")
+        Log.d("StockProfileActivity", "Session Token: $sessionToken")
 
         val request = PurchaseAssetRequest(
             session_token = sessionToken,
             usd_quantity = quantity,
             market = "stocks",
             ticker = ticker,
-            client_id = clientId ?: "" // Empty if not required
+            client_id = clientId
         )
 
         RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) {
-                    val message = response.body()?.status ?: "Unknown response"
-                    Toast.makeText(this@StockProfileActivity, message, Toast.LENGTH_SHORT).show()
-
-                    if (message.contains("Success", ignoreCase = true)) {
-                        Log.d("CryptoProfileActivity", "Purchase successful for $ticker")
-                    }
+                Log.d("StockProfileActivity", "Response code: ${response.code()}")
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Log.d("StockProfileActivity", "Buy Successful: ${response.body()}")
+                    Toast.makeText(this@StockProfileActivity, "Successfully bought $ticker!", Toast.LENGTH_SHORT).show()
                 } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("StockProfileActivity", "Error Response: $errorBody")
                     Toast.makeText(
                         this@StockProfileActivity,
-                        "Failed to complete purchase.",
+                        "Failed to buy $ticker. Server response: $errorBody",
                         Toast.LENGTH_SHORT
                     ).show()
-                    Log.e(
-                        "CryptoProfileActivity",
-                        "Error response: ${response.errorBody()?.string()}"
-                    )
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Log.e("CryptoProfileActivity", "API call failed: ${t.message}")
+                Log.e("StockProfileActivity", "API Failure: ${t.message}")
                 Toast.makeText(
                     this@StockProfileActivity,
                     "Failed to connect. Please try again.",
@@ -412,4 +461,26 @@ class StockProfileActivity : AppCompatActivity() {
             }
         })
     }
+
+    // Fetch client list
+    private fun fetchClientList(callback: (List<Client>) -> Unit) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) return
+
+        RetrofitClient.apiService.getClientList(TokenRequest(sessionToken)).enqueue(object : Callback<ClientListResponse> {
+            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val clients = response.body()?.clients ?: emptyList()
+                    callback(clients)
+                }
+            }
+
+            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
+                Toast.makeText(this@StockProfileActivity, "Failed to fetch client list.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 }
