@@ -735,7 +735,7 @@ Body (JSON):
   "session_token": "string",
   "market": "string",            // "stocks" or "crypto"
   "client_id": "string"          // Client id (or user id for "fa" user type)
-  "ticker_symbol": "string"      // Ticker symbol with no -USD suffix
+  "ticker": "string"      // Ticker symbol with no -USD suffix
 }
 Response: JSON - Asset report and status message
 Example:
