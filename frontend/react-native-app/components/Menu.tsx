@@ -19,6 +19,7 @@ const Menu: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState<boolean>(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -42,8 +43,36 @@ const Menu: React.FC = () => {
       }
     };
 
+    const fetchBalance = async () => {
+      try {
+        const response = await fetch('https://tradeagently.dev/get-balance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_token: sessionToken }),
+        });
+
+        const data = await response.json();
+        if (data.status === 'Success') {
+          setBalance(data.balance);
+        } else {
+          console.error('Failed to fetch balance');
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
+
     if (sessionToken) {
       fetchUserType();
+      fetchBalance();
+
+      const intervalId = setInterval(() => {
+        fetchBalance();
+      }, 10000); // Every 10 seconds
+
+      return () => clearInterval(intervalId); // Clear the interval when the component unmounts
     }
 
     const handleResize = () => {
@@ -73,6 +102,11 @@ const Menu: React.FC = () => {
           />
         </NavLink>
 
+        {/* Display Balance */}
+        {balance !== null && (
+          <Text style={styles.balanceText}>Balance: ${balance.toFixed(2)}</Text>
+        )}
+
         {/* Mobile View - Burger Menu */}
         {isMobileView ? (
           <TouchableOpacity
@@ -82,7 +116,6 @@ const Menu: React.FC = () => {
             <FontAwesome name="bars" size={32} color="white" />
             {isMenuOpen && (
               <ScrollView style={styles.dropdownMenu}>
-                
                 {sessionToken ? (
                   <>
                     {userType === 'admin' && (
@@ -94,7 +127,6 @@ const Menu: React.FC = () => {
                       >
                         <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
                       </NavLink>
-                      
                     )}
                     <View style={styles.spacer} />
                     {userType === 'fa' && (
@@ -232,7 +264,7 @@ const Menu: React.FC = () => {
               </>
             ) : (
               <NavLink
-                to="/login-register"
+                to="/login"
                 style={({ isActive }) =>
                   isActive ? styles.activeMenuItem : styles.menuItem
                 }
@@ -338,6 +370,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
+  },
+  balanceText: {
+    fontSize: 18,
+    color: 'white',
+    marginLeft: 20,
+    fontWeight: 'bold',
   },
   dropdownItem: {
     padding: 15,

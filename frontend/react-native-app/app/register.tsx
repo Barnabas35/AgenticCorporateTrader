@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Pressable } from 'react-native';
 import { useNavigate } from 'react-router-dom';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import firebaseApp, { auth } from '../components/firebase';
+
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -11,6 +14,60 @@ const Register: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const navigate = useNavigate();
+
+  const auth = getAuth(firebaseApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  const handleGoogleRegister = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      const user = result.user;
+
+      console.log('Google User:', user);
+      console.log('Google Access Token:', token);
+
+      // Send the user data to your backend server for validation and registration
+      const url = 'https://tradeagently.dev/register';
+      const bodyData = {
+        id_token: token,
+        user_type: userType,
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(bodyData),
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'Success') {
+          setModalMessage('Registration successful via Google!');
+          setModalVisible(true);
+          navigate('/'); // Navigate to login or another page after successful registration
+        } else if (data.status === 'Email already exists.') {
+          setModalMessage('Email already exists. Please use a different email.');
+          setModalVisible(true);
+        } else {
+          setModalMessage('Registration failed. Please try again.');
+          setModalVisible(true);
+        }
+      } catch (error) {
+        console.error('Error during registration:', error);
+        setModalMessage('An unexpected error occurred. Please try again.');
+        setModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Error during Google Sign-In:', error);
+      setModalMessage('An unexpected error occurred during Google Sign-In. Please try again.');
+      setModalVisible(true);
+    }
+  };
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
@@ -108,6 +165,10 @@ const Register: React.FC = () => {
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister}>
+        <Text style={styles.buttonText}>Register with Google</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigate('/login-register')} style={styles.loginLink}>
         <Text style={styles.loginText}>Already have an account? Login here</Text>
       </TouchableOpacity>
@@ -181,6 +242,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
+    marginBottom: 15,
+  },
+  googleButton: {
+    width: '40%',
+    height: 50,
+    backgroundColor: '#DB4437',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 15,
   },
   buttonText: {
     color: 'white',
