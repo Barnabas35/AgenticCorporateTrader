@@ -1,12 +1,13 @@
 package com.tradeagently.act_app
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -109,22 +110,6 @@ class ClientProfileActivity : AppCompatActivity() {
     }
 
     private fun updateRecyclerViewWithAssets(assets: List<String>) {
-        val noAssetsTextView: TextView = findViewById(R.id.noAssetsTextView) // Find the TextView for no assets message
-
-        if (assets.isEmpty()) {
-            // Show the no assets message and hide the RecyclerView
-            noAssetsTextView.visibility = View.VISIBLE
-            recyclerView.visibility = View.GONE
-
-            // Set the text based on the selected market
-            val selectedMarket = if (buttonStock.isSelected) "stocks" else "crypto"
-            noAssetsTextView.text = "This client doesn't own any $selectedMarket."
-        } else {
-            // Hide the no assets message and show the RecyclerView
-            noAssetsTextView.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
-        }
-
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                 val view = layoutInflater.inflate(R.layout.asset_item, parent, false)
@@ -136,12 +121,13 @@ class ClientProfileActivity : AppCompatActivity() {
                 val assetQuantity: TextView = holder.itemView.findViewById(R.id.assetQuantity)
                 val buyButton: Button = holder.itemView.findViewById(R.id.buyButton)
                 val sellButton: Button = holder.itemView.findViewById(R.id.sellButton)
+                val settingsButton: ImageButton = holder.itemView.findViewById(R.id.settingsButton)
 
                 val ticker = assets[position]
                 assetName.text = ticker
 
                 // Fetch and display asset quantity
-                val request = GetAssetRequest(sessionToken, selectedMarket, ticker, clientId)
+                val request = GetAssetRequest(session_token = sessionToken, market = selectedMarket, ticker = ticker, client_id = clientId)
                 RetrofitClient.apiService.getAsset(request).enqueue(object : Callback<AssetResponse> {
                     override fun onResponse(call: Call<AssetResponse>, response: Response<AssetResponse>) {
                         if (response.isSuccessful && response.body()?.status == "Success") {
@@ -159,9 +145,26 @@ class ClientProfileActivity : AppCompatActivity() {
                     }
                 })
 
-                // Set up Buy and Sell button actions
-                buyButton.setOnClickListener { openBuyDialog(ticker) }
-                sellButton.setOnClickListener { openSellDialog(ticker) }
+                buyButton.setOnClickListener {
+                    openBuyDialog(ticker)
+                }
+
+                sellButton.setOnClickListener {
+                    openSellDialog(ticker)
+                }
+
+                settingsButton.setOnClickListener {
+                    val options = arrayOf("Asset Report", "Asset Email Notification")
+                    val builder = AlertDialog.Builder(this@ClientProfileActivity)
+                    builder.setTitle("Settings")
+                    builder.setItems(options) { _, which ->
+                        when (which) {
+                            0 -> showAssetReport(ticker)
+                            1 -> showEmailNotificationSettings(ticker)
+                        }
+                    }
+                    builder.create().show()
+                }
             }
 
             override fun getItemCount() = assets.size
@@ -267,5 +270,79 @@ class ClientProfileActivity : AppCompatActivity() {
     private fun logApiError(response: Response<*>) {
         val errorBody = response.errorBody()?.string()
         Log.e("API_ERROR", "Status: ${response.code()}, Error: $errorBody")
+    }
+
+    private fun showAssetReport(ticker: String) {
+        val intent = Intent(this, AssetReportActivity::class.java)
+        intent.putExtra("session_token", sessionToken)
+        intent.putExtra("ticker", ticker)
+        intent.putExtra("market", selectedMarket)
+        intent.putExtra("client_id", clientId)
+        startActivity(intent)
+        overridePendingTransition(0, 0)
+    }
+
+    private fun showEmailNotificationSettings(ticker: String) {
+        // Inflate the dialog layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_price_alert, null)
+        val tickerTextView: TextView = dialogView.findViewById(R.id.tickerTextView)
+        val priceInput: EditText = dialogView.findViewById(R.id.priceInput)
+        val setAlertButton: Button = dialogView.findViewById(R.id.setAlertButton)
+
+        // Set the ticker in the TextView
+        tickerTextView.text = "Ticker: $ticker"
+
+        // Create and show the dialog
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Set Price Alert")
+            .setView(dialogView)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+
+        setAlertButton.setOnClickListener {
+            val price = priceInput.text.toString().toDoubleOrNull()
+
+            if (price != null && price > 0) {
+                dialog.dismiss()
+                setPriceAlert(ticker, price)
+            } else {
+                Toast.makeText(this, "Please enter a valid price.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun setPriceAlert(ticker: String, price: Double) {
+        if (sessionToken.isEmpty()) {
+            Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create the API request
+        val request = SetPriceAlertRequest(
+            session_token = sessionToken,
+            ticker = ticker,
+            price = price,
+            market = if (buttonStock.isSelected) "stocks" else "crypto"
+        )
+
+        // Send the request
+        RetrofitClient.apiService.createPriceAlert(request).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@ClientProfileActivity, "Price alert set successfully for $ticker!", Toast.LENGTH_SHORT).show()
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("PriceAlert", "Error: $errorBody")
+                    Toast.makeText(this@ClientProfileActivity, "Failed to set price alert. Try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("PriceAlert", "API Failure: ${t.message}")
+                Toast.makeText(this@ClientProfileActivity, "Failed to connect. Please try again.", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

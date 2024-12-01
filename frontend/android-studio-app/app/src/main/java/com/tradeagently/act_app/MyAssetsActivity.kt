@@ -1,6 +1,7 @@
 package com.tradeagently.act_app
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,10 +37,8 @@ class MyAssetsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_assets)
 
-        // Set up the bottom navigation to handle navigation between activities
         NavigationHelper.setupBottomNavigation(this, R.id.nav_my_assets)
 
-        // Get session token
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         sessionToken = prefs.getString("session_token", "") ?: ""
 
@@ -48,25 +48,21 @@ class MyAssetsActivity : AppCompatActivity() {
             return
         }
 
-        // Initialize Views
         recyclerView = findViewById(R.id.recyclerViewAssets)
         userBalanceTextView = findViewById(R.id.userBalance)
         addBalanceButton = findViewById(R.id.addBalanceButton)
         buttonStock = findViewById(R.id.buttonStock)
         buttonCrypto = findViewById(R.id.buttonCrypto)
 
-        // Initialize RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Fetch user type and proceed with fetching data
+        fetchUserBalance()
         fetchUserType()
 
-        // Add balance button
         addBalanceButton.setOnClickListener {
             navigateToAddBalance()
         }
 
-        // Set up button listeners for FA/Admin
         buttonStock.setOnClickListener {
             setButtonSelected(buttonStock, true)
             setButtonSelected(buttonCrypto, false)
@@ -83,20 +79,31 @@ class MyAssetsActivity : AppCompatActivity() {
     private fun fetchUserType() {
         val request = TokenRequest(sessionToken)
         RetrofitClient.apiService.getUserType(request).enqueue(object : Callback<UserTypeResponse> {
-            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
+            override fun onResponse(
+                call: Call<UserTypeResponse>,
+                response: Response<UserTypeResponse>
+            ) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     userType = response.body()?.user_type ?: ""
                     setupUI()
                     fetchInitialData()
                 } else {
                     logApiError(response)
-                    Toast.makeText(this@MyAssetsActivity, "Failed to determine user type.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MyAssetsActivity,
+                        "Failed to determine user type.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
                 Log.e("API_ERROR", "Error fetching user type: ${t.message}")
-                Toast.makeText(this@MyAssetsActivity, "Error fetching user type.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MyAssetsActivity,
+                    "Error fetching user type.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
     }
@@ -104,10 +111,8 @@ class MyAssetsActivity : AppCompatActivity() {
     private fun setupUI() {
         val buttonContainer: View = findViewById(R.id.buttonContainer)
         if (userType == "fm") {
-            // Hide the button container for FM users
             buttonContainer.visibility = View.GONE
         } else {
-            // Show the button container and set STOCK as the default selected option for FA and Admin
             buttonContainer.visibility = View.VISIBLE
             setButtonSelected(buttonStock, true)
             setButtonSelected(buttonCrypto, false)
@@ -116,14 +121,10 @@ class MyAssetsActivity : AppCompatActivity() {
 
 
     private fun fetchInitialData() {
-        // Fetch user balance
-        fetchUserBalance()
-
-        // Fetch clients or assets based on user type
         when (userType) {
-            "fm" -> fetchClientList() // FM sees client list
-            "fa" -> fetchClientListAndSelectFirstClient() // FA automatically fetches assets for the first client
-            else -> fetchUserAssetsForSelf() // Admin directly fetches user assets
+            "fm" -> fetchClientList()
+            "fa" -> fetchClientListAndSelectFirstClient()
+            else -> fetchUserAssetsForSelf()
         }
     }
 
@@ -135,7 +136,10 @@ class MyAssetsActivity : AppCompatActivity() {
     private fun fetchUserBalance() {
         val request = TokenRequest(sessionToken)
         RetrofitClient.apiService.getBalance(request).enqueue(object : Callback<BalanceResponse> {
-            override fun onResponse(call: Call<BalanceResponse>, response: Response<BalanceResponse>) {
+            override fun onResponse(
+                call: Call<BalanceResponse>,
+                response: Response<BalanceResponse>
+            ) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     val balance = response.body()?.balance ?: 0.0
                     userBalanceTextView.text = "Balance: $%.2f".format(balance)
@@ -146,52 +150,65 @@ class MyAssetsActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<BalanceResponse>, t: Throwable) {
                 Log.e("API_ERROR", "Error fetching balance: ${t.message}")
-                Toast.makeText(this@MyAssetsActivity, "Error fetching balance.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MyAssetsActivity, "Error fetching balance.", Toast.LENGTH_SHORT)
+                    .show()
             }
         })
     }
 
     private fun fetchClientList() {
         val request = TokenRequest(sessionToken)
-        RetrofitClient.apiService.getClientList(request).enqueue(object : Callback<ClientListResponse> {
-            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val clients = response.body()?.clients ?: listOf()
-                    updateRecyclerViewWithClients(clients)
-                } else {
-                    logApiError(response)
+        RetrofitClient.apiService.getClientList(request)
+            .enqueue(object : Callback<ClientListResponse> {
+                override fun onResponse(
+                    call: Call<ClientListResponse>,
+                    response: Response<ClientListResponse>
+                ) {
+                    if (response.isSuccessful && response.body()?.status == "Success") {
+                        val clients = response.body()?.clients ?: listOf()
+                        updateRecyclerViewWithClients(clients)
+                    } else {
+                        logApiError(response)
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
-                Log.e("API_ERROR", "Error fetching clients: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
+                    Log.e("API_ERROR", "Error fetching clients: ${t.message}")
+                }
+            })
     }
 
     private fun fetchClientListAndSelectFirstClient() {
         val request = TokenRequest(sessionToken)
-        RetrofitClient.apiService.getClientList(request).enqueue(object : Callback<ClientListResponse> {
-            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val clients = response.body()?.clients ?: listOf()
-                    val defaultClient = clients.firstOrNull()
-                    if (defaultClient != null) {
-                        client_id = defaultClient.client_id
-                        client_name = defaultClient.client_name
-                        fetchUserAssetsForSelf()
+        RetrofitClient.apiService.getClientList(request)
+            .enqueue(object : Callback<ClientListResponse> {
+                override fun onResponse(
+                    call: Call<ClientListResponse>,
+                    response: Response<ClientListResponse>
+                ) {
+                    if (response.isSuccessful && response.body()?.status == "Success") {
+                        val clients = response.body()?.clients ?: listOf()
+                        val defaultClient = clients.firstOrNull()
+                        if (defaultClient != null) {
+                            client_id = defaultClient.client_id
+                            client_name = defaultClient.client_name
+                            fetchUserAssetsForSelf()
+                        } else {
+                            Toast.makeText(
+                                this@MyAssetsActivity,
+                                "No clients available.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     } else {
-                        Toast.makeText(this@MyAssetsActivity, "No clients available.", Toast.LENGTH_SHORT).show()
+                        logApiError(response)
                     }
-                } else {
-                    logApiError(response)
                 }
-            }
 
-            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
-                Log.e("API_ERROR", "Error fetching clients: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
+                    Log.e("API_ERROR", "Error fetching clients: ${t.message}")
+                }
+            })
     }
 
     private fun fetchUserAssetsForSelf() {
@@ -203,27 +220,34 @@ class MyAssetsActivity : AppCompatActivity() {
         val selectedMarket = if (buttonStock.isSelected) "stocks" else "crypto"
         val request = GetUserAssetsRequest(sessionToken, client_id, selectedMarket)
 
-        RetrofitClient.apiService.getUserAssets(request).enqueue(object : Callback<UserAssetsResponse> {
-            override fun onResponse(call: Call<UserAssetsResponse>, response: Response<UserAssetsResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val assets = response.body()?.ticker_symbols ?: listOf()
-                    updateRecyclerViewWithAssets(assets)
-                } else {
-                    logApiError(response)
+        RetrofitClient.apiService.getUserAssets(request)
+            .enqueue(object : Callback<UserAssetsResponse> {
+                override fun onResponse(
+                    call: Call<UserAssetsResponse>,
+                    response: Response<UserAssetsResponse>
+                ) {
+                    if (response.isSuccessful && response.body()?.status == "Success") {
+                        val assets = response.body()?.ticker_symbols ?: listOf()
+                        updateRecyclerViewWithAssets(assets)
+                    } else {
+                        logApiError(response)
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<UserAssetsResponse>, t: Throwable) {
-                Log.e("API_ERROR", "Error fetching assets: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<UserAssetsResponse>, t: Throwable) {
+                    Log.e("API_ERROR", "Error fetching assets: ${t.message}")
+                }
+            })
     }
 
     private fun updateRecyclerViewWithClients(clients: List<Client>) {
         val displayableClients = clients.map { it.client_name }
 
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int
+            ): RecyclerView.ViewHolder {
                 val view = layoutInflater.inflate(R.layout.client_item, parent, false)
                 return object : RecyclerView.ViewHolder(view) {}
             }
@@ -251,9 +275,12 @@ class MyAssetsActivity : AppCompatActivity() {
     }
 
     private fun updateRecyclerViewWithAssets(assets: List<String>) {
-        displayableAssets = assets // Update the global list
+        displayableAssets = assets
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int
+            ): RecyclerView.ViewHolder {
                 val view = layoutInflater.inflate(R.layout.asset_item, parent, false)
                 return object : RecyclerView.ViewHolder(view) {}
             }
@@ -263,41 +290,57 @@ class MyAssetsActivity : AppCompatActivity() {
                 val assetQuantity: TextView = holder.itemView.findViewById(R.id.assetQuantity)
                 val buyButton: Button = holder.itemView.findViewById(R.id.buyButton)
                 val sellButton: Button = holder.itemView.findViewById(R.id.sellButton)
+                val settingsButton: ImageButton = holder.itemView.findViewById(R.id.settingsButton)
 
                 val ticker = displayableAssets[position]
                 assetName.text = ticker
 
-                // Fetch and display asset quantity
                 val request = GetAssetRequest(
                     session_token = sessionToken,
                     market = if (buttonStock.isSelected) "stocks" else "crypto",
                     ticker = ticker,
                     client_id = client_id
                 )
-                RetrofitClient.apiService.getAsset(request).enqueue(object : Callback<AssetResponse> {
-                    override fun onResponse(call: Call<AssetResponse>, response: Response<AssetResponse>) {
-                        if (response.isSuccessful && response.body()?.status == "Success") {
-                            val quantity = response.body()?.total_asset_quantity ?: 0.0
-                            assetQuantity.text = "Owned: %.5f".format(quantity)
-                        } else {
-                            assetQuantity.text = "Owned: 0.00000"
-                            logApiError(response)
+                RetrofitClient.apiService.getAsset(request)
+                    .enqueue(object : Callback<AssetResponse> {
+                        override fun onResponse(
+                            call: Call<AssetResponse>,
+                            response: Response<AssetResponse>
+                        ) {
+                            if (response.isSuccessful && response.body()?.status == "Success") {
+                                val quantity = response.body()?.total_asset_quantity ?: 0.0
+                                assetQuantity.text = "Owned: %.5f".format(quantity)
+                            } else {
+                                assetQuantity.text = "Owned: 0.00000"
+                                logApiError(response)
+                            }
                         }
-                    }
 
-                    override fun onFailure(call: Call<AssetResponse>, t: Throwable) {
-                        assetQuantity.text = "Owned: 0.00000"
-                        Log.e("API_ERROR", "Error fetching asset quantity: ${t.message}")
-                    }
-                })
+                        override fun onFailure(call: Call<AssetResponse>, t: Throwable) {
+                            assetQuantity.text = "Owned: 0.00000"
+                            Log.e("API_ERROR", "Error fetching asset quantity: ${t.message}")
+                        }
+                    })
 
-                // Set up buy and sell buttons
                 buyButton.setOnClickListener {
                     openBuyDialog(ticker)
                 }
 
                 sellButton.setOnClickListener {
                     openSellDialog(ticker)
+                }
+
+                settingsButton.setOnClickListener {
+                    val options = arrayOf("Asset Report", "Asset Email Notification")
+                    val builder = AlertDialog.Builder(this@MyAssetsActivity)
+                    builder.setTitle("Settings")
+                    builder.setItems(options) { _, which ->
+                        when (which) {
+                            0 -> showAssetReport(ticker)
+                            1 -> showEmailNotificationSettings(ticker)
+                        }
+                    }
+                    builder.create().show()
                 }
             }
 
@@ -370,17 +413,26 @@ class MyAssetsActivity : AppCompatActivity() {
         RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
-                    Toast.makeText(this@MyAssetsActivity, "Successfully bought $ticker!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MyAssetsActivity,
+                        "Successfully bought $ticker!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     fetchUserAssetsForSelf() // Refresh asset list
                 } else {
                     logApiError(response)
-                    Toast.makeText(this@MyAssetsActivity, "Failed to buy $ticker.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MyAssetsActivity,
+                        "Failed to buy $ticker.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Log.e("API_ERROR", "Error buying asset: ${t.message}")
-                Toast.makeText(this@MyAssetsActivity, "Error buying asset.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MyAssetsActivity, "Error buying asset.", Toast.LENGTH_SHORT)
+                    .show()
             }
         })
     }
@@ -397,17 +449,100 @@ class MyAssetsActivity : AppCompatActivity() {
         RetrofitClient.apiService.sellAsset(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
-                    Toast.makeText(this@MyAssetsActivity, "Successfully sold $ticker!", Toast.LENGTH_SHORT).show()
-                    fetchUserAssetsForSelf() // Refresh asset list
+                    Toast.makeText(
+                        this@MyAssetsActivity,
+                        "Successfully sold $ticker!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    fetchUserAssetsForSelf()
                 } else {
                     logApiError(response)
-                    Toast.makeText(this@MyAssetsActivity, "Failed to sell $ticker.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MyAssetsActivity,
+                        "Failed to sell $ticker.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Log.e("API_ERROR", "Error selling asset: ${t.message}")
-                Toast.makeText(this@MyAssetsActivity, "Error selling asset.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MyAssetsActivity, "Error selling asset.", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        })
+    }
+
+    private fun showAssetReport(ticker: String) {
+        val intent = Intent(this, AssetReportActivity::class.java)
+        intent.putExtra("session_token", sessionToken)
+        intent.putExtra("ticker", ticker)
+        intent.putExtra("market", if (buttonStock.isSelected) "stocks" else "crypto")
+        intent.putExtra("client_id", client_id)
+        startActivity(intent)
+        overridePendingTransition(0, 0)
+    }
+
+    private fun showEmailNotificationSettings(ticker: String) {
+        // Inflate the dialog layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_price_alert, null)
+        val tickerTextView: TextView = dialogView.findViewById(R.id.tickerTextView)
+        val priceInput: EditText = dialogView.findViewById(R.id.priceInput)
+        val setAlertButton: Button = dialogView.findViewById(R.id.setAlertButton)
+
+        // Set the ticker in the TextView
+        tickerTextView.text = "Ticker: $ticker"
+
+        // Create and show the dialog
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Set Price Alert")
+            .setView(dialogView)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+
+        setAlertButton.setOnClickListener {
+            val price = priceInput.text.toString().toDoubleOrNull()
+
+            if (price != null && price > 0) {
+                dialog.dismiss()
+                setPriceAlert(ticker, price)
+            } else {
+                Toast.makeText(this, "Please enter a valid price.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun setPriceAlert(ticker: String, price: Double) {
+        if (sessionToken.isEmpty()) {
+            Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create the API request
+        val request = SetPriceAlertRequest(
+            session_token = sessionToken,
+            ticker = ticker,
+            price = price,
+            market = if (buttonStock.isSelected) "stocks" else "crypto"
+        )
+
+        // Send the request
+        RetrofitClient.apiService.createPriceAlert(request).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@MyAssetsActivity, "Price alert set successfully for $ticker!", Toast.LENGTH_SHORT).show()
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("PriceAlert", "Error: $errorBody")
+                    Toast.makeText(this@MyAssetsActivity, "Failed to set price alert. Try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("PriceAlert", "API Failure: ${t.message}")
+                Toast.makeText(this@MyAssetsActivity, "Failed to connect. Please try again.", Toast.LENGTH_SHORT).show()
             }
         })
     }

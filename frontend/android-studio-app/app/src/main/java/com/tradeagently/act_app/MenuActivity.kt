@@ -22,6 +22,7 @@ class MenuActivity : AppCompatActivity() {
         val supportButton = findViewById<Button>(R.id.supportButton)
         val clientManagementButton = findViewById<Button>(R.id.clientManagementButton)
         val adminToolsButton = findViewById<Button>(R.id.adminToolsButton)
+        val priceAlertsButton = findViewById<Button>(R.id.priceAlertsButton)
 
         // Retrieve the user type from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -30,24 +31,18 @@ class MenuActivity : AppCompatActivity() {
         // Conditionally show/hide buttons based on user type
         when (userType) {
             "admin" -> {
-                // Show Admin Tools button only for admin users
                 adminToolsButton.visibility = View.VISIBLE
                 clientManagementButton.visibility = View.GONE
             }
             "fa" -> {
-                // Hide Client Management button for "fa" users
                 clientManagementButton.visibility = View.GONE
                 adminToolsButton.visibility = View.GONE
-
             }
             "fm" -> {
-                // Show Client Management button for "fm" users
                 clientManagementButton.visibility = View.VISIBLE
                 adminToolsButton.visibility = View.GONE
-
             }
             else -> {
-                // Hide Admin Tools and Client Management button for unknown types
                 adminToolsButton.visibility = View.GONE
                 clientManagementButton.visibility = View.GONE
             }
@@ -79,8 +74,13 @@ class MenuActivity : AppCompatActivity() {
         }
 
         adminToolsButton.setOnClickListener {
-            // Start AdminToolsActivity for "admin" users
             val intent = Intent(this, AdminToolsActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+        }
+
+        priceAlertsButton.setOnClickListener {
+            val intent = Intent(this, PriceAlertsActivity::class.java)
             startActivity(intent)
             overridePendingTransition(0, 0)
         }

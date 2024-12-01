@@ -97,9 +97,19 @@
             android:name=".AddBalanceActivity"
             android:exported="false" /> <!-- Internal activity -->
 
-        <!-- CLient Profile Activity -->
+        <!-- Client Profile Activity -->
         <activity
             android:name=".ClientProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+        <!-- Asset Report Activity -->
+        <activity
+            android:name=".AssetReportActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+        <!-- Price Alerts Activity -->
+        <activity
+            android:name=".PriceAlertsActivity"
             android:exported="false" /> <!-- Internal activity -->
 
     </application>

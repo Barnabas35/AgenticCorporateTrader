@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
 import retrofit2.Callback
@@ -84,6 +85,7 @@ class CryptoAdapter(
             putExtra("open", cryptoInfo.open)
         }
         context.startActivity(intent)
+        (context as? AppCompatActivity)?.overridePendingTransition(0, 0)
     }
 
     inner class CryptoViewHolder(view: View) : RecyclerView.ViewHolder(view) {

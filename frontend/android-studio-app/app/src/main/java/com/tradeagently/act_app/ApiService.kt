@@ -365,6 +365,32 @@ data class AssetReportResponse(
     val total_usd_invested: Double
 )
 
+// Data class for creating a price alert
+data class SetPriceAlertRequest(
+    val session_token: String,
+    val ticker: String,
+    val price: Double,
+    val market: String
+)
+
+// Data class for retrieving price alerts
+data class GetPriceAlertsRequest(
+    val session_token: String
+)
+
+// Data class for an individual price alert
+data class PriceAlert(
+    val alert_id: String,
+    val market: String,
+    val price: Double,
+    val ticker: String
+)
+
+// Data class for the response when retrieving price alerts
+data class GetPriceAlertsResponse(
+    val status: String,
+    val alerts: List<PriceAlert>
+)
 
 // Retrofit interface for API calls
 interface ApiService {
@@ -504,4 +530,16 @@ interface ApiService {
     // Endpoint for getting an asset report
     @POST("/get-asset-report")
     fun getAssetReport(@Body assetReportRequest: AssetReportRequest): Call<AssetReportResponse>
+
+    // Endpoint for creating a price alert
+    @POST("/create-price-alert")
+    fun createPriceAlert(@Body request: SetPriceAlertRequest): Call<ApiResponse>
+
+    // Endpoint for retrieving price alerts
+    @POST("/get-price-alerts")
+    fun getPriceAlerts(@Body request: GetPriceAlertsRequest): Call<GetPriceAlertsResponse>
+
+    // Endpoint for deleting a price alert
+    @POST("/delete-price-alert")
+    fun deletePriceAlert(@Body request: Map<String, String>): Call<ApiResponse>
 }
