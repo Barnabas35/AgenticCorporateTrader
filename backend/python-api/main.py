@@ -303,6 +303,13 @@ def delete_price_alert():
     return jsonify(q_delete_price_alert(request.json)), 200
 
 
+# Get AI asset report
+@app.route("/get-ai-asset-report", methods=["POST"])
+def get_ai_asset_report():
+    from query_library.get_ai_asset_report import q_get_ai_asset_report
+    return jsonify(q_get_ai_asset_report(request.json)), 200
+
+
 if __name__ == "__main__":
 
     # Start background task to check price alerts
