@@ -780,3 +780,66 @@ Example:
 {
     "status": "Success"
 }
+
+
+### Create price alert ----------------------------------
+URL & Method: POST /create-price-alert
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "ticker": "string",             // Ticker symbol with no -USD suffix
+  "price": "float",               // Price to trigger alert
+  "market": "string"              // "stocks" or "crypto"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get price alerts ------------------------------------
+URL & Method: POST /get-price-alerts
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - List of price alerts and status message
+Example:
+{
+    "price_alerts": [
+        {
+            "alert_id": "string",
+            "market": "stocks",
+            "price": 123.45,
+            "ticker": "AAPL"
+        },
+        {
+            "alert_id": "string",
+            "market": "crypto",
+            "price": 12345.67,
+            "ticker": "BTC"
+        }
+    ],
+    "status": "Success"
+}
+
+
+### Delete price alert ----------------------------------
+URL & Method: POST /delete-price-alert
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "alert_id": "string"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}

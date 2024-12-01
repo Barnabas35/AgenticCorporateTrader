@@ -9,6 +9,7 @@ ADD db_access.py .
 ADD stock_api_access.py .
 ADD query_library/ ./query_library/
 ADD function_library/ ./function_library/
+ADD background_tasks/ ./background_tasks/
 ADD yfinance_requests/ ./yfinance_requests/
 ADD polygon_request_library/ ./polygon_request_library/
 

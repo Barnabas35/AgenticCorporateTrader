@@ -2,8 +2,10 @@
 # This python script is responsible for running the Flask application.
 # Database queries are not handled in this script.
 
+from background_tasks.check_alerts import check_alerts
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import threading
 
 app = Flask(__name__)
 CORS(app)
@@ -278,6 +280,34 @@ def exchange_tokens():
 def register_with_token():
     from query_library.register_with_token import q_register_with_token
     return jsonify(q_register_with_token(request.json)), 200
-  
+
+
+# Create price alert
+@app.route("/create-price-alert", methods=["POST"])
+def create_price_alert():
+    from query_library.create_price_alert import q_create_price_alert
+    return jsonify(q_create_price_alert(request.json)), 200
+
+
+# Get price alerts
+@app.route("/get-price-alerts", methods=["POST"])
+def get_price_alerts():
+    from query_library.get_price_alerts import q_get_price_alerts
+    return jsonify(q_get_price_alerts(request.json)), 200
+
+
+# Delete price alert
+@app.route("/delete-price-alert", methods=["POST"])
+def delete_price_alert():
+    from query_library.delete_price_alert import q_delete_price_alert
+    return jsonify(q_delete_price_alert(request.json)), 200
+
+
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=80)
+
+    # Start background task to check price alerts
+    thread = threading.Thread(target=check_alerts, daemon=True)
+    thread.start()
+
+    # Run Flask app
+    app.run(debug=True, host="0.0.0.0", port=80, use_reloader=False)
