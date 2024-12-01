@@ -1,5 +1,6 @@
 package com.tradeagently.act_app
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color.BLUE
 import android.graphics.Color.RED
@@ -11,6 +12,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
@@ -42,6 +44,9 @@ class StockProfileActivity : AppCompatActivity() {
     private lateinit var intervalSpinner: Spinner
     private lateinit var submitButton: Button
 
+    private var userType: String = ""
+    private var clientId: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stock_profile)
@@ -51,6 +56,9 @@ class StockProfileActivity : AppCompatActivity() {
 
         // Initialize TextViews and LineChart
         initializeViews()
+
+        // Fetch user type and client_id
+        fetchUserDetails()
 
         // Add TextWatcher to format dates
         setupDateInputFormatters()
@@ -63,7 +71,15 @@ class StockProfileActivity : AppCompatActivity() {
 
         // Handle user-submitted date ranges and intervals
         setupSubmitButton()
+
+        // Handle Buy Button Click
+        val buyCryptoButton: Button = findViewById(R.id.buyCryptoButton)
+        buyCryptoButton.setOnClickListener {
+            val ticker = intent.getStringExtra("symbol") ?: "AAPL" // Default to AAPL
+            openBuyDialog(ticker)
+        }
     }
+
 
     private fun initializeViews() {
         companyNameTextView = findViewById(R.id.companyNameTextView)
@@ -81,6 +97,60 @@ class StockProfileActivity : AppCompatActivity() {
         endDateInput = findViewById(R.id.endDateInput)
         intervalSpinner = findViewById(R.id.intervalSpinner)
         submitButton = findViewById(R.id.submitButton)
+    }
+
+    private fun fetchUserDetails() {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) {
+            Toast.makeText(this, "Session token is missing. Please log in.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Fetch user type
+        val userTypeRequest = TokenRequest(sessionToken)
+        RetrofitClient.apiService.getUserType(userTypeRequest).enqueue(object : Callback<UserTypeResponse> {
+            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    userType = response.body()?.user_type.toString()
+                    Log.d("CryptoProfileActivity", "User type: $userType")
+
+                    // Fetch client_id if user is a Fund Administrator (FA)
+                    if (userType == "fa") {
+                        fetchClientId(sessionToken)
+                    }
+                } else {
+                    Toast.makeText(this@StockProfileActivity, "Failed to fetch user type.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
+                Log.e("CryptoProfileActivity", "Error fetching user type: ${t.message}")
+            }
+        })
+    }
+
+    private fun fetchClientId(sessionToken: String) {
+        RetrofitClient.apiService.getClientList(TokenRequest(sessionToken)).enqueue(object : Callback<ClientListResponse> {
+            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val clients = response.body()?.clients
+                    if (!clients.isNullOrEmpty()) {
+                        clientId = clients.first().client_id // Select the first client for simplicity
+                        Log.d("CryptoProfileActivity", "Client ID: $clientId")
+                    } else {
+                        Toast.makeText(this@StockProfileActivity, "No clients found for this account.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@StockProfileActivity, "Failed to fetch client list.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
+                Log.e("CryptoProfileActivity", "Error fetching client list: ${t.message}")
+            }
+        })
     }
 
     private fun setupDateInputFormatters() {
@@ -257,5 +327,89 @@ class StockProfileActivity : AppCompatActivity() {
 
         lineChart.description.text = "Close Price Over Time"
         lineChart.invalidate() // Refresh the chart with new data
+    }
+
+    private fun openBuyDialog(ticker: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_buy, null)
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Buy $ticker")
+            .setView(dialogView)
+            .setPositiveButton("Buy") { _, _ ->
+                val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuy)
+                val quantity = quantityInput.text.toString().toDoubleOrNull()
+                if (quantity != null) {
+                    executeBuyTransaction(ticker, quantity)
+                } else {
+                    Toast.makeText(this, "Invalid quantity.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun executeBuyTransaction(ticker: String, quantity: Double) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) {
+            Toast.makeText(
+                this,
+                "Session token is missing. Please log in again.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        // Ensure client_id is provided for Fund Administrators
+        if (userType == "fa" && clientId.isNullOrEmpty()) {
+            Toast.makeText(
+                this,
+                "Fund Administrator must select a client to purchase assets.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val request = PurchaseAssetRequest(
+            session_token = sessionToken,
+            usd_quantity = quantity,
+            market = "stocks",
+            ticker = ticker,
+            client_id = clientId ?: "" // Empty if not required
+        )
+
+        RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful) {
+                    val message = response.body()?.status ?: "Unknown response"
+                    Toast.makeText(this@StockProfileActivity, message, Toast.LENGTH_SHORT).show()
+
+                    if (message.contains("Success", ignoreCase = true)) {
+                        Log.d("CryptoProfileActivity", "Purchase successful for $ticker")
+                    }
+                } else {
+                    Toast.makeText(
+                        this@StockProfileActivity,
+                        "Failed to complete purchase.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.e(
+                        "CryptoProfileActivity",
+                        "Error response: ${response.errorBody()?.string()}"
+                    )
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("CryptoProfileActivity", "API call failed: ${t.message}")
+                Toast.makeText(
+                    this@StockProfileActivity,
+                    "Failed to connect. Please try again.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
     }
 }

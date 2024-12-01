@@ -1,11 +1,13 @@
 package com.tradeagently.act_app
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,9 +26,10 @@ class MyAssetsActivity : AppCompatActivity() {
     private lateinit var buttonStock: Button
     private lateinit var buttonCrypto: Button
 
-    private var userType: String = "" // Dynamically fetched user type
+    private var userType: String = ""
     private var client_id: String = ""
     private var client_name: String = ""
+    private var displayableAssets: List<String> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -242,8 +245,7 @@ class MyAssetsActivity : AppCompatActivity() {
     }
 
     private fun updateRecyclerViewWithAssets(assets: List<String>) {
-        val displayableAssets = assets.map { it }
-
+        displayableAssets = assets // Update the global list
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                 val view = layoutInflater.inflate(R.layout.asset_item, parent, false)
@@ -252,7 +254,45 @@ class MyAssetsActivity : AppCompatActivity() {
 
             override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                 val assetName: TextView = holder.itemView.findViewById(R.id.assetName)
-                assetName.text = displayableAssets[position]
+                val assetQuantity: TextView = holder.itemView.findViewById(R.id.assetQuantity)
+                val buyButton: Button = holder.itemView.findViewById(R.id.buyButton)
+                val sellButton: Button = holder.itemView.findViewById(R.id.sellButton)
+
+                val ticker = displayableAssets[position]
+                assetName.text = ticker
+
+                // Fetch and display asset quantity
+                val request = GetAssetRequest(
+                    session_token = sessionToken,
+                    market = if (buttonStock.isSelected) "stocks" else "crypto",
+                    ticker = ticker,
+                    client_id = client_id
+                )
+                RetrofitClient.apiService.getAsset(request).enqueue(object : Callback<AssetResponse> {
+                    override fun onResponse(call: Call<AssetResponse>, response: Response<AssetResponse>) {
+                        if (response.isSuccessful && response.body()?.status == "Success") {
+                            val quantity = response.body()?.total_asset_quantity ?: 0.0
+                            assetQuantity.text = "Owned: %.5f".format(quantity)
+                        } else {
+                            assetQuantity.text = "Owned: 0.00000"
+                            logApiError(response)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<AssetResponse>, t: Throwable) {
+                        assetQuantity.text = "Owned: 0.00000"
+                        Log.e("API_ERROR", "Error fetching asset quantity: ${t.message}")
+                    }
+                })
+
+                // Set up buy and sell buttons
+                buyButton.setOnClickListener {
+                    openBuyDialog(ticker)
+                }
+
+                sellButton.setOnClickListener {
+                    openSellDialog(ticker)
+                }
             }
 
             override fun getItemCount() = displayableAssets.size
@@ -260,6 +300,7 @@ class MyAssetsActivity : AppCompatActivity() {
 
         recyclerView.adapter = adapter
     }
+
 
     private fun navigateToAddBalance() {
         startActivity(Intent(this, AddBalanceActivity::class.java))
@@ -269,5 +310,99 @@ class MyAssetsActivity : AppCompatActivity() {
     private fun logApiError(response: Response<*>) {
         val errorBody = response.errorBody()?.string()
         Log.e("API_ERROR", "Status: ${response.code()}, Error: $errorBody")
+    }
+
+    private fun openBuyDialog(ticker: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_buy, null)
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Buy $ticker")
+            .setView(dialogView)
+            .setPositiveButton("Buy") { _, _ ->
+                val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuy)
+                val quantity = quantityInput.text.toString().toDoubleOrNull()
+                if (quantity != null) {
+                    executeBuyTransaction(ticker, quantity)
+                } else {
+                    Toast.makeText(this, "Invalid quantity.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun openSellDialog(ticker: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_sell, null)
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Sell $ticker")
+            .setView(dialogView)
+            .setPositiveButton("Sell") { _, _ ->
+                val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputsell)
+                val quantity = quantityInput.text.toString().toDoubleOrNull()
+                if (quantity != null) {
+                    executeSellTransaction(ticker, quantity)
+                } else {
+                    Toast.makeText(this, "Invalid quantity.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun executeBuyTransaction(ticker: String, quantity: Double) {
+        val request = PurchaseAssetRequest(
+            session_token = sessionToken,
+            usd_quantity = quantity,
+            market = if (buttonStock.isSelected) "stocks" else "crypto",
+            ticker = ticker,
+            client_id = client_id
+        )
+
+        RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@MyAssetsActivity, "Successfully bought $ticker!", Toast.LENGTH_SHORT).show()
+                    fetchUserAssetsForSelf() // Refresh asset list
+                } else {
+                    logApiError(response)
+                    Toast.makeText(this@MyAssetsActivity, "Failed to buy $ticker.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("API_ERROR", "Error buying asset: ${t.message}")
+                Toast.makeText(this@MyAssetsActivity, "Error buying asset.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun executeSellTransaction(ticker: String, quantity: Double) {
+        val request = SellAssetRequest(
+            session_token = sessionToken,
+            asset_quantity = quantity,
+            market = if (buttonStock.isSelected) "stocks" else "crypto",
+            ticker = ticker,
+            client_id = client_id
+        )
+
+        RetrofitClient.apiService.sellAsset(request).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@MyAssetsActivity, "Successfully sold $ticker!", Toast.LENGTH_SHORT).show()
+                    fetchUserAssetsForSelf() // Refresh asset list
+                } else {
+                    logApiError(response)
+                    Toast.makeText(this@MyAssetsActivity, "Failed to sell $ticker.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("API_ERROR", "Error selling asset: ${t.message}")
+                Toast.makeText(this@MyAssetsActivity, "Error selling asset.", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
