@@ -57,20 +57,19 @@ class PriceAlertsActivity : AppCompatActivity() {
         RetrofitClient.apiService.getPriceAlerts(request).enqueue(object : Callback<GetPriceAlertsResponse> {
             override fun onResponse(call: Call<GetPriceAlertsResponse>, response: Response<GetPriceAlertsResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
-                    // Use the correct key `alerts` from the response model
                     val alerts = response.body()?.alerts ?: emptyList()
-                    Log.d("PriceAlertsActivity", "Fetched Alerts: $alerts") // Log alerts for debugging
                     priceAlertList.clear()
                     priceAlertList.addAll(alerts)
-                    Log.d("PriceAlertsActivity", "Updated List Size: ${priceAlertList.size}")
-                    updateRecyclerView()
+                    updateRecyclerView() // Ensure UI is updated
                 } else {
-                    Log.e("PriceAlertsActivity", "Failed to fetch price alerts: ${response.message()}")
-                    Toast.makeText(this@PriceAlertsActivity, "Failed to fetch price alerts.", Toast.LENGTH_SHORT).show()
+                    priceAlertList.clear() // Clear the list
+                    updateRecyclerView() // Show no alerts message
                 }
             }
 
             override fun onFailure(call: Call<GetPriceAlertsResponse>, t: Throwable) {
+                priceAlertList.clear() // Clear the list
+                updateRecyclerView() // Show no alerts message
                 Log.e("PriceAlertsActivity", "Error fetching price alerts: ${t.message}")
                 Toast.makeText(this@PriceAlertsActivity, "Error fetching price alerts.", Toast.LENGTH_SHORT).show()
             }
