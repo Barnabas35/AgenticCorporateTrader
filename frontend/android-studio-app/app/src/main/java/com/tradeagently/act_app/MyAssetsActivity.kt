@@ -1,7 +1,6 @@
 package com.tradeagently.act_app
 
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -336,12 +335,13 @@ class MyAssetsActivity : AppCompatActivity() {
                     builder.setTitle("Settings")
                     builder.setItems(options) { _, which ->
                         when (which) {
-                            0 -> showAssetReport(ticker)
+                            0 -> fetchAssetReport(ticker)
                             1 -> showEmailNotificationSettings(ticker)
                         }
                     }
                     builder.create().show()
                 }
+
             }
 
             override fun getItemCount() = displayableAssets.size
@@ -349,7 +349,6 @@ class MyAssetsActivity : AppCompatActivity() {
 
         recyclerView.adapter = adapter
     }
-
 
     private fun navigateToAddBalance() {
         startActivity(Intent(this, AddBalanceActivity::class.java))
@@ -473,14 +472,70 @@ class MyAssetsActivity : AppCompatActivity() {
         })
     }
 
-    private fun showAssetReport(ticker: String) {
-        val intent = Intent(this, AssetReportActivity::class.java)
-        intent.putExtra("session_token", sessionToken)
-        intent.putExtra("ticker", ticker)
-        intent.putExtra("market", if (buttonStock.isSelected) "stocks" else "crypto")
-        intent.putExtra("client_id", client_id)
-        startActivity(intent)
-        overridePendingTransition(0, 0)
+    private fun fetchAssetReport(ticker: String) {
+        if (sessionToken.isEmpty() || client_id.isEmpty() || ticker.isEmpty()) {
+            Toast.makeText(this, "Missing data for asset report.", Toast.LENGTH_SHORT).show()
+            Log.e("AssetReport", "Missing data: sessionToken=$sessionToken, client_id=$client_id, ticker=$ticker")
+            return
+        }
+
+        val request = AssetReportRequest(
+            session_token = sessionToken,
+            market = if (buttonStock.isSelected) "stocks" else "crypto",
+            client_id = client_id,
+            ticker = ticker
+        )
+
+        Log.d("AssetReport", "Request Payload: $request")
+
+        RetrofitClient.apiService.getAssetReport(request).enqueue(object : Callback<AssetReportResponse> {
+            override fun onResponse(call: Call<AssetReportResponse>, response: Response<AssetReportResponse>) {
+                if (response.isSuccessful) {
+                    val report = response.body()
+                    if (report != null && report.status == "Success") {
+                        showAssetReportDialog(report, ticker)
+                    } else {
+                        val errorMessage = report?.status ?: "Unknown error"
+                        Toast.makeText(this@MyAssetsActivity, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("AssetReport", "HTTP Error: ${response.code()}, $errorBody")
+                    Toast.makeText(this@MyAssetsActivity, "Failed to fetch report. Try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<AssetReportResponse>, t: Throwable) {
+                Log.e("AssetReport", "API failure: ${t.message}")
+                Toast.makeText(this@MyAssetsActivity, "Error connecting to server. Try again.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun showAssetReportDialog(report: AssetReportResponse, ticker: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_asset_report, null)
+
+        val tickerTextView = dialogView.findViewById<TextView>(R.id.tickerTextView)
+        val profitTextView = dialogView.findViewById<TextView>(R.id.profitTextView)
+        val totalInvestedTextView = dialogView.findViewById<TextView>(R.id.totalInvestedTextView)
+        val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+
+        // Populate the dialog with report data
+        tickerTextView.text = "Ticker: $ticker"
+        profitTextView.text = "Profit: $%.2f".format(report.profit)
+        totalInvestedTextView.text = "Total Invested: $%.2f".format(report.total_usd_invested)
+
+        // Create and show the dialog
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showEmailNotificationSettings(ticker: String) {

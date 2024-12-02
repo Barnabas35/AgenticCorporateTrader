@@ -350,21 +350,6 @@ data class SellAssetRequest(
     val client_id: String
 )
 
-// Request for asset report
-data class AssetReportRequest(
-    val session_token: String,
-    val market: String,
-    val client_id: String,
-    val ticker_symbol: String
-)
-
-// Response for asset report
-data class AssetReportResponse(
-    val profit: Double,
-    val status: String,
-    val total_usd_invested: Double
-)
-
 // Data class for creating a price alert
 data class SetPriceAlertRequest(
     val session_token: String,
@@ -390,6 +375,21 @@ data class PriceAlert(
 data class GetPriceAlertsResponse(
     val status: String,
     val alerts: List<PriceAlert>
+)
+
+// Request for asset report
+data class AssetReportRequest(
+    val session_token: String,
+    val market: String,
+    val client_id: String,
+    val ticker: String
+)
+
+// Response for asset report
+data class AssetReportResponse(
+    val profit: Double,
+    val status: String,
+    val total_usd_invested: Double
 )
 
 // Retrofit interface for API calls
@@ -527,10 +527,6 @@ interface ApiService {
     @POST("/sell-asset")
     fun sellAsset(@Body sellAssetRequest: SellAssetRequest): Call<ApiResponse>
 
-    // Endpoint for getting an asset report
-    @POST("/get-asset-report")
-    fun getAssetReport(@Body assetReportRequest: AssetReportRequest): Call<AssetReportResponse>
-
     // Endpoint for creating a price alert
     @POST("/create-price-alert")
     fun createPriceAlert(@Body request: SetPriceAlertRequest): Call<ApiResponse>
@@ -542,4 +538,8 @@ interface ApiService {
     // Endpoint for deleting a price alert
     @POST("/delete-price-alert")
     fun deletePriceAlert(@Body request: Map<String, String>): Call<ApiResponse>
+
+    // Endpoint for getting an asset report
+    @POST("/get-asset-report")
+    fun getAssetReport(@Body assetReportRequest: AssetReportRequest): Call<AssetReportResponse>
 }

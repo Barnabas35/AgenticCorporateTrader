@@ -102,9 +102,6 @@ class LoginActivity : AppCompatActivity() {
         fetchAndSaveEmail(token)
         fetchAndSaveProfileIcon(token)
         fetchAndSaveUserType(token)
-        fetchTopStocks(token)
-        fetchAndSaveSupportTickets(token)
-        fetchAndSaveReviews(token)
     }
 
     // Fetch and save username
@@ -209,71 +206,5 @@ class LoginActivity : AppCompatActivity() {
         val editor = sharedPreferences.edit()
         editor.putString("user_type", userType)
         editor.apply()
-    }
-
-    // Fetch top stocks
-    private fun fetchTopStocks(token: String) {
-        RetrofitClient.apiService.getTopStocks().enqueue(object : Callback<TopStocksResponse> {
-            override fun onResponse(call: Call<TopStocksResponse>, response: Response<TopStocksResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val topStocks = response.body()?.ticker_details ?: emptyList()
-                    saveTopStocksToPreferences(topStocks)
-                } else {
-                    Log.e("TOP_STOCKS_ERROR", "Failed to fetch top stocks: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<TopStocksResponse>, t: Throwable) {
-                Log.e("TOP_STOCKS_ERROR", "Error fetching top stocks: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveTopStocksToPreferences(stocks: List<StockItem>) {
-        val stockData = stocks.joinToString(";") { "${it.symbol},${it.company_name},${it.price},${it.currency}" }
-        saveToPreferences("top_stocks", stockData)
-    }
-
-    // Fetch and save support tickets
-    private fun fetchAndSaveSupportTickets(token: String) {
-        RetrofitClient.apiService.getSupportTicketList(TokenRequest(token)).enqueue(object : Callback<SupportTicketResponse> {
-            override fun onResponse(call: Call<SupportTicketResponse>, response: Response<SupportTicketResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val tickets = response.body()?.support_tickets ?: emptyList()
-                    val ticketData = tickets.joinToString(";") { "${it.issue_subject},${it.issue_description},${it.issue_status}" }
-                    saveToPreferences("support_tickets", ticketData)
-                } else {
-                    Log.e("SUPPORT_TICKETS_ERROR", "Failed to fetch support tickets: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<SupportTicketResponse>, t: Throwable) {
-                Log.e("SUPPORT_TICKETS_ERROR", "Error fetching support tickets: ${t.message}")
-            }
-        })
-    }
-
-    // Fetch and save reviews
-    private fun fetchAndSaveReviews(token: String) {
-        RetrofitClient.apiService.getReviewList(TokenRequest(token)).enqueue(object : Callback<ReviewListResponse> {
-            override fun onResponse(call: Call<ReviewListResponse>, response: Response<ReviewListResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val reviews = response.body()?.reviews ?: emptyList()
-                    val reviewData = reviews.joinToString(";") { "${it.score},${it.comment}" }
-                    saveToPreferences("reviews", reviewData)
-                } else {
-                    Log.e("REVIEWS_ERROR", "Failed to fetch reviews: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<ReviewListResponse>, t: Throwable) {
-                Log.e("REVIEWS_ERROR", "Error fetching reviews: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveToPreferences(key: String, value: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putString(key, value).apply()
     }
 }

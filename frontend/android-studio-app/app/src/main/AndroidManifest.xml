@@ -102,11 +102,6 @@
             android:name=".ClientProfileActivity"
             android:exported="false" /> <!-- Internal activity -->
 
-        <!-- Asset Report Activity -->
-        <activity
-            android:name=".AssetReportActivity"
-            android:exported="false" /> <!-- Internal activity -->
-
         <!-- Price Alerts Activity -->
         <activity
             android:name=".PriceAlertsActivity"
