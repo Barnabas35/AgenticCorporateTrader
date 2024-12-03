@@ -2,6 +2,8 @@
 from db_access import DBAccess
 from function_library.security_string_parsing import firestore_safe
 import time
+import stripe
+from function_library.stripe_api_key import get_stripe_api_key
 
 def q_add_balance(request_json):
 
@@ -35,6 +37,16 @@ def q_add_balance(request_json):
         # Getting user ID
         user_id = result[0].id
 
+        # Get stripe api key
+        stripe.api_key = get_stripe_api_key()
+
+        # Create payment intent
+        payment_intent = stripe.PaymentIntent.create(
+            amount=usd_quantity * 100,
+            currency='usd',
+            automatic_payment_methods={"enabled": True},
+        )
+
         # Adding transaction to transaction log
         db.collection("users").document(user_id).collection("transaction_log").add({"market": "currency",
                                                                                     "transaction_type": "purchase",
@@ -43,7 +55,9 @@ def q_add_balance(request_json):
                                                                                     "client_id": user_id,
                                                                                     "usd_quantity": usd_quantity,
                                                                                     "ticker_symbol": "USD",
-                                                                                    "unix_timestamp": int(time.time())})
+                                                                                    "unix_timestamp": int(time.time()),
+                                                                                    "payment_intent_id": payment_intent.id,
+                                                                                    "payment_intent_status": "pending"})
 
-        # Return status
-        return {"status": "Success"}
+        # Return status and client secret
+        return {"client_secret": payment_intent["client_secret"], "status": "Success"}
