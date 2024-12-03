@@ -58,7 +58,9 @@ def check_alerts():
                 alert_id = alert.id
                 user_id = alert_dict["user_id"]
 
-                if market == "stocks":
+                market_closed_indicator = [None, 0]
+                # Making sure market is stocks AND that the market is open by checking if the price is not None or 0
+                if market == "stocks" and (current_ticker_prices_stocks.get(ticker, None) not in market_closed_indicator):
                     current_ticker_price = current_ticker_prices_stocks[ticker]
                     previous_ticker_price = previous_ticker_prices_stocks.get(ticker, None)
 
