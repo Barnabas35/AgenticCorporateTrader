@@ -38,7 +38,7 @@ const About: React.FC = () => {
         <Text style={styles.paragraph}>
           We'd love to hear from you! If you have questions, suggestions, or just want to say hello, feel free to reach out to us at:
         </Text>
-        <Text style={styles.email}>contact@tradeagently.com</Text>
+        <Text style={styles.email}>tradeagently@gmail.com</Text>
       </View>
 
       <View style={styles.box}>
