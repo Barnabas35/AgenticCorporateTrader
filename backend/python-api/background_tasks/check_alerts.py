@@ -94,6 +94,6 @@ def check_alerts():
             previous_ticker_prices_stocks = current_ticker_prices_stocks
             previous_ticker_prices_crypto = current_ticker_prices_crypto
 
-            time.sleep(30)
+            time.sleep(300)
         except:
-            continue
+            time.sleep(300)
