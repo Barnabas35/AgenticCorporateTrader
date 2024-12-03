@@ -15,7 +15,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts", "app/contact.tsx",
+    "expo-env.d.ts", "app/contact.tsx", "components/CompletePage.jsx", "components/CheckoutForm.jsx", "components/CheckoutForm.jsx",
   ]
   
 }

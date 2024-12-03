@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import for navigation
 import { View, Text, StyleSheet, ActivityIndicator, TextInput, Button, Alert } from 'react-native';
 import { useSessionToken, useUser } from '../components/userContext';
 import BitcoinChart from '../components/BitcoinChart';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 
 const Home: React.FC = () => {
-  const { username } = useUser(); // Get username from user context
-  const [sessionToken] = useSessionToken(); // Get sessionToken from user context
+  const { username } = useUser();
+  const [sessionToken] = useSessionToken();
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [addAmount, setAddAmount] = useState<string>(''); // Amount to add
+  const [addAmount, setAddAmount] = useState<string>('');
+  const navigate = useNavigate(); // React Router navigation
 
   useEffect(() => {
     const fetchBalance = async () => {
       if (!sessionToken) {
-        setLoading(false); // Stop loading if there's no session token
+        setLoading(false);
         return;
       }
 
@@ -58,64 +60,39 @@ const Home: React.FC = () => {
       });
 
       const data = await response.json();
+      console.log(data)
       if (data.status === 'Success') {
-        Alert.alert('Success', `Added $${addAmount} to your balance.`);
-        setBalance((prev) => (prev !== null ? prev + Number(addAmount) : Number(addAmount)));
-        setAddAmount('');
+        // Redirect to CheckoutForm with the clientSecret
+        navigate('/checkout', {
+          state: { clientSecret: data.client_secret, dpmCheckerLink: data.dpmCheckerLink },
+        });
       } else {
-        Alert.alert('Error', 'Failed to add balance. Please try again.');
+        Alert.alert('Error', 'Failed to initiate payment. Please try again.');
       }
     } catch (error) {
-      console.error('Error adding balance:', error);
-      Alert.alert('Error', 'An error occurred while adding balance.');
+      console.error('Error initiating payment:', error);
+      Alert.alert('Error', 'An error occurred while initiating payment.');
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Left Side - Text Content */}
       <View style={styles.textContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.title}>
-            Welcome to TradeAgently, {username}!
-          </Text>
+          <Text style={styles.title}>Welcome to TradeAgently, {username}!</Text>
         </View>
-
         <Text style={styles.description}>
           This platform is designed to help users efficiently manage and track their investments.
-          Whether you're new to investing or an experienced fund manager, the app provides a comprehensive
-          suite of tools to assist you in making informed financial decisions.
         </Text>
-
         <View style={styles.featureContainer}>
           <MaterialIcons name="show-chart" size={28} color="#2e86de" />
-          <Text style={styles.featureText}>
-            Real-time tracking of investment performance to keep you ahead.
-          </Text>
+          <Text style={styles.featureText}>Real-time tracking of investment performance to keep you ahead.</Text>
         </View>
-
-        <View style={styles.featureContainer}>
-          <FontAwesome5 name="chart-pie" size={28} color="#e74c3c" />
-          <Text style={styles.featureText}>
-            Detailed analysis of fund allocations for effective decision-making.
-          </Text>
-        </View>
-
-        <View style={styles.featureContainer}>
-          <MaterialIcons name="touch-app" size={28} color="#27ae60" />
-          <Text style={styles.featureText}>
-            User-friendly interface that simplifies managing portfolios.
-          </Text>
-        </View>
-
         <Text style={styles.description}>
           To get started, log in or register, and begin tracking your investments today!
         </Text>
       </View>
-
-      {/* Right Side - Charts and More */}
       <View style={styles.rightContainer}>
-        {/* Conditionally Render Balance Box */}
         {sessionToken && (
           <View style={styles.balanceContainer}>
             {loading ? (
@@ -125,7 +102,6 @@ const Home: React.FC = () => {
                 <Text style={styles.balanceText}>
                   Balance: ${balance?.toFixed(2) ?? '0.00'}
                 </Text>
-                {/* Add Balance Section */}
                 <View style={styles.addBalanceContainer}>
                   <TextInput
                     style={styles.input}
@@ -140,15 +116,7 @@ const Home: React.FC = () => {
             )}
           </View>
         )}
-
-        {/* Bitcoin Chart */}
         <BitcoinChart />
-        <View style={styles.chartInfoContainer}>
-          <Text style={styles.chartTitle}>Bitcoin Market Overview</Text>
-          <Text style={styles.chartDescription}>
-            Track the performance of Bitcoin in real time with our live charts. Stay informed on the latest trends and make smarter investment decisions.
-          </Text>
-        </View>
       </View>
     </View>
   );
@@ -159,14 +127,15 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row', // Arrange horizontally
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start', // Align at the top
+    alignItems: 'flex-start',
     backgroundColor: '#f0f0f0',
     padding: 20,
+    width: '100%',
   },
   textContainer: {
-    flex: 1, // Occupy half the width
+    flex: 1,
     paddingRight: 20,
     justifyContent: 'flex-start',
   },
@@ -178,7 +147,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    textAlign: 'left',
     color: '#2e86de',
   },
   description: {
@@ -186,7 +154,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 15,
     lineHeight: 26,
-    textAlign: 'left',
   },
   featureContainer: {
     flexDirection: 'row',
@@ -197,10 +164,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
     marginLeft: 10,
-    lineHeight: 24,
   },
   rightContainer: {
-    flex: 1, // Occupy half the width
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
@@ -231,21 +197,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     width: '80%',
-  },
-  chartInfoContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  chartTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  chartDescription: {
-    fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });

@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Pressable } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import firebaseApp, { auth } from '../components/firebase';
-
+import firebaseApp from '../components/firebase';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userType, setUserType] = useState('user');
+  const [userType, setUserType] = useState('default'); // Default to "select user type"
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const navigate = useNavigate();
@@ -21,70 +20,23 @@ const Register: React.FC = () => {
   const handleGoogleRegister = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
       const user = result.user;
-
-      console.log('Google User:', user);
-      console.log('Google Access Token:', token);
-
-      // Send the user data to your backend server for validation and registration
-      const url = 'https://tradeagently.dev/register';
-      const bodyData = {
-        id_token: token,
-        user_type: userType,
-      };
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(bodyData),
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'Success') {
-          setModalMessage('Registration successful via Google!');
-          setModalVisible(true);
-          navigate('/'); // Navigate to login or another page after successful registration
-        } else if (data.status === 'Email already exists.') {
-          setModalMessage('Email already exists. Please use a different email.');
-          setModalVisible(true);
-        } else {
-          setModalMessage('Registration failed. Please try again.');
-          setModalVisible(true);
-        }
-      } catch (error) {
-        console.error('Error during registration:', error);
-        setModalMessage('An unexpected error occurred. Please try again.');
-        setModalVisible(true);
+  
+      if (!user) {
+        throw new Error("User not found after Google sign-in.");
       }
-    } catch (error) {
-      console.error('Error during Google Sign-In:', error);
-      setModalMessage('An unexpected error occurred during Google Sign-In. Please try again.');
-      setModalVisible(true);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (password !== confirmPassword) {
-      setModalMessage('Passwords do not match');
-      setModalVisible(true);
-      return;
-    }
-
-    const url = 'https://tradeagently.dev/register';
-    const bodyData = {
-      username: username.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      user_type: userType,
-    };
-
-    try {
+  
+      // Retrieve the ID token for the authenticated user
+      const idToken = await user.getIdToken(true); // Force refresh to ensure a valid token
+      console.log("Google User ID Token:", idToken);
+      console.log(userType)
+      // Send the ID token and user type to the backend
+      const url = 'https://tradeagently.dev/register-with-token';
+      const bodyData = {
+        auth_token: idToken,
+        user_type: userType, // Ensure user type is selected
+      };
+  
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -92,22 +44,65 @@ const Register: React.FC = () => {
         },
         body: JSON.stringify(bodyData),
       });
+  
+      const data = await response.json();
+      console.log(data)
+  
+      if (data.status === 'Success') {
+        setModalMessage('Registration successful via Google!');
+        setModalVisible(true);
+        navigate('/'); // Navigate to the home or login page
+      } else {
+        console.error('Backend registration error:', data);
+        setModalMessage(data.status || 'Registration failed. Please try again.');
+        setModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Error during Google registration:', error);
+      setModalMessage('An unexpected error occurred during Google registration. Please try again.');
+      setModalVisible(true);
+    }
+  };
+  
+
+  const handleRegister = async () => {
+    if (userType === 'default') {
+      setModalMessage('Please select a user type.');
+      setModalVisible(true);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setModalMessage('Passwords do not match.');
+      setModalVisible(true);
+      return;
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim(),
+          password: password.trim(),
+          user_type: userType,
+        }),
+      });
 
       const data = await response.json();
 
       if (data.status === 'Success') {
         setModalMessage('Registration successful!');
         setModalVisible(true);
-        navigate('/'); // Navigate to login or another page after a successful registration
-      } else if (data.status === 'Email already exists.') {
-        setModalMessage('Email already exists. Please use a different email.');
-        setModalVisible(true);
+        navigate('/'); // Redirect to login or home page
       } else {
-        setModalMessage(data.status && 'Registration failed. Please try again.');
-        setModalVisible(true);
+        throw new Error(data.message || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      console.error('Error during registration:', error);
+      console.error('Error during Registration:', error);
       setModalMessage('An unexpected error occurred. Please try again.');
       setModalVisible(true);
     }
@@ -169,7 +164,7 @@ const Register: React.FC = () => {
         <Text style={styles.buttonText}>Register with Google</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigate('/login-register')} style={styles.loginLink}>
+      <TouchableOpacity onPress={() => navigate('/login')} style={styles.loginLink}>
         <Text style={styles.loginText}>Already have an account? Login here</Text>
       </TouchableOpacity>
 

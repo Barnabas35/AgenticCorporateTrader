@@ -43,6 +43,11 @@ interface CryptoDetails extends Crypto {
   description: string;
 }
 
+interface Client {
+  client_id: string;
+  client_name: string;
+}
+
 const CryptoSearch: React.FC = () => {
   const [topCryptos, setTopCryptos] = useState<Crypto[]>([]);
   const [searchResults, setSearchResults] = useState<Crypto[]>([]);
@@ -60,9 +65,16 @@ const CryptoSearch: React.FC = () => {
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [buyUsdQuantity, setBuyUsdQuantity] = useState<string>('');
   const [buyTicker, setBuyTicker] = useState<string>('');
+  const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
+  const [alertPrice, setAlertPrice] = useState<string>('');
+  const [alertTicker, setAlertTicker] = useState<string>('');
+  const [isFundManager, setIsFundManager] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTopCryptos();
+    fetchUserType();
   }, []);
 
   useEffect(() => {
@@ -70,6 +82,48 @@ const CryptoSearch: React.FC = () => {
       fetchCryptoAggregates(selectedCrypto.symbol);
     }
   }, [interval, historyWindow, selectedCrypto]);
+
+  const fetchUserType = async () => {
+    try {
+      const response = await fetch(`https://tradeagently.dev/get-user-type`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const data = await response.json();
+      if (data.status === 'Success') {
+        if (data.user_type === 'fm') {
+          setIsFundManager(true);
+          fetchClients();
+        } else if (data.user_type === 'fa') {
+          fetchClients();
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching user type:', err);
+    }
+  };
+
+  const fetchClients = async () => {
+    try {
+      const response = await fetch(`https://tradeagently.dev/get-client-list`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const data = await response.json();
+      if (data.status === 'Success') {
+        setClients(data.clients);
+        if (data.clients.length === 1) {
+          setSelectedClient(data.clients[0].client_id);
+        }
+      } else {
+        setError('Failed to fetch clients');
+      }
+    } catch (err) {
+      console.error('Error fetching clients:', err);
+    }
+  };
 
   const fetchTopCryptos = async (limit = 10) => {
     setLoading(true);
@@ -213,15 +267,22 @@ const CryptoSearch: React.FC = () => {
     setBuyModalVisible(true);
   };
 
-  const confirmBuy = async () => {
+  const handleConfirmBuy = async () => {
     if (!buyUsdQuantity || isNaN(parseFloat(buyUsdQuantity))) {
       Alert.alert('Error', 'Please enter a valid USD amount.');
       return;
     }
 
-    console.log(sessionToken)
-    console.log(buyUsdQuantity)
-    console.log(buyTicker)
+    if (!buyTicker) {
+      Alert.alert('Error', 'Ticker is missing.');
+      return;
+    }
+
+    if (!selectedClient) {
+      Alert.alert('Error', 'Please select a client.');
+      return;
+    }
+
     try {
       const response = await fetch('https://tradeagently.dev/purchase-asset', {
         method: 'POST',
@@ -231,17 +292,21 @@ const CryptoSearch: React.FC = () => {
           usd_quantity: parseFloat(buyUsdQuantity),
           market: 'crypto',
           ticker: buyTicker,
+          client_id: selectedClient,
         }),
       });
 
       const data = await response.json();
-      console.log(data)
       if (data.status === 'Success') {
-        Alert.alert('Success', `Successfully purchased ${buyUsdQuantity} USD of ${buyTicker}.`);
+        Alert.alert(
+          'Success',
+          `Successfully purchased ${buyUsdQuantity} USD of ${buyTicker} for client ${selectedClient}.`
+        );
         setBuyModalVisible(false);
         setBuyUsdQuantity('');
+        setSelectedClient(null);
       } else {
-        Alert.alert('Error', 'Failed to complete the purchase.');
+        Alert.alert('Error', data.message || 'Failed to complete the purchase.');
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while processing the purchase.');
@@ -255,11 +320,53 @@ const CryptoSearch: React.FC = () => {
         <Text>{item.name}</Text>
         <Text style={styles.priceText}>{item.price} USD</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.buyButton} onPress={() => handleBuy(item.symbol)}>
-        <Text style={styles.buyButtonText}>Buy</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.buyButton} onPress={() => handleBuy(item.symbol)}>
+          <Text style={styles.buyButtonText}>Buy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.alertButton} onPress={() => handleSetPriceAlert(item.symbol)}>
+          <Text style={styles.alertButtonText}>Set Price Alert</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
+
+  const handleSetPriceAlert = (ticker: string) => {
+    setAlertTicker(ticker);
+    setPriceAlertModalVisible(true);
+  };
+
+  const confirmPriceAlert = async () => {
+    if (!alertPrice || isNaN(parseFloat(alertPrice))) {
+      Alert.alert('Error', 'Please enter a valid price.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/create-price-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          ticker: alertTicker,
+          price: parseFloat(alertPrice),
+          market: 'crypto',
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data)
+      if (data.status === 'Success') {
+        Alert.alert('Success', `Price alert set for ${alertTicker} at ${alertPrice} USD.`);
+        setPriceAlertModalVisible(false);
+        setAlertPrice('');
+      } else {
+        Alert.alert('Error', 'Failed to set the price alert.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while setting the price alert.');
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -338,7 +445,7 @@ const CryptoSearch: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Buy Asset</Text>
-            <Text style={styles.modalText}>Enter the amount in USD to buy for {buyTicker}:</Text>
+            <Text style={styles.modalText}>Enter the amount in USD to buy for {selectedCrypto?.symbol}:</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="USD Amount"
@@ -346,14 +453,56 @@ const CryptoSearch: React.FC = () => {
               value={buyUsdQuantity}
               onChangeText={setBuyUsdQuantity}
             />
+            {isFundManager && (
+              <View style={styles.dropdownContainer}>
+                <Text style={styles.modalLabel}>Select Client:</Text>
+                <Picker
+                  selectedValue={selectedClient}
+                  onValueChange={(value) => setSelectedClient(value)}
+                >
+                  <Picker.Item label="Select a client" value={null} />
+                  {clients.map((client) => (
+                    <Picker.Item key={client.client_id} label={client.client_name} value={client.client_id} />
+                  ))}
+                </Picker>
+              </View>
+            )}
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={confirmBuy}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleConfirmBuy}>
                 <Text style={styles.modalButtonText}>Confirm Purchase</Text>
               </TouchableOpacity>
               <View style={{ width: 10 }} />
               <TouchableOpacity
                 style={[styles.modalButton, styles.modalCancelButton]}
                 onPress={() => setBuyModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={priceAlertModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Set Price Alert</Text>
+            <Text style={styles.modalText}>Enter the alert price for {alertTicker}:</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Alert Price"
+              keyboardType="numeric"
+              value={alertPrice}
+              onChangeText={setAlertPrice}
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={confirmPriceAlert}>
+                <Text style={styles.modalButtonText}>Confirm Alert</Text>
+              </TouchableOpacity>
+              <View style={{ width: 10 }} />
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={() => setPriceAlertModalVisible(false)}
               >
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
@@ -380,8 +529,6 @@ const styles = StyleSheet.create({
   },
   cryptoSymbol: { fontWeight: 'bold' },
   priceText: { color: 'green', fontWeight: 'bold' },
-  buyButton: { backgroundColor: '#007bff', padding: 10, borderRadius: 5 },
-  buyButtonText: { color: 'white', fontWeight: 'bold' },
   cryptoDetails: { padding: 16 },
   description: { marginVertical: 8, fontStyle: 'italic' },
   modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
@@ -396,6 +543,22 @@ const styles = StyleSheet.create({
   chartContainer: { height: 300, width: '85%', alignSelf: 'center', marginVertical: 20 },
   backButton: { backgroundColor: '#007bff', padding: 8, borderRadius: 5, alignSelf: 'center', marginVertical: 10 },
   backButtonText: { color: 'white', fontWeight: 'bold' },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buyButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  buyButtonText: { color: 'white', fontWeight: 'bold' },
+  alertButton: { backgroundColor: '#FFAA00', padding: 10, borderRadius: 5 },
+  alertButtonText: { color: 'white', fontWeight: 'bold' },
+  dropdownContainer: { marginBottom: 16 },
+  modalLabel: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
+  picker: { height: 40, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginBottom: 16 },
 });
 
 export default CryptoSearch;

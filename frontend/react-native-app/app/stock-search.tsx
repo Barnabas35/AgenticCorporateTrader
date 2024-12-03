@@ -73,6 +73,11 @@ const StockSearch: React.FC = () => {
   const [isFundManager, setIsFundManager] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
+  const [alertPrice, setAlertPrice] = useState<string>(''); 
+  const [alertTicker, setAlertTicker] = useState<string | null>(null);
+
+
 
   useEffect(() => {
     fetchTopStocks();
@@ -297,45 +302,57 @@ const StockSearch: React.FC = () => {
       Alert.alert('Error', 'An error occurred while buying the stock.');
     }
   };
+
+  const confirmPriceAlert = async () => {
+    if (!alertPrice || isNaN(parseFloat(alertPrice))) {
+      Alert.alert('Error', 'Please enter a valid price.');
+      console.log("No price entered");
+      return;
+    }
+  
+    if (!alertTicker) {
+      Alert.alert('Error', 'No stock selected for the price alert.');
+      console.log("No ticker selected");
+      return;
+    }
+  
+    try {
+      const response = await fetch('https://tradeagently.dev/create-price-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          ticker: alertTicker,
+          price: parseFloat(alertPrice),
+          market: 'stocks',
+        }),
+      });
+  
+      const data = await response.json();
+      if (data.status === 'Success') {
+        Alert.alert(
+          'Success',
+          `Price alert set for ${alertTicker} at ${alertPrice} USD. Notifications will be sent when the price is reached.`
+        );
+        setPriceAlertModalVisible(false);
+        setAlertPrice(''); // Reset alertPrice after success
+        setAlertTicker(null); // Reset alertTicker after success
+      } else {
+        Alert.alert('Error', data.message || 'Failed to set the price alert.');
+      }
+    } catch (error) {
+      console.error('Error setting price alert:', error);
+      Alert.alert('Error', 'An error occurred while setting the price alert.');
+    }
+  };
+  
+  
   
   
 
   const renderStockItem = ({ item }: { item: Stock }) => (
-    <TouchableOpacity
-      style={styles.stockItem}
-      onPress={async () => {
-        setLoading(true);
-        try {
-          const response = await fetch('https://tradeagently.dev/get-ticker-info', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ticker: item.symbol, session_token: sessionToken }),
-          });
-
-          const data = await response.json();
-
-          if (data.status === 'Success') {
-            setSelectedStock(data.ticker_info);
-          } else {
-            Alert.alert('Error', 'Failed to fetch stock details.');
-          }
-        } catch (err) {
-          console.error('Error fetching stock details:', err);
-          Alert.alert('Error', 'An error occurred while fetching stock details.');
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
-      <View>
-        <Text style={styles.stockSymbol}>{item.symbol}</Text>
-        <Text>{item.company_name}</Text>
-        <Text style={styles.priceText}>
-          {item.price} {item.currency}
-        </Text>
-      </View>
+    <View style={styles.stockItem}>
       <TouchableOpacity
-        style={styles.buyButton}
         onPress={async () => {
           setLoading(true);
           try {
@@ -344,12 +361,11 @@ const StockSearch: React.FC = () => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ ticker: item.symbol, session_token: sessionToken }),
             });
-
+  
             const data = await response.json();
-
+  
             if (data.status === 'Success') {
               setSelectedStock(data.ticker_info);
-              setBuyModalVisible(true);
             } else {
               Alert.alert('Error', 'Failed to fetch stock details.');
             }
@@ -361,10 +377,62 @@ const StockSearch: React.FC = () => {
           }
         }}
       >
-        <Text style={styles.buyButtonText}>Buy</Text>
+        <View>
+          <Text style={styles.stockSymbol}>{item.symbol}</Text>
+          <Text>{item.company_name}</Text>
+          <Text style={styles.priceText}>
+            {item.price} {item.currency}
+          </Text>
+        </View>
       </TouchableOpacity>
-    </TouchableOpacity>
+  
+      {/* Button Container for Buy and Price Alert */}
+      <View style={styles.buttonContainer}>
+        {/* Buy Button */}
+        <TouchableOpacity
+          style={styles.buyButton}
+          onPress={async () => {
+            setLoading(true);
+            try {
+              const response = await fetch('https://tradeagently.dev/get-ticker-info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticker: item.symbol, session_token: sessionToken }),
+              });
+  
+              const data = await response.json();
+  
+              if (data.status === 'Success') {
+                setSelectedStock(data.ticker_info);
+                setBuyModalVisible(true);
+              } else {
+                Alert.alert('Error', 'Failed to fetch stock details.');
+              }
+            } catch (err) {
+              console.error('Error fetching stock details:', err);
+              Alert.alert('Error', 'An error occurred while fetching stock details.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <Text style={styles.buyButtonText}>Buy</Text>
+        </TouchableOpacity>
+  
+        {/* Price Alert Button */}
+        <TouchableOpacity
+          style={styles.alertButton}
+          onPress={() => {
+            setAlertTicker(item.symbol);
+            setPriceAlertModalVisible(true);
+          }}
+        >
+          <Text style={styles.alertButtonText}>Set Price Alert</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
+  
 
   return (
     <ScrollView style={styles.container}>
@@ -400,10 +468,7 @@ const StockSearch: React.FC = () => {
           <Text style={styles.detailText}>Volume: {selectedStock.volume}</Text>
           <Text style={styles.detailText}>Employee Count: {selectedStock.employee_count}</Text>
           <Text style={styles.sectionTitle}>Historical Data</Text>
-          <Picker
-            selectedValue={historyWindow}
-            onValueChange={(value) => setHistoryWindow(value)}
-          >
+          <Picker selectedValue={historyWindow} onValueChange={(value) => setHistoryWindow(value)}>
             <Picker.Item label="Last Hour" value="hour" />
             <Picker.Item label="Last Day" value="day" />
             <Picker.Item label="Last Week" value="week" />
@@ -454,6 +519,7 @@ const StockSearch: React.FC = () => {
           keyExtractor={(item) => item.symbol}
         />
       )}
+      {/* Buy Modal */}
       <Modal visible={buyModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
@@ -466,23 +532,22 @@ const StockSearch: React.FC = () => {
               onChangeText={setBuyAmount}
             />
             {isFundManager && (
-            <View style={styles.dropdownContainer}>
-              <Text style={styles.modalLabel}>Select Client:</Text>
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={selectedClient}
-                  onValueChange={(value) => setSelectedClient(value)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select a client" value={null} />
-                  {clients.map((client) => (
-                    <Picker.Item key={client.client_id} label={client.client_name} value={client.client_id} />
-                  ))}
-                </Picker>
+              <View style={styles.dropdownContainer}>
+                <Text style={styles.modalLabel}>Select Client:</Text>
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    selectedValue={selectedClient}
+                    onValueChange={(value) => setSelectedClient(value)}
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Select a client" value={null} />
+                    {clients.map((client) => (
+                      <Picker.Item key={client.client_id} label={client.client_name} value={client.client_id} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
-            </View>
-          )}
-
+            )}
             <TouchableOpacity style={styles.modalButton} onPress={handleBuyStock}>
               <Text style={styles.modalButtonText}>Confirm Purchase</Text>
             </TouchableOpacity>
@@ -495,8 +560,37 @@ const StockSearch: React.FC = () => {
           </View>
         </View>
       </Modal>
+  
+      {/* Price Alert Modal */}
+      <Modal visible={priceAlertModalVisible} transparent={true} animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Set Price Alert</Text>
+            <Text style={styles.modalText}>
+              Enter the alert price for {selectedStock?.symbol}:
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Alert Price"
+              keyboardType="numeric"
+              value={alertPrice}
+              onChangeText={setAlertPrice}
+            />
+            <TouchableOpacity style={styles.modalButton} onPress={confirmPriceAlert}>
+              <Text style={styles.modalButtonText}>Confirm Alert</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setPriceAlertModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -630,6 +724,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     color: '#333', // Text color
   },
+  modalText: {
+    fontSize: 16, // Adjust the font size as needed
+    color: '#333', // Dark gray text color
+    marginBottom: 10, // Spacing below the text
+    textAlign: 'center', // Center align the text
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  alertButton: {
+    backgroundColor: '#FFAA00', // Yellow color for the alert button
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10, // Spacing between buttons
+  },
+  alertButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  
 });
 
 export default StockSearch;

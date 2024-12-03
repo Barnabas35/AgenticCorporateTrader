@@ -104,8 +104,11 @@ const Menu: React.FC = () => {
 
         {/* Display Balance */}
         {balance !== null && (
-          <Text style={styles.balanceText}>Balance: ${balance.toFixed(2)}</Text>
+          <View style={styles.balanceContainer}>
+            <Text style={styles.balanceText}>Balance: ${balance.toFixed(2)}</Text>
+          </View>
         )}
+
 
         {/* Mobile View - Burger Menu */}
         {isMobileView ? (
@@ -192,15 +195,20 @@ const Menu: React.FC = () => {
             >
               <FontAwesome name="home" size={18} color="white" /> Home
             </NavLink>
-            <View style={styles.spacer} />
-            <NavLink
-              to="/about"
-              style={({ isActive }) =>
-                isActive ? styles.activeMenuItem : styles.menuItem
-              }
-            >
-              <FontAwesome name="info-circle" size={18} color="white" /> About
-            </NavLink>
+              {!sessionToken && (
+              <>
+                <View style={styles.spacer} />
+                <NavLink
+                  to="/about"
+                  style={({ isActive }) =>
+                    isActive ? styles.activeMenuItem : styles.menuItem
+                  }
+                >
+                  <FontAwesome name="info-circle" size={18} color="white" /> About
+                </NavLink>
+              </>
+              )}
+
             <View style={styles.spacer} />
             {sessionToken ? (
               <>
@@ -371,12 +379,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
   },
-  balanceText: {
-    fontSize: 18,
-    color: 'white',
-    marginLeft: 20,
-    fontWeight: 'bold',
-  },
   dropdownItem: {
     padding: 15,
     backgroundColor: '#4CAF50',
@@ -436,6 +438,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     textAlign: 'center',
+  },
+  balanceContainer: {
+    backgroundColor: '#4CAF50', // Same green color as other menu options
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  balanceText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
