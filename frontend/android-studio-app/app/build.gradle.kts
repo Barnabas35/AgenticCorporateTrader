@@ -70,5 +70,8 @@ dependencies {
 
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    //Stripe
+    implementation ("com.stripe:stripe-android:21.2.0")
 }
 

@@ -293,16 +293,22 @@ data class AdminDeleteUserRequest(
     val id: String
 )
 
-// Response for balance
-data class BalanceResponse(
-    val balance: Double,
-    val status: String
+// Response for adding balance
+data class AddBalanceResponse(
+    val status: String,
+    val client_secret: String? = null // Nullable as it may not be returned in all cases
 )
 
 // Request for adding balance
 data class AddBalanceRequest(
     val session_token: String,
-    val usd_quantity: Int
+    val usd_quantity: Int // Updated to Double to support fractional USD amounts
+)
+
+// Response for balance retrieval
+data class BalanceResponse(
+    val balance: Double,
+    val status: String
 )
 
 // Request for purchasing an asset
@@ -473,27 +479,19 @@ interface ApiService {
 
     // GET request for the top cryptos
     @GET("/get-top-cryptos")
-    fun getTopCryptos(
-        @Query("limit") limit: Int = 10
-    ): Call<TopCryptosResponse>
+    fun getTopCryptos(@Query("limit") limit: Int = 10): Call<TopCryptosResponse>
 
     // POST request for text search crypto
     @POST("/text-search-crypto")
-    fun textSearchCrypto(
-        @Body request: TextSearchCryptoRequest
-    ): Call<TextSearchCryptoResponse>
+    fun textSearchCrypto(@Body request: TextSearchCryptoRequest): Call<TextSearchCryptoResponse>
 
     // POST request to get crypto info
     @POST("/get-crypto-info")
-    fun getCryptoInfo(
-        @Body request: CryptoInfoRequest
-    ): Call<CryptoInfoResponse>
+    fun getCryptoInfo(@Body request: CryptoInfoRequest): Call<CryptoInfoResponse>
 
     // POST request to get crypto aggregates
     @POST("/get-crypto-aggregates")
-    fun getCryptoAggregates(
-        @Body request: CryptoAggregatesRequest
-    ): Call<CryptoAggregatesResponse>
+    fun getCryptoAggregates(@Body request: CryptoAggregatesRequest): Call<CryptoAggregatesResponse>
 
     // Endpoint for getting the user list as an admin
     @POST("/get-user-list")
@@ -509,7 +507,7 @@ interface ApiService {
 
     // Endpoint for adding balance
     @POST("/add-balance")
-    fun addBalance(@Body addBalanceRequest: AddBalanceRequest): Call<ApiResponse>
+    fun addBalance(@Body addBalanceRequest: AddBalanceRequest): Call<AddBalanceResponse>
 
     // Endpoint for purchasing an asset
     @POST("/purchase-asset")
