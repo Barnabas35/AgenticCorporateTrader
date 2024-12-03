@@ -42,7 +42,8 @@ def q_get_asset_report(request_json):
         snapshot = client.get_snapshot_ticker("stocks", ticker)
         asset_usd_unit_price_current = snapshot.day.close
     elif market == "crypto":
-        asset_usd_unit_price_current = yf.Ticker(ticker).history(period="1d")["Close"].iloc[0]
+        crypto_usd = f"{ticker}-USD"
+        asset_usd_unit_price_current = yf.Ticker(crypto_usd).history(period="1d")["Close"].iloc[0]
     else:
         return {"status": "Invalid market."}
 
