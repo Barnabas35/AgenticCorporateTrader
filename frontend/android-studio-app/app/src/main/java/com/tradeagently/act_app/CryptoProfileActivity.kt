@@ -301,8 +301,8 @@ class CryptoProfileActivity : AppCompatActivity() {
         val lineDataSet = LineDataSet(entries, "Close Price").apply {
             lineWidth = 2f
             color = BLUE
-            setCircleColor(RED)
-            circleRadius = 3f
+            setCircleColor(BLUE)
+            circleRadius = 2f
         }
 
         lineChart.data = LineData(lineDataSet)
