@@ -26,6 +26,7 @@ RUN pip install polygon-api-client
 RUN pip install yfinance
 RUN pip install stripe
 RUN pip install boto3
+RUN pip install sendgrid
 
 # Run the application
 CMD ["python", "main.py"]
