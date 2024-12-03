@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { useSessionToken, useUser } from '../components/userContext'; // Adjust the path as needed
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import firebaseApp from '../components/firebase'; // Adjust the path as needed
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +11,48 @@ const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState(''); // State to display error messages
   const navigate = useNavigate();
   const { setUsername, setEmail: setUserEmail, setSessionToken, setProfileIconUrl } = useUser(); // Get the setters from context
+
+  const auth = getAuth(firebaseApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  useEffect(() => {
+    // Load the Google API script when the component mounts
+    const loadGoogleScript = () => {
+      const script = document.createElement('script');
+      script.src = 'https://apis.google.com/js/platform.js';
+      script.async = true;
+      script.onload = initializeGoogleSignIn;
+      document.body.appendChild(script);
+    };
+
+    const initializeGoogleSignIn = () => {
+      (window as any).gapi.load('auth2', () => {
+        (window as any).gapi.auth2.init({
+          client_id: 'AIzaSyDpIaiuRrQcE8Get-eXXhOI8R_Unr7GawQ',
+        });
+      });
+    };
+
+    loadGoogleScript();
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      const user = result.user;
+
+      console.log('Google User:', user);
+      console.log('Google Access Token:', token);
+
+      // Here you can send the user data to your backend server for validation and login
+      navigate('/');
+    } catch (error) {
+      console.error('Error during Google Sign-In:', error);
+      window.alert('An unexpected error occurred during Google Sign-In. Please try again.');
+    }
+  };
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email validation regex
@@ -30,86 +74,24 @@ const Login: React.FC = () => {
       return;
     }
 
-    const url = 'https://tradeagently.dev/login';
-    const bodyData = {
-      email: email.trim(),
-      password: password.trim(),
-    };
-
     try {
-      const response = await fetch(url, {
+      const response = await fetch('https://tradeagently.dev/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
       });
 
       const data = await response.json();
 
-      if (data.session_token != null) {
-        // Store the session token in context
+      if (data.status === 'Success' && data.session_token) {
         setSessionToken(data.session_token);
-        console.log('Session Token:', data.session_token);
-
-        // Fetch username with the session token
-        const usernameResponse = await fetch('https://tradeagently.dev/get-username', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_token: data.session_token }),
-        });
-
-        const usernameData = await usernameResponse.json();
-
-        if (usernameData.status === 'Success') {
-          console.log('Username:', usernameData.username);
-          // Store the username in context
-          setUsername(usernameData.username);
-        } else {
-          window.alert(usernameData.message || 'Failed to fetch username.');
-        }
-
-        // Fetch email with the session token
-        const emailResponse = await fetch('https://tradeagently.dev/get-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_token: data.session_token }),
-        });
-
-        const emailData = await emailResponse.json();
-
-        if (emailData.status === 'Success') {
-          setUserEmail(emailData.email);
-        } else {
-          window.alert(emailData.message || 'Failed to fetch email.');
-        }
-
-        // Fetch profile icon with the session token
-        const profileIconResponse = await fetch('https://tradeagently.dev/get-profile-icon', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_token: data.session_token }),
-        });
-
-        const profileIconData = await profileIconResponse.json();
-
-        if (profileIconData.status === 'Success') {
-          setProfileIconUrl(profileIconData.profile_icon_url);
-        } else {
-          window.alert(profileIconData.message || 'Failed to fetch profile icon.');
-        }
 
         // Navigate to the home page or any other protected route
         navigate('/');
       } else {
-        // Handle errors (e.g., invalid credentials)
-        window.alert(data.message || 'Login failed. Please try again.');
+        window.alert(data.message || 'Login failed. Please check your credentials and try again.');
       }
     } catch (error) {
       console.error('Error during login:', error);
@@ -138,6 +120,9 @@ const Login: React.FC = () => {
       />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+        <Text style={styles.buttonText}>Login with Google</Text>
       </TouchableOpacity>
       {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <TouchableOpacity onPress={() => navigate('/register')} style={styles.registerLink}>
@@ -177,6 +162,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
+    marginBottom: 15,
+  },
+  googleButton: {
+    width: '30%',
+    height: 50,
+    backgroundColor: '#DB4437', // Red background for Google button
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 15,
   },
   buttonText: {
     color: 'white',

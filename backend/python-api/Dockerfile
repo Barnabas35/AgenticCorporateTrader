@@ -10,6 +10,7 @@ ADD stock_api_access.py .
 ADD query_library/ ./query_library/
 ADD stripe_webhooks/ ./stripe_webhooks/
 ADD function_library/ ./function_library/
+ADD background_tasks/ ./background_tasks/
 ADD yfinance_requests/ ./yfinance_requests/
 ADD polygon_request_library/ ./polygon_request_library/
 
@@ -24,6 +25,7 @@ RUN pip install flask-cors
 RUN pip install polygon-api-client
 RUN pip install yfinance
 RUN pip install stripe
+RUN pip install boto3
 
 # Run the application
 CMD ["python", "main.py"]

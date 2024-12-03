@@ -13,6 +13,7 @@ import StockSearch from './app/stock-search';
 import About from './app/about'
 import ClientManagement from './app/client-management';
 import Admin from './app/admin';
+import MyAssets from './app/my-assets';
 import { View, StyleSheet } from 'react-native'; // Import View and StyleSheet for layout
 import { UserProvider } from './components/userContext';
 
@@ -25,7 +26,7 @@ const App: React.FC = () => {
           <View style={styles.content}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/login-register" element={<Login />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/register" element={<Register />} />
               <Route path="/user-account" element={<UserAccount />} />
@@ -34,6 +35,7 @@ const App: React.FC = () => {
               <Route path="/crypto-search" element={<CryptoSearch />} />
               <Route path="/stock-search" element={<StockSearch />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/my-assets" element={< MyAssets />} />
             </Routes>
           </View>
         </View>

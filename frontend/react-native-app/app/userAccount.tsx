@@ -16,10 +16,11 @@ const UserAccount: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [debugMessage, setDebugMessage] = useState(''); // Debug message state
+  const [userType, setUserType] = useState<string | null>(null); // Store user type
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (username && email && profileIconUrl) {
+    if (username && email && profileIconUrl && userType) {
       setLoading(false);
       return;
     }
@@ -49,7 +50,6 @@ const UserAccount: React.FC = () => {
         });
         const usernameData = await usernameResponse.json();
 
-
         const emailResponse = await fetch('https://tradeagently.dev/get-email', {
           method: 'POST',
           headers: {
@@ -59,10 +59,25 @@ const UserAccount: React.FC = () => {
         });
         const emailData = await emailResponse.json();
 
-        if (usernameData.status === 'Success' && emailData.status === 'Success' && iconData.status === 'Success') {
+        const userTypeResponse = await fetch('https://tradeagently.dev/get-user-type', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_token: sessionToken }),
+        });
+        const userTypeData = await userTypeResponse.json();
+
+        if (
+          usernameData.status === 'Success' &&
+          emailData.status === 'Success' &&
+          iconData.status === 'Success' &&
+          userTypeData.status === 'Success'
+        ) {
           setUsername(usernameData.username);
           setEmail(emailData.email);
           setProfileIconUrl(iconData.url);
+          setUserType(userTypeData.user_type); // Set user type
         } else {
           setModalVisible(true);
         }
@@ -135,9 +150,13 @@ const UserAccount: React.FC = () => {
         </View>
         <Text style={styles.text}>Username: {username}</Text>
         <Text style={styles.text}>Email: {email}</Text>
+        <Text style={styles.text}>User Type: {userType}</Text>
         <Button title="Logout" onPress={handleLogout} />
-        <View style={styles.spacer} /> {/* Spacer between buttons */}
-        <Button title="Delete Account" color="red" onPress={handleDeleteAccount} /> 
+        <View style={styles.spacer} />
+        {/* Conditionally render the Delete Account button */}
+        {userType !== 'admin' && (
+          <Button title="Delete Account" color="red" onPress={handleDeleteAccount} />
+        )}
       </View>
 
       <Modal
@@ -201,7 +220,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   spacer: {
-    height: 20, // Space between buttons
+    height: 20,
   },
   modalBackground: {
     flex: 1,

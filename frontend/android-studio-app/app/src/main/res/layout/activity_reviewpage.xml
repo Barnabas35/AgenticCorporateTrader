@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -29,180 +30,152 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- User Name -->
-    <TextView
-        android:id="@+id/username"
+    <!-- Scrollable Form Content -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:padding="12dp"
-        android:text="Your name"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_height="0dp"
+        android:padding="5dp"
+        app:layout_constraintTop_toBottomOf="@id/assetsToolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/assetsToolbar" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <EditText
-        android:id="@+id/editTextName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#E0E0E0"
-        android:background="@drawable/btn_bg"
-        android:hint="Your Name"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <!-- Question about Features -->
-    <TextView
-        android:id="@+id/textViewQuestionEase"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:padding="12dp"
-        android:text="How easy and user-friendly did you find TradeAgently?"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTextName" />
+            <!-- User Name -->
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your name"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:layout_marginTop="12dp" />
 
-    <EditText
-        android:id="@+id/editTextEaseOfUse"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#E0E0E0"
-        android:background="@drawable/btn_bg"
-        android:gravity="top"
-        android:hint="Your Answer"
-        android:minHeight="40dp"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewQuestionEase" />
+            <EditText
+                android:id="@+id/editTextName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#E0E0E0"
+                android:background="@drawable/btn_bg"
+                android:hint="Your Name"
+                android:padding="12dp" />
 
-    <!-- Question about Features -->
-    <TextView
-        android:id="@+id/textViewQuestionFeatures"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:padding="12dp"
-        android:text="Which features did you like the most?"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTextEaseOfUse" />
+            <!-- Question about Ease of Use -->
+            <TextView
+                android:id="@+id/textViewQuestionEase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="12dp"
+                android:text="How easy and user-friendly did you find TradeAgently?"
+                android:textColor="#000000"
+                android:textSize="16sp" />
 
-    <EditText
-        android:id="@+id/editTextFeatures"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#E0E0E0"
-        android:background="@drawable/btn_bg"
-        android:gravity="top"
-        android:hint="Your Answer"
-        android:minHeight="40dp"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewQuestionFeatures" />
+            <EditText
+                android:id="@+id/editTextEaseOfUse"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#E0E0E0"
+                android:background="@drawable/btn_bg"
+                android:gravity="top"
+                android:hint="Your Answer"
+                android:minHeight="40dp"
+                android:padding="12dp" />
 
-    <!-- Question about Overall Satisfaction -->
-    <TextView
-        android:id="@+id/textViewQuestionSatisfaction"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:padding="12dp"
-        android:text="How satisfied are you with the overall experience?"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTextFeatures" />
+            <!-- Question about Features -->
+            <TextView
+                android:id="@+id/textViewQuestionFeatures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="12dp"
+                android:text="Which features did you like the most?"
+                android:textColor="#000000"
+                android:textSize="16sp" />
 
-    <EditText
-        android:id="@+id/editTextSatisfaction"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#E0E0E0"
-        android:background="@drawable/btn_bg"
-        android:gravity="top"
-        android:hint="Your Answer"
-        android:minHeight="40dp"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewQuestionSatisfaction" />
+            <EditText
+                android:id="@+id/editTextFeatures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#E0E0E0"
+                android:background="@drawable/btn_bg"
+                android:gravity="top"
+                android:hint="Your Answer"
+                android:minHeight="40dp"
+                android:padding="12dp" />
 
-    <!-- User Review Input -->
-    <TextView
-        android:id="@+id/textViewAdditionalComments"
-        android:layout_width="412dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="8dp"
-        android:padding="12dp"
-        android:text="Please provide any additional comments:"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSatisfaction" />
+            <!-- Question about Overall Satisfaction -->
+            <TextView
+                android:id="@+id/textViewQuestionSatisfaction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="12dp"
+                android:text="How satisfied are you with the overall experience?"
+                android:textColor="#000000"
+                android:textSize="16sp" />
 
-    <EditText
-        android:id="@+id/editTextReview"
-        android:layout_width="411dp"
-        android:layout_height="88dp"
-        android:backgroundTint="#E0E0E0"
-        android:background="@drawable/btn_bg"
-        android:gravity="top"
-        android:hint="Additional Comments..."
-        android:minHeight="100dp"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewAdditionalComments" />
+            <EditText
+                android:id="@+id/editTextSatisfaction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#E0E0E0"
+                android:background="@drawable/btn_bg"
+                android:gravity="top"
+                android:hint="Your Answer"
+                android:minHeight="40dp"
+                android:padding="12dp" />
 
-    <!-- Rating Bar -->
-    <RatingBar
-        android:id="@+id/ratingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:numStars="5"
-        android:stepSize="1.0"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editTextReview" />
+            <!-- Additional Comments -->
+            <TextView
+                android:id="@+id/textViewAdditionalComments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:text="Please provide any additional comments:"
+                android:textColor="#000000"
+                android:textSize="16sp" />
 
-    <!-- Submit Button -->
-    <Button
-        android:id="@+id/buttonSubmit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Submit"
-        android:backgroundTint="@color/primary"
-        android:background="@drawable/btn_bg"
-        android:textColor="@color/white"
-        android:padding="12dp"
-        app:layout_constraintTop_toBottomOf="@id/ratingBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+            <EditText
+                android:id="@+id/editTextReview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#E0E0E0"
+                android:background="@drawable/btn_bg"
+                android:gravity="top"
+                android:hint="Additional Comments..."
+                android:minHeight="100dp"
+                android:padding="12dp" />
+
+            <!-- Rating Bar -->
+            <RatingBar
+                android:id="@+id/ratingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:numStars="5"
+                android:stepSize="1.0"
+                android:layout_gravity="center" />
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/buttonSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Submit"
+                android:backgroundTint="@color/primary"
+                android:background="@drawable/btn_bg"
+                android:textColor="@color/white"
+                android:padding="12dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

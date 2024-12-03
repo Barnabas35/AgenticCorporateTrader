@@ -131,13 +131,18 @@ Body (JSON):
   "session_token": "string"
 }
 Response: JSON - List of clients and status message
-Example:
+Example 1 (when fm):
 {
-  "clients": [                                              // If user type is "fa" then the user id is returned
-    {"client_name": "client1", "id": "AgSO2FnIP46FA"},      // This user id should be used as client id in other requests
-    {"client_name": "client2", "id": "AgSO2FnIP46FB"}
+  "clients": [
+    {"client_name": "client1", "client_id": "AgSO2FnIP46FA"},
+    {"client_name": "client2", "client_id": "AgSO2FnIP46FB"}
   ],
   "status": "Success"
+}
+Example 2 (when fa):
+{
+  "clients": [{"client_name": "Fund Administrator", "client_id": "AgSO2FnIP46FA"}],   // If user type is "fa" then the user id is returned
+  "status": "Success"                                                                 // This user id should be used as client id in other requests
 }
 
 
@@ -566,7 +571,68 @@ Example:
 }
 
 
-# Add balance -----------------------------------------
+### Get user list as admin ------------------------------
+URL & Method: POST /get-user-list
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - List of users and status message
+Example:
+{
+    "status": "Success",
+    "user_list": [
+        {
+            "email": "milosz@gmail.com",
+            "id": "1W0lH5oMGPsGBvG0A",
+            "password": "96cae35c8a9b24418bf24966c2c1b8385723a9a6b8358cddca0a1e",
+            "session_token": "",
+            "user_type": "fm",
+            "username": "Milosz"
+        },
+        {
+            "email": "kbooks1@gmail.com",
+            "id": "9e8YODxoCKswYH0DW",
+            "password": "091e6bb938c4e6925b1b927682b8bbeaad44109889b6c38dea54a49ee4",
+            "session_token": "hRAiBp69AeU0POanxvrlNw3LV69BlWfhAsxKf6xFAi1mDiv5vfJBHh0ZlO6M",
+            "user_type": "fa",
+            "username": "kbooks1"
+        },
+        {
+            "email": "user2@gmail.com",
+            "id": "E6xQPxkSI4Znq61Vb",
+            "password": "6025d1fe48abd4168528f18a2e265dd98d41a7084aa09f6141703901a3",
+            "session_token": "VJSawERPfifve3Lk36Mm141jZqY2zLmpa9zoRqpGxxph2QZp0n8i1RUWKZBG",
+            "user_type": "fa",
+            "username": "user2"
+        },
+        {
+            "email": "menel@gmail.com",
+            "id": "H3Ek22fwlQcic7kpV",
+            "password": "c5b6783c56b7662e2d3d64220e69a2c356c21f173d7926762ccda643d6",
+            "session_token": "TOTpcEM8LFzaSJs7VI0dxt1KOOCqyM35VaedV3iVTUeGRvelsSCRLloXm8SU",
+            "user_type": "fa",
+            "username": "menel"
+        }
+    ]
+}
+
+
+### Admin delete user -----------------------------------
+URL & Method: POST /admin-delete-user
+{
+  "session_token": "string",        // User session token of an admin
+  "id": "string"                    // User ID
+}
+Example:
+{
+  "status": "Success"
+}
+
+
+### Add balance -----------------------------------------
 URL & Method: POST /add-balance
 Headers:
  - Content-Type: application/json
@@ -583,7 +649,7 @@ Example:
 }
 
 
-# Purchase asset --------------------------------------
+### Purchase asset --------------------------------------
 URL & Method: POST /purchase-asset
 Headers:
  - Content-Type: application/json
@@ -602,7 +668,7 @@ Example:
 }
 
 
-# Get user assets -------------------------------------
+### Get user assets -------------------------------------
 URL & Method: POST /get-user-assets
 Headers:
  - Content-Type: application/json
@@ -623,7 +689,7 @@ Example:
 }
 
 
-# Get asset -------------------------------------------
+### Get asset -------------------------------------------
 URL & Method: POST /get-asset
 Headers:
  - Content-Type: application/json
@@ -642,7 +708,7 @@ Example:
 }
 
 
-# Sell asset ------------------------------------------
+### Sell asset ------------------------------------------
 URL & Method: POST /sell-asset
 Headers:
  - Content-Type: application/json
@@ -661,7 +727,7 @@ Example:
 }
 
 
-# Get asset report ------------------------------------
+### Get asset report ------------------------------------
 URL & Method: POST /get-asset-report
 Headers:
  - Content-Type: application/json
@@ -670,7 +736,7 @@ Body (JSON):
   "session_token": "string",
   "market": "string",            // "stocks" or "crypto"
   "client_id": "string"          // Client id (or user id for "fa" user type)
-  "ticker_symbol": "string"      // Ticker symbol with no -USD suffix
+  "ticker": "string"      // Ticker symbol with no -USD suffix
 }
 Response: JSON - Asset report and status message
 Example:
@@ -678,4 +744,103 @@ Example:
     "profit": -0.006719999999999615,    // Profit in USD over all transactions including past ones already withdrawn
     "status": "Success",
     "total_usd_invested": 10            // USD invested - withdrawn
+}
+
+
+### Exchange tokens -------------------------------------
+URL & Method: POST /exchange-tokens
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "auth_token": "string"               // Auth token from firebase
+}
+Response: JSON - Session token and status message
+Example 1 (When user already exists):
+{
+    "session_token": "yh1vtDb71lexRhXJJW2gnQhzv",
+    "status": "Success"
+}
+Example 2 (When user does not exist):
+{
+    "status": "Success: Register User"
+}
+
+
+### Register with token ---------------------------------
+URL & Method: POST /register-with-token
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "auth_token": "string",              // Auth token from firebase
+  "user_type": "string"                // "fa" or "fm"
+}
+Response: JSON - Session token and status message
+Example:
+{
+    "status": "Success"
+}
+
+
+### Create price alert ----------------------------------
+URL & Method: POST /create-price-alert
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "ticker": "string",             // Ticker symbol with no -USD suffix
+  "price": "float",               // Price to trigger alert
+  "market": "string"              // "stocks" or "crypto"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
+}
+
+
+### Get price alerts ------------------------------------
+URL & Method: POST /get-price-alerts
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - List of price alerts and status message
+Example:
+{
+    "price_alerts": [
+        {
+            "alert_id": "string",
+            "market": "stocks",
+            "price": 123.45,
+            "ticker": "AAPL"
+        },
+        {
+            "alert_id": "string",
+            "market": "crypto",
+            "price": 12345.67,
+            "ticker": "BTC"
+        }
+    ],
+    "status": "Success"
+}
+
+
+### Delete price alert ----------------------------------
+URL & Method: POST /delete-price-alert
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "alert_id": "string"
+}
+Response: JSON - Status message
+Example:
+{
+  "status": "Success"
 }

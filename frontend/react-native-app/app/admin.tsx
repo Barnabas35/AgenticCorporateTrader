@@ -110,25 +110,33 @@ const AdminPage: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
+  
     try {
       const response = await fetch('https://tradeagently.dev/get-user-list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken }),
       });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
       const data = await response.json();
+  
       if (data.status === 'Success') {
-        setUsers(data.user_list);
+        setUsers(data.user_list); // Update state with user list
       } else {
-        setError('Failed to fetch users');
+        setError(data.message || 'Failed to fetch users');
       }
     } catch (err) {
       console.error('Error fetching users:', err);
-      setError('Failed to fetch users');
+      setError('Failed to fetch users. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+  
 
   const deleteUser = async (userId: string) => {
     Alert.alert('Confirm', 'Are you sure you want to delete this user?', [

@@ -2,8 +2,10 @@
 # This python script is responsible for running the Flask application.
 # Database queries are not handled in this script.
 
+from background_tasks.check_alerts import check_alerts
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import threading
 
 app = Flask(__name__)
 CORS(app)
@@ -196,6 +198,20 @@ def get_crypto_aggregates():
     return jsonify(api_get_crypto_aggregates(request.json)), 200
 
 
+# Admin get user list
+@app.route("/get-user-list", methods=["POST"])
+def admin_get_user_list():
+    from query_library.get_user_list import q_get_user_list
+    return jsonify(q_get_user_list(request.json)), 200
+
+
+# Admin delete user
+@app.route("/admin-delete-user", methods=["POST"])
+def admin_delete_user():
+    from query_library.admin_delete_user import q_admin_delete_user
+    return jsonify(q_admin_delete_user(request.json)), 200
+
+
 # Get balance
 @app.route("/get-balance", methods=["POST"])
 def get_balance():
@@ -258,5 +274,47 @@ def payment_webhook():
     from stripe_webhooks.payment_webhook import q_payment_webhook
     return jsonify(q_payment_webhook(request)), 200
 
+  
+# Exchange tokens
+@app.route("/exchange-tokens", methods=["POST"])
+def exchange_tokens():
+    from query_library.exchange_tokens import q_exchange_tokens
+    return jsonify(q_exchange_tokens(request.json)), 200
+
+
+# Register with token
+@app.route("/register-with-token", methods=["POST"])
+def register_with_token():
+    from query_library.register_with_token import q_register_with_token
+    return jsonify(q_register_with_token(request.json)), 200
+
+
+# Create price alert
+@app.route("/create-price-alert", methods=["POST"])
+def create_price_alert():
+    from query_library.create_price_alert import q_create_price_alert
+    return jsonify(q_create_price_alert(request.json)), 200
+
+
+# Get price alerts
+@app.route("/get-price-alerts", methods=["POST"])
+def get_price_alerts():
+    from query_library.get_price_alerts import q_get_price_alerts
+    return jsonify(q_get_price_alerts(request.json)), 200
+
+
+# Delete price alert
+@app.route("/delete-price-alert", methods=["POST"])
+def delete_price_alert():
+    from query_library.delete_price_alert import q_delete_price_alert
+    return jsonify(q_delete_price_alert(request.json)), 200
+
+
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=80)
+
+    # Start background task to check price alerts
+    thread = threading.Thread(target=check_alerts, daemon=True)
+    thread.start()
+
+    # Run Flask app
+    app.run(debug=True, host="0.0.0.0", port=80, use_reloader=False)

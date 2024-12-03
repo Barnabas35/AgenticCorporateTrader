@@ -1,0 +1,162 @@
+[
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_stock_selector.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_stock_selector.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable-w50dp_tradeagentlylogogray.png.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable-w50dp/tradeagentlylogogray.png"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_ic_chart.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/ic_chart.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_launcher_background.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_menu_selector.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_menu_selector.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_menu.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_menu.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_burger_menu.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_burger_menu.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_drawer_menu.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/drawer_menu.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_stock.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_stock.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_bottom_nav_menu.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_stock_green.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_stock_green.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_ic_more.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/ic_more.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/xml_data_extraction_rules.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_assets_selector.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_assets_selector.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_assets.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_assets.xml"
+    },
+    {
+        "merged": "com.example.act_app-debug-31:/layout_activity_menu.xml.flat",
+        "source": "com.example.act_app-main-33:/layout/activity_menu.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_menu.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_menu.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_my_assets.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_my_assets.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_stock.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_stock.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_main.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable-w50dp_tradeagentlylogo.png.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable-w50dp/tradeagentlylogo.png"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_register.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_register.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/xml_backup_rules.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_btn_bg.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/btn_bg.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_menu_green.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_menu_green.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_login.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_login.xml"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_assets_green.xml.flat",
+        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_assets_green.xml"
+    }
+]

@@ -10,7 +10,7 @@ import {
   Modal,
   Button,
 } from 'react-native';
-import { useUser } from './userContext'; // Import the user context
+import { useUser } from './userContext';
 import { FontAwesome } from '@expo/vector-icons';
 
 const Menu: React.FC = () => {
@@ -19,6 +19,7 @@ const Menu: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState<boolean>(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -42,8 +43,36 @@ const Menu: React.FC = () => {
       }
     };
 
+    const fetchBalance = async () => {
+      try {
+        const response = await fetch('https://tradeagently.dev/get-balance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_token: sessionToken }),
+        });
+
+        const data = await response.json();
+        if (data.status === 'Success') {
+          setBalance(data.balance);
+        } else {
+          console.error('Failed to fetch balance');
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
+
     if (sessionToken) {
       fetchUserType();
+      fetchBalance();
+
+      const intervalId = setInterval(() => {
+        fetchBalance();
+      }, 10000); // Every 10 seconds
+
+      return () => clearInterval(intervalId); // Clear the interval when the component unmounts
     }
 
     const handleResize = () => {
@@ -73,6 +102,11 @@ const Menu: React.FC = () => {
           />
         </NavLink>
 
+        {/* Display Balance */}
+        {balance !== null && (
+          <Text style={styles.balanceText}>Balance: ${balance.toFixed(2)}</Text>
+        )}
+
         {/* Mobile View - Burger Menu */}
         {isMobileView ? (
           <TouchableOpacity
@@ -94,6 +128,7 @@ const Menu: React.FC = () => {
                         <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
                       </NavLink>
                     )}
+                    <View style={styles.spacer} />
                     {userType === 'fa' && (
                       <NavLink
                         to="/client-management"
@@ -104,6 +139,7 @@ const Menu: React.FC = () => {
                         <FontAwesome name="users" size={16} color="white" /> Client Management
                       </NavLink>
                     )}
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/crypto-search"
                       style={({ isActive }) =>
@@ -112,6 +148,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="bitcoin" size={16} color="white" /> Crypto Search
                     </NavLink>
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/stock-search"
                       style={({ isActive }) =>
@@ -120,6 +157,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="line-chart" size={16} color="white" /> Stock Search
                     </NavLink>
+                    <View style={styles.spacer} />
                     <NavLink
                       to="/user-account"
                       style={({ isActive }) =>
@@ -128,6 +166,7 @@ const Menu: React.FC = () => {
                     >
                       <FontAwesome name="user" size={16} color="white" /> User Account
                     </NavLink>
+                    <View style={styles.spacer} />
                   </>
                 ) : (
                   <NavLink
@@ -166,31 +205,36 @@ const Menu: React.FC = () => {
             {sessionToken ? (
               <>
                 {userType === 'admin' && (
-                  <>
-                    <NavLink
-                      to="/admin"
-                      style={({ isActive }) =>
-                        isActive ? styles.activeMenuItem : styles.menuItem
-                      }
-                    >
-                      <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
-                    </NavLink>
-                    <View style={styles.spacer} />
-                  </>
+                  <NavLink
+                    to="/admin"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="wrench" size={18} color="white" /> Admin Tools
+                  </NavLink>
+                )}
+                {userType === 'fm' && (
+                  <NavLink
+                    to="/client-management"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="users" size={18} color="white" /> Client Management
+                  </NavLink>
                 )}
                 {userType === 'fa' && (
-                  <>
-                    <NavLink
-                      to="/client-management"
-                      style={({ isActive }) =>
-                        isActive ? styles.activeMenuItem : styles.menuItem
-                      }
-                    >
-                      <FontAwesome name="users" size={18} color="white" /> Client Management
-                    </NavLink>
-                    <View style={styles.spacer} />
-                  </>
+                  <NavLink
+                    to="/my-assets"
+                    style={({ isActive }) =>
+                      isActive ? styles.activeMenuItem : styles.menuItem
+                    }
+                  >
+                    <FontAwesome name="list-alt" size={18} color="white" /> My Assets
+                  </NavLink>
                 )}
+                <View style={styles.spacer} />
                 <NavLink
                   to="/crypto-search"
                   style={({ isActive }) =>
@@ -220,7 +264,7 @@ const Menu: React.FC = () => {
               </>
             ) : (
               <NavLink
-                to="/login-register"
+                to="/login"
                 style={({ isActive }) =>
                   isActive ? styles.activeMenuItem : styles.menuItem
                 }
@@ -261,9 +305,10 @@ const Menu: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  // Styles remain the same as provided.
   container: {
-    backgroundColor: '#282424', // Gray color
-    height: 105, // Reduced height of the navbar
+    backgroundColor: '#282424',
+    height: 105,
     flexDirection: 'column',
     justifyContent: 'flex-start',
     zIndex: 1,
@@ -275,7 +320,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   menuOpen: {
-    height: 400, // Expands the height when burger menu is open
+    height: 400,
   },
   title: {
     textDecorationLine: 'none',
@@ -290,8 +335,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    left: '50%',
+    left: '55%',
     transform: [{ translateX: '-50%' }],
+    width: '100%',
   },
   menuItem: {
     backgroundColor: '#4CAF50',
@@ -307,7 +353,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 5, // Adding shadow for visual effect
+    shadowRadius: 5,
   },
   activeMenuItem: {
     backgroundColor: '#E85759',
@@ -324,6 +370,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
+  },
+  balanceText: {
+    fontSize: 18,
+    color: 'white',
+    marginLeft: 20,
+    fontWeight: 'bold',
   },
   dropdownItem: {
     padding: 15,

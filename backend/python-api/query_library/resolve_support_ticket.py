@@ -1,6 +1,7 @@
 
 from db_access import DBAccess
 from function_library.security_string_parsing import firestore_safe
+from function_library.send_email import send_email_smtp
 
 
 def q_resolve_support_ticket(request_json):
@@ -66,7 +67,10 @@ def q_resolve_support_ticket(request_json):
     user_email = result.to_dict()["email"]
 
     # Send email to user with response
-    # To be implemented
+    email_status = send_email_smtp(user_email, response_subject, response_body)
+
+    if email_status["status"] != "Success":
+        return {"status": "Support ticket resolved but email failed to send."}
 
     # Return status
     return {"status": "Success"}
