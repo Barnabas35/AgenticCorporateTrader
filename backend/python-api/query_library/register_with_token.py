@@ -20,6 +20,9 @@ def q_register_with_token(request_json):
     if user_type != "admin" and user_type != "fa" and user_type != "fm":
         return {"status": "Invalid user type."}
 
+    # Connect to the database
+    db = DBAccess.get_db()
+
     # Verify the auth token
     try:
         decoded_token = auth.verify_id_token(auth_token)
@@ -29,10 +32,7 @@ def q_register_with_token(request_json):
     # Retrieve email, uid, and name from the decoded token
     email = decoded_token["email"]
     uid = decoded_token["uid"]
-    username = decoded_token["display_name"]
-
-    # Connect to the database
-    db = DBAccess.get_db()
+    username = decoded_token["name"]
 
     # Finding matching email in database
     result = db.collection("users").where(field_path="email", op_string="==", value=email).get()

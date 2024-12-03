@@ -313,8 +313,8 @@ def delete_price_alert():
 if __name__ == "__main__":
 
     # Start background task to check price alerts
-    thread = threading.Thread(target=check_alerts, daemon=True)
-    thread.start()
+    #thread = threading.Thread(target=check_alerts, daemon=True)
+    #thread.start()
 
     # Run Flask app
     app.run(debug=True, host="0.0.0.0", port=80, use_reloader=False)
