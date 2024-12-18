@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -45,6 +47,8 @@ dependencies {
     implementation(libs.androidx.room.compiler) {
         exclude(group = "com.intellij", module = "annotations")
     }
+    implementation(libs.play.services.basement)
+    implementation(libs.firebase.common.ktx)
 
     // Testing dependencies
     testImplementation(libs.junit)
@@ -70,5 +74,14 @@ dependencies {
 
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    //Stripe
+    implementation ("com.stripe:stripe-android:21.2.0")
+
+    // Firebase Authentication
+    implementation ("com.google.firebase:firebase-auth-ktx:22.1.1")
+
+    // Google Sign-In
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
 }
 

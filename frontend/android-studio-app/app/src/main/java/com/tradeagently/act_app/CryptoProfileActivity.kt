@@ -3,12 +3,9 @@ package com.tradeagently.act_app
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color.BLUE
-import android.graphics.Color.RED
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
@@ -19,12 +16,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
-import java.util.Locale
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
+import java.util.*
+import kotlin.math.abs
 
 class CryptoProfileActivity : AppCompatActivity() {
 
@@ -37,10 +30,8 @@ class CryptoProfileActivity : AppCompatActivity() {
     private lateinit var volumeTextView: TextView
     private lateinit var openPriceTextView: TextView
     private lateinit var lineChart: LineChart
-    private lateinit var startDateInput: EditText
-    private lateinit var endDateInput: EditText
-    private lateinit var intervalSpinner: Spinner
-    private lateinit var submitButton: Button
+    private lateinit var timeframeSpinner: Spinner
+    private lateinit var searchButton: Button
 
     private var userType: String = ""
     private var clientId: String = ""
@@ -51,23 +42,23 @@ class CryptoProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_crypto_profile)
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Initialize TextViews, EditTexts, and LineChart variables
+        // Initialize views
         initializeViews()
 
         // Fetch user type and client_id
         fetchUserDetails()
 
-        // Add TextWatcher to format dates
-        setupDateInputFormatters()
-
         // Display crypto information from the Intent
         displayCryptoInfoFromIntent()
 
-        // Fetch and display crypto aggregates in the chart
-        fetchCryptoAggregates()
+        // Initially fetch default aggregates (e.g., Last Day by default)
+        fetchDefaultAggregates()
 
-        // Handle user-submitted date ranges and intervals
-        setupSubmitButton()
+        // Handle "SEARCH" button click
+        searchButton.setOnClickListener {
+            val selectedTimeframe = timeframeSpinner.selectedItem.toString()
+            applyTimeframeFilter(selectedTimeframe)
+        }
 
         // Handle Buy Button Click
         val buyCryptoButton: Button = findViewById(R.id.buyCryptoButton)
@@ -141,56 +132,16 @@ class CryptoProfileActivity : AppCompatActivity() {
         volumeTextView = findViewById(R.id.volumeTextView)
         openPriceTextView = findViewById(R.id.openPriceTextView)
         lineChart = findViewById(R.id.cryptoLineChart)
-        startDateInput = findViewById(R.id.startDateInput)
-        endDateInput = findViewById(R.id.endDateInput)
-        intervalSpinner = findViewById(R.id.intervalSpinner)
-        submitButton = findViewById(R.id.submitButton)
+        timeframeSpinner = findViewById(R.id.timeframeSpinner)
+        searchButton = findViewById(R.id.searchButton)
+
+        // Populate timeframeSpinner with options
+        val options = listOf("Last Hour", "Last Day", "Last Week", "Last Month", "Last Year")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        timeframeSpinner.adapter = adapter
+        timeframeSpinner.setSelection(1) // Default to Last Day
     }
-
-
-    private fun setupDateInputFormatters() {
-        val dateTextWatcher = object : TextWatcher {
-            private var isUpdating = false
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isUpdating || s.isNullOrEmpty()) return
-                isUpdating = true
-
-                val input = s.toString().replace("-", "") // Remove any existing dashes
-                val formatted = StringBuilder()
-
-                try {
-                    if (input.length > 4) {
-                        formatted.append(input.substring(0, 4)).append("-")
-                        if (input.length > 6) {
-                            formatted.append(input.substring(4, 6)).append("-")
-                            formatted.append(input.substring(6))
-                        } else {
-                            formatted.append(input.substring(4))
-                        }
-                    } else {
-                        formatted.append(input)
-                    }
-
-                    // Update the text without resetting the cursor
-                    s.replace(0, s.length, formatted.toString())
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    isUpdating = false
-                }
-            }
-        }
-
-        // Attach the TextWatcher to both date input fields
-        startDateInput.addTextChangedListener(dateTextWatcher)
-        endDateInput.addTextChangedListener(dateTextWatcher)
-    }
-
 
     private fun displayCryptoInfoFromIntent() {
         val symbol = intent.getStringExtra("symbol")
@@ -212,26 +163,55 @@ class CryptoProfileActivity : AppCompatActivity() {
         openPriceTextView.text = "Open: ${String.format("%.6f", open)}"
     }
 
-    private fun setupSubmitButton() {
-        submitButton.setOnClickListener {
-            val startDate = startDateInput.text.toString()
-            val endDate = endDateInput.text.toString()
-            val interval = intervalSpinner.selectedItem.toString()
+    private fun fetchDefaultAggregates() {
+        // Default to "Last Day"
+        applyTimeframeFilter("Last Day")
+    }
 
-            if (startDate.isEmpty() || endDate.isEmpty()) {
-                Log.e("CryptoProfileActivity", "Start date and end date must be filled.")
-                return@setOnClickListener
+    private fun applyTimeframeFilter(timeframe: String) {
+        val now = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val endDate = dateFormat.format(now.time)
+
+        val (startCalendar, interval) = when (timeframe) {
+            "Last Hour" -> {
+                // For the last hour, we still request the last day's data, but use a 1m interval.
+                // Adjust this logic if the backend API requires a different time window approach.
+                now.add(Calendar.DAY_OF_YEAR, -1)
+                Pair(now, "1m")
             }
-
-            // Fetch and update chart with user-defined parameters
-            fetchCryptoAggregates(startDate, endDate, interval)
+            "Last Day" -> {
+                now.add(Calendar.DAY_OF_YEAR, -1)
+                Pair(now, "1h")
+            }
+            "Last Week" -> {
+                now.add(Calendar.DAY_OF_YEAR, -7)
+                Pair(now, "1d")
+            }
+            "Last Month" -> {
+                now.add(Calendar.MONTH, -1)
+                Pair(now, "1d")
+            }
+            "Last Year" -> {
+                now.add(Calendar.YEAR, -1)
+                Pair(now, "1d")
+            }
+            else -> {
+                // Fallback to Last Day
+                now.add(Calendar.DAY_OF_YEAR, -1)
+                Pair(now, "1h")
+            }
         }
+
+        val startDate = dateFormat.format(startCalendar.time)
+        fetchCryptoAggregates(startDate, endDate, interval)
     }
 
     private fun fetchCryptoAggregates(
-        startDate: String = "2024-11-15",
-        endDate: String = "2024-11-17",
-        interval: String = "1h"
+        startDate: String,
+        endDate: String,
+        interval: String
     ) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val sessionToken = sharedPreferences.getString("session_token", null)
@@ -243,10 +223,7 @@ class CryptoProfileActivity : AppCompatActivity() {
             return
         }
 
-        Log.d(
-            "CryptoProfileActivity",
-            "Fetching aggregates for $cryptoSymbol from $startDate to $endDate with interval: $interval"
-        )
+        Log.d("CryptoProfileActivity", "Fetching aggregates for $cryptoSymbol from $startDate to $endDate with interval: $interval")
 
         val request = CryptoAggregatesRequest(
             crypto = cryptoSymbol,
@@ -256,19 +233,22 @@ class CryptoProfileActivity : AppCompatActivity() {
             interval = interval
         )
 
-        val apiService = RetrofitClient.createService(ApiService::class.java)
-        apiService.getCryptoAggregates(request)
+        RetrofitClient.apiService.getCryptoAggregates(request)
             .enqueue(object : Callback<CryptoAggregatesResponse> {
                 override fun onResponse(
                     call: Call<CryptoAggregatesResponse>,
                     response: Response<CryptoAggregatesResponse>
                 ) {
                     if (response.isSuccessful && response.body()?.status == "Success") {
-                        val data = response.body()?.crypto_aggregates
+                        var data = response.body()?.crypto_aggregates
                         if (data.isNullOrEmpty()) {
-                            lineChart.setNoDataText("No available data for this period. Try adjusting the date range.")
+                            lineChart.setNoDataText("No available data for this period. Try another timeframe.")
                             lineChart.invalidate()
                         } else {
+                            // Limit the last hour to only the first 60 aggregates
+                            if (interval == "1m") {
+                                data = data.take(60)
+                            }
                             updateChartWithData(data)
                         }
                     } else {
@@ -278,7 +258,7 @@ class CryptoProfileActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<CryptoAggregatesResponse>, t: Throwable) {
-                    lineChart.setNoDataText("Failed to load data. Please check your network connection and try again.")
+                    lineChart.setNoDataText("Failed to load data. Check your network connection.")
                     lineChart.invalidate()
                 }
             })
@@ -301,15 +281,18 @@ class CryptoProfileActivity : AppCompatActivity() {
         val lineDataSet = LineDataSet(entries, "Close Price").apply {
             lineWidth = 2f
             color = BLUE
-            setCircleColor(RED)
-            circleRadius = 3f
+            setCircleColor(BLUE)
+            circleRadius = 2f
+            setDrawValues(false)
         }
 
-        lineChart.data = LineData(lineDataSet)
+        val lineData = LineData(lineDataSet)
+        lineChart.data = lineData
         lineChart.xAxis.apply {
             valueFormatter = IndexAxisValueFormatter(dateLabels)
             granularity = 1f
         }
+        lineChart.description.text = "Close Price Over Time"
         lineChart.invalidate()
     }
 
@@ -396,13 +379,6 @@ class CryptoProfileActivity : AppCompatActivity() {
             return
         }
 
-        // Debug logs for confirmation
-        Log.d("CryptoProfileActivity", "Executing Buy Transaction:")
-        Log.d("CryptoProfileActivity", "Ticker: $ticker")
-        Log.d("CryptoProfileActivity", "Quantity: $quantity")
-        Log.d("CryptoProfileActivity", "Client ID: $clientId")
-        Log.d("CryptoProfileActivity", "Session Token: $sessionToken")
-
         val request = PurchaseAssetRequest(
             session_token = sessionToken,
             usd_quantity = quantity,
@@ -413,7 +389,6 @@ class CryptoProfileActivity : AppCompatActivity() {
 
         RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                Log.d("CryptoProfileActivity", "Response code: ${response.code()}")
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     Toast.makeText(this@CryptoProfileActivity, "Successfully bought $ticker!", Toast.LENGTH_SHORT).show()
                 } else {

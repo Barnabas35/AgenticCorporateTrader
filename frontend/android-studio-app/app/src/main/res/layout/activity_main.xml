@@ -10,9 +10,15 @@
     tools:context=".MainActivity">
 
     <!-- Toolbar with centered title -->
+
+    <!-- Login Button -->
+
+    <!-- Register Button -->
+
+    <!-- Toolbar with centered title -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/materialToolbar"
-        android:layout_width="0dp"
+        android:layout_width="417dp"
         android:layout_height="77dp"
         android:background="#272727"
         android:minHeight="?attr/actionBarSize"
@@ -23,26 +29,26 @@
 
         <ImageView
             android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/tradeagentlylogo" />
+            android:layout_width="441dp"
+            android:layout_height="90dp"
+            app:srcCompat="@drawable/tradeagentlylogo"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
+
     </com.google.android.material.appbar.MaterialToolbar>
-
-    <!-- Login Button -->
-
-    <!-- Register Button -->
 
     <Button
         android:id="@+id/loginButton"
         android:layout_width="250dp"
         android:layout_height="60dp"
-        android:layout_marginStart="80dp"
-        android:layout_marginTop="224dp"
+        android:layout_marginTop="192dp"
         android:background="@drawable/btn_bg"
         android:backgroundTint="#4CAF50"
         android:text="LOGIN"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/materialToolbar"
         app:layout_constraintWidth_percent="0.6" />
