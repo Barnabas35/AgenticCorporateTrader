@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -155,7 +156,7 @@ class LoginActivity : AppCompatActivity() {
                         }
                         "Success: Register User" -> {
                             // User does not exist, redirect to register with token
-                            registerWithToken(authToken)
+                            showUserTypeSelectionDialog(authToken)
                         }
                         "Invalid auth token." -> {
                             // Show a message and sign out to retry
@@ -185,8 +186,33 @@ class LoginActivity : AppCompatActivity() {
         sharedPreferences.edit().putString("session_token", sessionToken).apply()
     }
 
-    private fun registerWithToken(authToken: String) {
-        val request = RegisterWithTokenRequest(auth_token = authToken, user_type = "fa") // or "fm"
+    private fun showUserTypeSelectionDialog(firebaseToken: String) {
+        val userTypeOptions = arrayOf("Fund Administrator", "Fund Manager")
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Select User Type")
+        builder.setItems(userTypeOptions) { dialog, which ->
+            val selectedUserType = when (userTypeOptions[which]) {
+                "Fund Administrator" -> "fa"
+                "Fund Manager" -> "fm"
+                else -> throw IllegalArgumentException("Unknown user type selected.")
+            }
+
+            dialog.dismiss()
+            // Now call registerWithToken again, this time with the chosen userType
+            registerWithToken(firebaseToken, selectedUserType)
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun registerWithToken(authToken: String, userType: String) {
+        val request = RegisterWithTokenRequest(auth_token = authToken, user_type = userType)
 
         RetrofitClient.apiService.registerWithToken(request).enqueue(object : Callback<RegisterWithTokenResponse> {
             override fun onResponse(call: Call<RegisterWithTokenResponse>, response: Response<RegisterWithTokenResponse>) {

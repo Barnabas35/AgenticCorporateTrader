@@ -1,14 +1,16 @@
 package com.tradeagently.act_app
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import androidx.appcompat.app.AlertDialog
+import com.google.android.gms.auth.api.signin.*
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import retrofit2.Call
@@ -94,13 +96,13 @@ class RegisterActivity : AppCompatActivity() {
 
         // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            // Replace with your web client ID
-            .requestIdToken("YOUR-WEB-CLIENT-ID.apps.googleusercontent.com")
+            .requestIdToken("68009005920-gkrtmda8m8hrq0273t5ptgsr1voivf0n.apps.googleusercontent.com")
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        // Handle Google Sign-In button click
         googleSignInButton.setOnClickListener {
             // Clear cached token before initiating sign-in
             googleSignInClient.signOut().addOnCompleteListener {
@@ -108,6 +110,9 @@ class RegisterActivity : AppCompatActivity() {
                 startActivityForResult(signInIntent, RC_SIGN_IN)
             }
         }
+
+        // Initialize Firebase
+        initializeFirebase()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -132,17 +137,16 @@ class RegisterActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        // Firebase sign-in successful
                         val user = FirebaseAuth.getInstance().currentUser
                         if (user != null) {
+                            // Get the Firebase Auth token
                             user.getIdToken(true).addOnCompleteListener { tokenTask ->
                                 if (tokenTask.isSuccessful) {
                                     val firebaseToken = tokenTask.result?.token
                                     if (!firebaseToken.isNullOrEmpty()) {
-                                        // Register user with token
-                                        // Assign a default user type if not chosen yet (e.g., "fa" or "fm")
-                                        // Or show a prompt to the user to pick a type before calling this
-                                        val defaultUserType = "fa" // Or you can prompt user to select
-                                        registerWithToken(firebaseToken, defaultUserType)
+                                        // Now you have a Firebase token suitable for your backend
+                                        exchangeTokens(firebaseToken)
                                     } else {
                                         Toast.makeText(this, "Could not retrieve Firebase token", Toast.LENGTH_SHORT).show()
                                     }
@@ -160,6 +164,105 @@ class RegisterActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Failed to retrieve Google ID token", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun exchangeTokens(authToken: String) {
+        val request = ExchangeTokensRequest(auth_token = authToken)
+
+        // Make API call
+        RetrofitClient.apiService.exchangeTokens(request).enqueue(object : Callback<ExchangeTokensResponse> {
+            override fun onResponse(
+                call: Call<ExchangeTokensResponse>,
+                response: Response<ExchangeTokensResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val exchangeResponse = response.body()
+                    when (exchangeResponse?.status) {
+                        "Success" -> {
+                            // Save the session token and proceed
+                            exchangeResponse.session_token?.let {
+                                saveSessionToken(it)
+                            }
+                            navigateToAssetsActivity()
+                        }
+                        "Success: Register User" -> {
+                            // User does not exist, ask them to pick a user type
+                            showUserTypeSelectionDialog(authToken)
+                        }
+                        "Invalid auth token." -> {
+                            // Show a message and sign out to retry
+                            Toast.makeText(this@RegisterActivity, "Invalid token. Please try signing in again.", Toast.LENGTH_LONG).show()
+                            googleSignInClient.signOut().addOnCompleteListener {
+                                val signInIntent = googleSignInClient.signInIntent
+                                startActivityForResult(signInIntent, RC_SIGN_IN)
+                            }
+                        }
+                        else -> {
+                            Toast.makeText(this@RegisterActivity, "Unexpected status: ${exchangeResponse?.status}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this@RegisterActivity, "Error exchanging tokens.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ExchangeTokensResponse>, t: Throwable) {
+                Toast.makeText(this@RegisterActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun saveSessionToken(sessionToken: String) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putString("session_token", sessionToken).apply()
+    }
+
+    private fun showUserTypeSelectionDialog(firebaseToken: String) {
+        val userTypeOptions = arrayOf("Fund Administrator", "Fund Manager")
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Select User Type")
+        builder.setItems(userTypeOptions) { dialog, which ->
+            val selectedUserType = when (userTypeOptions[which]) {
+                "Fund Administrator" -> "fa"
+                "Fund Manager" -> "fm"
+                else -> throw IllegalArgumentException("Unknown user type selected.")
+            }
+
+            dialog.dismiss()
+            // Now call registerWithToken again, this time with the chosen userType
+            registerWithToken(firebaseToken, selectedUserType)
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun registerWithToken(authToken: String, userType: String) {
+        val request = RegisterWithTokenRequest(auth_token = authToken, user_type = userType)
+
+        RetrofitClient.apiService.registerWithToken(request).enqueue(object : Callback<RegisterWithTokenResponse> {
+            override fun onResponse(call: Call<RegisterWithTokenResponse>, response: Response<RegisterWithTokenResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@RegisterActivity, "Registration successful!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@RegisterActivity, "Failed to register with token.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<RegisterWithTokenResponse>, t: Throwable) {
+                Toast.makeText(this@RegisterActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun navigateToAssetsActivity() {
+        startActivity(Intent(this@RegisterActivity, MyAssetsActivity::class.java))
+        finish()
     }
 
     private fun registerViaEmailPassword(registerRequest: RegisterRequest) {
@@ -185,25 +288,21 @@ class RegisterActivity : AppCompatActivity() {
         })
     }
 
-    private fun registerWithToken(authToken: String, userType: String) {
-        val request = RegisterWithTokenRequest(auth_token = authToken, user_type = userType)
-        RetrofitClient.apiService.registerWithToken(request).enqueue(object : Callback<RegisterWithTokenResponse> {
-            override fun onResponse(
-                call: Call<RegisterWithTokenResponse>,
-                response: Response<RegisterWithTokenResponse>
-            ) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    Toast.makeText(this@RegisterActivity, "Registration successful via Google!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this@RegisterActivity, "Failed to register with token.", Toast.LENGTH_SHORT).show()
-                }
-            }
+    private fun initializeFirebase() {
+        val options = FirebaseOptions.Builder()
+            .setApiKey("AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko") // Corrected API key
+            .setApplicationId("1:68009005920:android:2c5b77919be0a2d0e60405") // Corrected app ID
+            .setProjectId("agenticcorporatetrader") // Verified project ID
+            .setDatabaseUrl("https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app") // Corrected database URL
+            .build()
 
-            override fun onFailure(call: Call<RegisterWithTokenResponse>, t: Throwable) {
-                Toast.makeText(this@RegisterActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+        try {
+            // Initialize Firebase only if not already initialized
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                FirebaseApp.initializeApp(this, options)
             }
-        })
+        } catch (e: Exception) {
+            Log.e("FirebaseInit", "Error initializing Firebase: ${e.message}")
+        }
     }
 }
