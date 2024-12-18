@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.tradeagently.act_app" />
+                  <option name="mobileSdkAppId" value="1:68009005920:android:2c5b77919be0a2d0e60405" />
+                  <option name="projectId" value="agenticcorporatetrader" />
+                  <option name="projectNumber" value="68009005920" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

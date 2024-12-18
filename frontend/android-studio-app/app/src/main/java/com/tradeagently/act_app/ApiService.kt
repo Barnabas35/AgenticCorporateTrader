@@ -398,6 +398,28 @@ data class AssetReportResponse(
     val total_usd_invested: Double
 )
 
+// Request for exchanging tokens
+data class ExchangeTokensRequest(
+    val auth_token: String
+)
+
+// Response for exchanging tokens
+data class ExchangeTokensResponse(
+    val session_token: String?,
+    val status: String
+)
+
+// Request for registering with a token
+data class RegisterWithTokenRequest(
+    val auth_token: String,
+    val user_type: String
+)
+
+// Response for registering with a token
+data class RegisterWithTokenResponse(
+    val status: String
+)
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -540,4 +562,12 @@ interface ApiService {
     // Endpoint for getting an asset report
     @POST("/get-asset-report")
     fun getAssetReport(@Body assetReportRequest: AssetReportRequest): Call<AssetReportResponse>
+
+    // Endpoint for exchanging tokens
+    @POST("/exchange-tokens")
+    fun exchangeTokens(@Body request: ExchangeTokensRequest): Call<ExchangeTokensResponse>
+
+    // Endpoint for registering with a token
+    @POST("/register-with-token")
+    fun registerWithToken(@Body request: RegisterWithTokenRequest): Call<RegisterWithTokenResponse>
 }

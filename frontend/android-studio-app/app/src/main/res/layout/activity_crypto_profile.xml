@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundLight">
 
-    <!-- Toolbar with Crypto Symbol and Name -->
+    <!-- Toolbar with Crypto Symbol -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/cryptoProfileToolbar"
         android:layout_width="0dp"
@@ -62,68 +62,36 @@
                 android:layout_marginBottom="16dp"
                 android:background="#E0E0E0" />
 
-            <!-- Input fields for startDate, endDate, and interval -->
+            <!-- Timeframe Spinner and Search Button -->
             <LinearLayout
-                android:id="@+id/inputFieldsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:padding="8dp">
-
-                <!-- Start Date Input -->
-                <EditText
-                    android:id="@+id/startDateInput"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="2024-11-15"
-                    android:inputType="date"
-                    android:padding="8dp"
-                    android:background="@drawable/input_field_background"
-                    android:textSize="14sp" />
-
-                <!-- End Date Input -->
-                <EditText
-                    android:id="@+id/endDateInput"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:hint="2024-11-17"
-                    android:inputType="date"
-                    android:padding="8dp"
-                    android:background="@drawable/input_field_background"
-                    android:textSize="14sp" />
-
-                <!-- Spinner for Interval Selection -->
-                <Spinner
-                    android:id="@+id/intervalSpinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/input_field_background"
-                    android:padding="8dp"
-                    android:spinnerMode="dropdown"
-                    android:entries="@array/interval_options" />
-
-            </LinearLayout>
-
-            <!-- Submit Button -->
-            <Button
-                android:id="@+id/submitButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:padding="8dp"
-                android:backgroundTint="@color/primary"
-                android:background="@drawable/btn_bg"
-                android:text="Submit"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp">
+
+                <Spinner
+                    android:id="@+id/timeframeSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_field_background"
+                    android:padding="8dp"
+                    android:spinnerMode="dropdown" />
+
+                <Button
+                    android:id="@+id/searchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:padding="8dp"
+                    android:background="@drawable/btn_bg"
+                    android:text="SEARCH"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/primary"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <!-- Crypto Details (Open, Close, High, Low, Volume) -->
             <LinearLayout
@@ -137,7 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Open: 68746.79"
+                    android:text="Open: "
                     android:textSize="14sp" />
 
                 <TextView
@@ -145,7 +113,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Latest Price: 68899.84"
+                    android:text="Latest Price: "
                     android:textSize="14sp" />
 
                 <TextView
@@ -153,7 +121,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="High: 68873.02"
+                    android:text="High: "
                     android:textSize="14sp" />
 
                 <TextView
@@ -161,7 +129,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Low: 68261.33"
+                    android:text="Low: "
                     android:textSize="14sp" />
 
                 <TextView
@@ -169,7 +137,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Volume: 36003250176"
+                    android:text="Volume: "
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -194,13 +162,12 @@
                     android:padding="8dp" />
             </LinearLayout>
 
-            <!-- Description and Homepage -->
+            <!-- Description -->
             <TextView
                 android:id="@+id/descriptionTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Description: Bitcoin (BTC) is a cryptocurrency launched in 2010..."
                 android:textSize="14sp" />
 
             <TextView
