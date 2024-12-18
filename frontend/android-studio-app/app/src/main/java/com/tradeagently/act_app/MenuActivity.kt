@@ -6,8 +6,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MenuActivity : AppCompatActivity() {
+
+    private lateinit var profileButton: Button
+    private lateinit var reviewpageButton: Button
+    private lateinit var supportButton: Button
+    private lateinit var clientManagementButton: Button
+    private lateinit var adminToolsButton: Button
+    private lateinit var priceAlertsButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,36 +27,24 @@ class MenuActivity : AppCompatActivity() {
         // Set up the bottom navigation to handle navigation between activities
         NavigationHelper.setupBottomNavigation(this, R.id.nav_menu)
 
-        // Find the buttons
-        val profileButton = findViewById<Button>(R.id.profileButton)
-        val reviewpageButton = findViewById<Button>(R.id.reviewpageButton)
-        val supportButton = findViewById<Button>(R.id.supportButton)
-        val clientManagementButton = findViewById<Button>(R.id.clientManagementButton)
-        val adminToolsButton = findViewById<Button>(R.id.adminToolsButton)
-        val priceAlertsButton = findViewById<Button>(R.id.priceAlertsButton)
+        // Initialize buttons
+        profileButton = findViewById(R.id.profileButton)
+        reviewpageButton = findViewById(R.id.reviewpageButton)
+        supportButton = findViewById(R.id.supportButton)
+        clientManagementButton = findViewById(R.id.clientManagementButton)
+        adminToolsButton = findViewById(R.id.adminToolsButton)
+        priceAlertsButton = findViewById(R.id.priceAlertsButton)
 
-        // Retrieve the user type from SharedPreferences
+        // Attempt to fetch user type from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val userType = sharedPreferences.getString("user_type", "")
+        val storedUserType = sharedPreferences.getString("user_type", null)
 
-        // Conditionally show/hide buttons based on user type
-        when (userType) {
-            "admin" -> {
-                adminToolsButton.visibility = View.VISIBLE
-                clientManagementButton.visibility = View.GONE
-            }
-            "fa" -> {
-                clientManagementButton.visibility = View.GONE
-                adminToolsButton.visibility = View.GONE
-            }
-            "fm" -> {
-                clientManagementButton.visibility = View.VISIBLE
-                adminToolsButton.visibility = View.GONE
-            }
-            else -> {
-                adminToolsButton.visibility = View.GONE
-                clientManagementButton.visibility = View.GONE
-            }
+        if (storedUserType.isNullOrEmpty()) {
+            // If user type not stored locally, fetch it from server
+            fetchUserTypeFromServer()
+        } else {
+            // If we already have the user type, set the UI
+            setUIBasedOnUserType(storedUserType)
         }
 
         // Set click listeners for each button
@@ -83,6 +82,63 @@ class MenuActivity : AppCompatActivity() {
             val intent = Intent(this, PriceAlertsActivity::class.java)
             startActivity(intent)
             overridePendingTransition(0, 0)
+        }
+    }
+
+    private fun fetchUserTypeFromServer() {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) {
+            Toast.makeText(this, "No session token found. Please log in.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val request = TokenRequest(sessionToken)
+        RetrofitClient.apiService.getUserType(request).enqueue(object : Callback<UserTypeResponse> {
+            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val userType = response.body()?.user_type
+                    if (!userType.isNullOrEmpty()) {
+                        // Store user type in SharedPreferences
+                        val editor = sharedPreferences.edit()
+                        editor.putString("user_type", userType)
+                        editor.apply()
+
+                        // Update UI
+                        setUIBasedOnUserType(userType)
+                    } else {
+                        Toast.makeText(this@MenuActivity, "Failed to retrieve user type.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@MenuActivity, "Failed to fetch user type from server.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
+                Toast.makeText(this@MenuActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun setUIBasedOnUserType(userType: String) {
+        when (userType) {
+            "admin" -> {
+                adminToolsButton.visibility = View.VISIBLE
+                clientManagementButton.visibility = View.GONE
+            }
+            "fa" -> {
+                clientManagementButton.visibility = View.GONE
+                adminToolsButton.visibility = View.GONE
+            }
+            "fm" -> {
+                clientManagementButton.visibility = View.VISIBLE
+                adminToolsButton.visibility = View.GONE
+            }
+            else -> {
+                adminToolsButton.visibility = View.GONE
+                clientManagementButton.visibility = View.GONE
+            }
         }
     }
 }
