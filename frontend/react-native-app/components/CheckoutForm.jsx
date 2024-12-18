@@ -11,7 +11,9 @@ export default function CheckoutForm() {
   const elements = useElements();
   const location = useLocation();
   const navigate = useNavigate();
-  const { clientSecret } = location.state || {};
+  
+  // Destructure amount along with clientSecret from state
+  const { clientSecret, amount } = location.state || {};
 
   const [message, setMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +38,7 @@ export default function CheckoutForm() {
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
+        // Optionally, include the amount in the payment confirmation if needed
         return_url: `${window.location.origin}/complete`,
       },
     });
@@ -89,8 +92,12 @@ export default function CheckoutForm() {
         <div style={styles.paymentElementContainer}>
           <PaymentElement id="payment-element" options={paymentElementOptions} />
         </div>
-        <button type="submit" disabled={isLoading || !stripe || !elements} style={styles.button}>
-          {isLoading ? <span>Loading...</span> : "Pay now"}
+        <button 
+          type="submit" 
+          disabled={isLoading || !stripe || !elements} 
+          style={styles.button}
+        >
+          {isLoading ? <span>Loading...</span> : `Pay Now $${amount?.toFixed(2) || '0.00'}`}
         </button>
         {message && <div id="payment-message" style={styles.message}>{message}</div>}
       </form>

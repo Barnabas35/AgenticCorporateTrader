@@ -10,6 +10,8 @@ import {
   ScrollView,
   Modal,
   Alert,
+  TextStyle,
+  ViewStyle
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 import { Line } from 'react-chartjs-2';
@@ -68,6 +70,7 @@ const StockSearch: React.FC = () => {
   });
   const [historyWindow, setHistoryWindow] = useState<string>('month');
   const [interval, setIntervalValue] = useState<string>('day');
+
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [buyAmount, setBuyAmount] = useState<string>('');
   const [isFundManager, setIsFundManager] = useState(false);
@@ -77,11 +80,12 @@ const StockSearch: React.FC = () => {
   const [alertPrice, setAlertPrice] = useState<string>(''); 
   const [alertTicker, setAlertTicker] = useState<string | null>(null);
 
-
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     fetchTopStocks();
     fetchUserType();
+    fetchBalance();
   }, []);
 
   useEffect(() => {
@@ -90,22 +94,20 @@ const StockSearch: React.FC = () => {
     }
   }, [interval, historyWindow, selectedStock]);
 
-  const fetchTopStocks = async (limit = 10) => {
-    setLoading(true);
-    setError(null);
+  const fetchBalance = async () => {
+    if (!sessionToken) return;
     try {
-      const response = await fetch(`https://tradeagently.dev/get-top-stocks?limit=${limit}`);
+      const response = await fetch('https://tradeagently.dev/get-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
       const data = await response.json();
       if (data.status === 'Success') {
-        setTopStocks(data.ticker_details);
-      } else {
-        setError('Failed to fetch top stocks');
+        setBalance(data.balance);
       }
-    } catch (error) {
-      console.error('Error fetching top stocks:', error);
-      setError('Failed to fetch top stocks');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching balance:', err);
     }
   };
 
@@ -120,16 +122,16 @@ const StockSearch: React.FC = () => {
       if (data.status === 'Success') {
         if (data.user_type === 'fm') {
           setIsFundManager(true);
-          fetchClients(); // Fetch clients for Fund Managers
+          fetchClients();
         } else if (data.user_type === 'fa') {
-          fetchClients(); // Fetch client for Fund Administrator
+          fetchClients();
         }
       }
     } catch (err) {
       console.error('Error fetching user type:', err);
     }
   };
-  
+
   const fetchClients = async () => {
     try {
       const response = await fetch(`https://tradeagently.dev/get-client-list`, {
@@ -140,7 +142,6 @@ const StockSearch: React.FC = () => {
       const data = await response.json();
       if (data.status === 'Success') {
         setClients(data.clients);
-        // Automatically set the selected client if the user is a Fund Administrator
         if (data.clients.length === 1) {
           setSelectedClient(data.clients[0].client_id);
         }
@@ -151,7 +152,24 @@ const StockSearch: React.FC = () => {
       console.error('Error fetching clients:', err);
     }
   };
-  
+
+  const fetchTopStocks = async (limit = 10) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`https://tradeagently.dev/get-top-stocks?limit=${limit}`);
+      const data = await response.json();
+      if (data.status === 'Success') {
+        setTopStocks(data.ticker_details);
+      } else {
+        setError('Failed to fetch top stocks');
+      }
+    } catch {
+      setError('Failed to fetch top stocks');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -188,45 +206,99 @@ const StockSearch: React.FC = () => {
     }
   };
 
+  const fetchStockDetails = async (ticker: string, callback: () => void = () => {}) => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://tradeagently.dev/get-ticker-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticker, session_token: sessionToken }),
+      });
+      const data = await response.json();
+
+      if (data.status === 'Success') {
+        setSelectedStock(data.ticker_info);
+        callback();
+      } else {
+        Alert.alert('Error', 'Failed to fetch stock details.');
+      }
+    } catch (err) {
+      console.error('Error fetching stock details:', err);
+      Alert.alert('Error', 'An error occurred while fetching stock details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  function getIntervalAndLimit(historyWindow: string): { interval: string; limit: number } {
+    switch (historyWindow) {
+      case 'hour':
+        // Last hour: maybe 60 data points (1 per minute)
+        return { interval: 'hour', limit: 60 };
+      case 'day':
+        // Last day: 24 data points (1 per hour)
+        return { interval: 'hour', limit: 24 };
+      case 'week':
+        // Last week: 7 data points (1 per day)
+        return { interval: 'day', limit: 7 };
+      case 'month':
+        // Last month: 30 data points (1 per day)
+        return { interval: 'day', limit: 30 };
+      case 'year':
+        // Last year: 365 data points (1 per day)
+        return { interval: 'day', limit: 365 };
+      default:
+        // Default: treat as month
+        return { interval: 'day', limit: 30 };
+    }
+  }
+  
   const fetchStockAggregates = async (ticker: string) => {
     setLoading(true);
     setError(null);
+  
+    const end = new Date();
+    const endDate = end.toISOString().split('T')[0];
     let startDate = '';
-    const endDate = new Date().toISOString().split('T')[0];
+  
+    // Determine the start_date based on historyWindow without changing state
     switch (historyWindow) {
       case 'hour':
-        setIntervalValue('minute');
-        startDate = new Date(Date.now() - 3600 * 1000).toISOString();
+        const oneHourAgo = new Date(end.getTime() - 3600 * 1000);
+        startDate = oneHourAgo.toISOString().split('T')[0];
         break;
       case 'day':
-        setIntervalValue('hour');
-        startDate = new Date(Date.now() - 86400 * 1000).toISOString().split('T')[0];
+        const oneDayAgo = new Date(end.getTime() - 86400 * 1000);
+        startDate = oneDayAgo.toISOString().split('T')[0];
         break;
       case 'week':
-        setIntervalValue('day');
-        startDate = new Date(Date.now() - 7 * 86400 * 1000).toISOString().split('T')[0];
+        const oneWeekAgo = new Date(end.getTime() - 7 * 86400 * 1000);
+        startDate = oneWeekAgo.toISOString().split('T')[0];
         break;
       case 'month':
-        setIntervalValue('day');
-        startDate = new Date(Date.now() - 30 * 86400 * 1000).toISOString().split('T')[0];
+        const oneMonthAgo = new Date(end.getTime() - 30 * 86400 * 1000);
+        startDate = oneMonthAgo.toISOString().split('T')[0];
         break;
       case 'year':
-        setIntervalValue('day');
-        startDate = new Date(Date.now() - 30 * 86400 * 1000 * 12).toISOString().split('T')[0];
+        const oneYearAgo = new Date(end.getTime() - 365 * 86400 * 1000);
+        startDate = oneYearAgo.toISOString().split('T')[0];
         break;
       default:
-        startDate = '2024-01-01';
+        const defaultStart = new Date(end.getTime() - 30 * 86400 * 1000);
+        startDate = defaultStart.toISOString().split('T')[0];
     }
-
+  
+    const { interval, limit } = getIntervalAndLimit(historyWindow);
+  
     const requestBody = {
       ticker,
       session_token: sessionToken,
       start_date: startDate,
       end_date: endDate,
       interval,
-      limit: 100,
+      limit,
     };
-
+  
     try {
       const response = await fetch('https://tradeagently.dev/get-ticker-aggregates', {
         method: 'POST',
@@ -234,17 +306,48 @@ const StockSearch: React.FC = () => {
         body: JSON.stringify(requestBody),
       });
       const data = await response.json();
-
+  
       if (data.status === 'Success' && Array.isArray(data.ticker_info)) {
-        const validData = data.ticker_info.filter((item: any) => item.close !== undefined);
-        setHistoricalData({
-          labels: validData.map((item: any) =>
-            historyWindow === 'hour'
-              ? new Date(item.t).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-              : new Date(item.t).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-          ),
-          prices: validData.map((item: any) => item.close),
+        let validData = data.ticker_info;
+  
+        if (historyWindow === 'hour' && validData.length === 0) {
+          setHistoricalData({ labels: [], prices: [] });
+          setError('No data available for the last hour timeframe.');
+          setLoading(false);
+          return;
+        }
+  
+        // Reverse so oldest data is on the left
+        validData.reverse();
+  
+        const labels = validData.map((item: any) => {
+          const dateObj = new Date(item.timestamp);
+          if (historyWindow === 'hour') {
+            // hour timeframe: show hour:minute
+            return dateObj.toLocaleString('en-US', {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true,
+            });
+          } else if (historyWindow === 'day') {
+            // day timeframe: show hour
+            return dateObj.toLocaleString('en-US', {
+              hour: 'numeric',
+              hour12: true,
+            });
+          } else {
+            // week/month/year: show date
+            return dateObj.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            });
+          }
         });
+  
+        const prices = validData.map((item: any) => item.close);
+  
+        setHistoricalData({ labels, prices });
       } else {
         setError(data.message || 'Failed to fetch stock aggregates');
       }
@@ -261,33 +364,36 @@ const StockSearch: React.FC = () => {
       Alert.alert('Error', 'Please enter a valid amount to buy.');
       return;
     }
-  
-    // Ensure the selected client is set for both Fund Manager and Fund Administrator
-    if ((isFundManager || clients.length === 1) && !selectedClient) {
-      Alert.alert('Error', 'Client information is missing. Please select a client or try again.');
+
+    if ((isFundManager || clients.length > 1) && !selectedClient) {
+      Alert.alert('Error', 'Please select a client.');
       return;
     }
-  
+
     if (!selectedStock?.symbol) {
       Alert.alert('Error', 'No stock selected for purchase.');
       return;
     }
-  
+
     const requestBody = {
       session_token: sessionToken,
-      client_id: isFundManager ? selectedClient : clients.length === 1 ? clients[0].client_id : undefined,
-      ticker: selectedStock.symbol, // Use the selected stock's symbol directly
+      client_id: isFundManager
+        ? selectedClient
+        : clients.length === 1
+        ? clients[0].client_id
+        : undefined,
+      ticker: selectedStock.symbol,
       usd_quantity: parseFloat(buyAmount),
       market: 'stocks',
     };
-  
+
     try {
       const response = await fetch(`https://tradeagently.dev/purchase-asset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
-  
+
       const data = await response.json();
       if (data.status === 'Success') {
         Alert.alert('Success', `Successfully purchased ${buyAmount} USD of ${selectedStock.symbol}.`);
@@ -306,16 +412,14 @@ const StockSearch: React.FC = () => {
   const confirmPriceAlert = async () => {
     if (!alertPrice || isNaN(parseFloat(alertPrice))) {
       Alert.alert('Error', 'Please enter a valid price.');
-      console.log("No price entered");
       return;
     }
-  
+
     if (!alertTicker) {
       Alert.alert('Error', 'No stock selected for the price alert.');
-      console.log("No ticker selected");
       return;
     }
-  
+
     try {
       const response = await fetch('https://tradeagently.dev/create-price-alert', {
         method: 'POST',
@@ -327,16 +431,16 @@ const StockSearch: React.FC = () => {
           market: 'stocks',
         }),
       });
-  
+
       const data = await response.json();
       if (data.status === 'Success') {
         Alert.alert(
           'Success',
-          `Price alert set for ${alertTicker} at ${alertPrice} USD. Notifications will be sent when the price is reached.`
+          `Price alert set for ${alertTicker} at ${alertPrice} USD.`
         );
         setPriceAlertModalVisible(false);
-        setAlertPrice(''); // Reset alertPrice after success
-        setAlertTicker(null); // Reset alertTicker after success
+        setAlertPrice('');
+        setAlertTicker(null);
       } else {
         Alert.alert('Error', data.message || 'Failed to set the price alert.');
       }
@@ -345,94 +449,29 @@ const StockSearch: React.FC = () => {
       Alert.alert('Error', 'An error occurred while setting the price alert.');
     }
   };
-  
-  
-  
-  
 
   const renderStockItem = ({ item }: { item: Stock }) => (
-    <View style={styles.stockItem}>
-      <TouchableOpacity
-        onPress={async () => {
-          setLoading(true);
-          try {
-            const response = await fetch('https://tradeagently.dev/get-ticker-info', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ticker: item.symbol, session_token: sessionToken }),
-            });
-  
-            const data = await response.json();
-  
-            if (data.status === 'Success') {
-              setSelectedStock(data.ticker_info);
-            } else {
-              Alert.alert('Error', 'Failed to fetch stock details.');
-            }
-          } catch (err) {
-            console.error('Error fetching stock details:', err);
-            Alert.alert('Error', 'An error occurred while fetching stock details.');
-          } finally {
-            setLoading(false);
-          }
-        }}
-      >
-        <View>
-          <Text style={styles.stockSymbol}>{item.symbol}</Text>
-          <Text>{item.company_name}</Text>
-          <Text style={styles.priceText}>
-            {item.price} {item.currency}
-          </Text>
-        </View>
+    <View style={styles.cryptoItem}>
+      <TouchableOpacity onPress={() => fetchStockDetails(item.symbol)}>
+        <Text style={styles.cryptoSymbol}>{item.symbol}</Text>
+        <Text>{item.company_name}</Text>
+        <Text style={styles.priceText}>{item.price} {item.currency}</Text>
       </TouchableOpacity>
-  
-      {/* Button Container for Buy and Price Alert */}
       <View style={styles.buttonContainer}>
-        {/* Buy Button */}
-        <TouchableOpacity
-          style={styles.buyButton}
-          onPress={async () => {
-            setLoading(true);
-            try {
-              const response = await fetch('https://tradeagently.dev/get-ticker-info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ticker: item.symbol, session_token: sessionToken }),
-              });
-  
-              const data = await response.json();
-  
-              if (data.status === 'Success') {
-                setSelectedStock(data.ticker_info);
-                setBuyModalVisible(true);
-              } else {
-                Alert.alert('Error', 'Failed to fetch stock details.');
-              }
-            } catch (err) {
-              console.error('Error fetching stock details:', err);
-              Alert.alert('Error', 'An error occurred while fetching stock details.');
-            } finally {
-              setLoading(false);
-            }
-          }}
-        >
+        <TouchableOpacity style={styles.buyButton} onPress={() => fetchStockDetails(item.symbol, () => setBuyModalVisible(true))}>
           <Text style={styles.buyButtonText}>Buy</Text>
         </TouchableOpacity>
-  
-        {/* Price Alert Button */}
-        <TouchableOpacity
-          style={styles.alertButton}
-          onPress={() => {
-            setAlertTicker(item.symbol);
-            setPriceAlertModalVisible(true);
-          }}
-        >
+        <TouchableOpacity style={styles.alertButton} onPress={() => {
+          setAlertTicker(item.symbol);
+          setPriceAlertModalVisible(true);
+        }}>
           <Text style={styles.alertButtonText}>Set Price Alert</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-  
+
+  const changePercentageColor = selectedStock?.change_percentage && selectedStock.change_percentage < 0 ? 'red' : 'green';
 
   return (
     <ScrollView style={styles.container}>
@@ -454,62 +493,113 @@ const StockSearch: React.FC = () => {
       {error && <Text style={styles.errorText}>{error}</Text>}
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {selectedStock ? (
-        <View style={styles.stockDetails}>
-          <Text style={styles.stockSymbol}>
+        <View style={styles.cryptoDetails}>
+          <Text style={styles.cryptoTitle}>
             {selectedStock.symbol} - {selectedStock.company_name}
           </Text>
-          <Text style={styles.description}>{selectedStock.company_description}</Text>
-          <Text style={styles.detailText}>
-            Current Price: {selectedStock.close_price} {selectedStock.currency}
-          </Text>
-          <Text style={styles.detailText}>
-            Open: {selectedStock.open_price}, High: {selectedStock.high_price}, Low: {selectedStock.low_price}
-          </Text>
-          <Text style={styles.detailText}>Volume: {selectedStock.volume}</Text>
-          <Text style={styles.detailText}>Employee Count: {selectedStock.employee_count}</Text>
-          <Text style={styles.sectionTitle}>Historical Data</Text>
-          <Picker selectedValue={historyWindow} onValueChange={(value) => setHistoryWindow(value)}>
-            <Picker.Item label="Last Hour" value="hour" />
-            <Picker.Item label="Last Day" value="day" />
-            <Picker.Item label="Last Week" value="week" />
-            <Picker.Item label="Last Month" value="month" />
-            <Picker.Item label="Last Year" value="year" />
-          </Picker>
-          <View style={styles.chartContainer}>
-            <Line
-              data={{
-                labels: historicalData.labels,
-                datasets: [
-                  {
-                    label: 'Price',
-                    data: historicalData.prices,
-                    borderColor: 'rgba(75,192,192,1)',
-                    borderWidth: 1,
-                    fill: false,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                plugins: { title: { display: true, text: 'Price History' } },
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    type: historyWindow === 'hour' ? 'time' : 'category',
-                    time: { unit: historyWindow === 'hour' ? 'minute' : 'day' },
-                  },
-                },
-              }}
-            />
+
+          {/* Info Container */}
+          <View style={styles.infoContainer}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Change %:</Text>
+              <Text style={[styles.infoValue, { color: changePercentageColor }]}>
+                {(selectedStock.change_percentage * 100).toFixed(2)}%
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Current Price:</Text>
+              <Text style={styles.infoValue}>{selectedStock.close_price} {selectedStock.currency.toUpperCase()}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Open:</Text>
+              <Text style={styles.infoValue}>{selectedStock.open_price}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>High:</Text>
+              <Text style={[styles.infoValue, { color: 'green' }]}>{selectedStock.high_price}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Low:</Text>
+              <Text style={[styles.infoValue, { color: 'red' }]}>{selectedStock.low_price}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Volume:</Text>
+              <Text style={styles.infoValue}>{selectedStock.volume}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Employees:</Text>
+              <Text style={styles.infoValue}>{selectedStock.employee_count}</Text>
+            </View>
+            {selectedStock.homepage && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Homepage:</Text>
+                <Text style={styles.infoValue}>{selectedStock.homepage}</Text>
+              </View>
+            )}
           </View>
+
+          {/* Historical Data & Chart Container */}
+          <View style={styles.chartSection}>
+            <Text style={styles.sectionTitle}>Historical Data</Text>
+            <View style={styles.dropdownWrapper}>
+              <Text style={styles.dropdownLabel}>Select Timeframe:</Text>
+              <View style={styles.customPickerContainer}>
+                <Picker
+                  selectedValue={historyWindow}
+                  onValueChange={(value) => setHistoryWindow(value)}
+                  style={styles.pickerStyle}
+                >
+                  <Picker.Item label="Last Hour" value="hour" />
+                  <Picker.Item label="Last Day" value="day" />
+                  <Picker.Item label="Last Week" value="week" />
+                  <Picker.Item label="Last Month" value="month" />
+                  <Picker.Item label="Last Year" value="year" />
+                </Picker>
+              </View>
+            </View>
+
+            <View style={styles.chartContainer}>
+              <Line
+                data={{
+                  labels: historicalData.labels,
+                  datasets: [
+                    {
+                      label: 'Price',
+                      data: historicalData.prices,
+                      borderColor: 'rgba(75,192,192,1)',
+                      borderWidth: 1,
+                      fill: false,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  plugins: { title: { display: true, text: 'Price History' } },
+                  maintainAspectRatio: false,
+                  scales: {
+                    x: {
+                      type: historyWindow === 'hour' ? 'time' : 'category',
+                      time: { unit: historyWindow === 'hour' ? 'minute' : 'day' },
+                    },
+                  },
+                }}
+              />
+            </View>
+          </View>
+
+          {/* Description Container */}
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.description}>{selectedStock.company_description}</Text>
+          </View>
+
           <TouchableOpacity
-            style={[styles.modalButton, styles.cancelButton]}
+            style={[styles.backButton]}
             onPress={() => {
               setSelectedStock(null);
               setSearchResults([]);
             }}
           >
-            <Text style={styles.modalButtonText}>Back</Text>
+            <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -519,14 +609,19 @@ const StockSearch: React.FC = () => {
           keyExtractor={(item) => item.symbol}
         />
       )}
+
       {/* Buy Modal */}
       <Modal visible={buyModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
+          <View style={styles.modalContainerSmall}>
             <Text style={styles.modalTitle}>Buy {selectedStock?.symbol}</Text>
+            {balance !== null && (
+              <Text style={styles.modalText}>Your Balance: ${balance.toFixed(2)}</Text>
+            )}
+            <Text style={styles.modalText}>Enter amount in USD:</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Enter amount in USD"
+              placeholder="USD Amount"
               keyboardType="numeric"
               value={buyAmount}
               onChangeText={setBuyAmount}
@@ -534,11 +629,11 @@ const StockSearch: React.FC = () => {
             {isFundManager && (
               <View style={styles.dropdownContainer}>
                 <Text style={styles.modalLabel}>Select Client:</Text>
-                <View style={styles.pickerWrapper}>
+                <View style={styles.customPickerContainer}>
                   <Picker
                     selectedValue={selectedClient}
                     onValueChange={(value) => setSelectedClient(value)}
-                    style={styles.picker}
+                    style={styles.pickerStyle}
                   >
                     <Picker.Item label="Select a client" value={null} />
                     {clients.map((client) => (
@@ -548,26 +643,30 @@ const StockSearch: React.FC = () => {
                 </View>
               </View>
             )}
-            <TouchableOpacity style={styles.modalButton} onPress={handleBuyStock}>
-              <Text style={styles.modalButtonText}>Confirm Purchase</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setBuyModalVisible(false)}
-            >
-              <Text style={styles.modalButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={[styles.modalButton, styles.flexButton]} onPress={handleBuyStock}>
+                <Text style={styles.modalButtonText}>Confirm Purchase</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton, styles.flexButton]} onPress={() => setBuyModalVisible(false)}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
-  
+
       {/* Price Alert Modal */}
       <Modal visible={priceAlertModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
+          <View style={styles.modalContainerSmall}>
             <Text style={styles.modalTitle}>Set Price Alert</Text>
+            {selectedStock && selectedStock.symbol === alertTicker && (
+              <Text style={styles.modalText}>
+                Current Price of {alertTicker}: ${selectedStock.close_price.toFixed(2)}
+              </Text>
+            )}
             <Text style={styles.modalText}>
-              Enter the alert price for {selectedStock?.symbol}:
+              Enter the alert price for {alertTicker}:
             </Text>
             <TextInput
               style={styles.modalInput}
@@ -576,176 +675,127 @@ const StockSearch: React.FC = () => {
               value={alertPrice}
               onChangeText={setAlertPrice}
             />
-            <TouchableOpacity style={styles.modalButton} onPress={confirmPriceAlert}>
-              <Text style={styles.modalButtonText}>Confirm Alert</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setPriceAlertModalVisible(false)}
-            >
-              <Text style={styles.modalButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={[styles.modalButton, styles.flexButton]} onPress={confirmPriceAlert}>
+                <Text style={styles.modalButtonText}>Confirm Alert</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancelButton, styles.flexButton]}
+                onPress={() => setPriceAlertModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
     </ScrollView>
   );
-  
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    width: '100%',
-  },
-  searchInput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  stockItem: {
+  container: { flex: 1, padding: 16, width: '100%' },
+  searchInput: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 16, paddingHorizontal: 8 },
+  errorText: { color: 'red', marginBottom: 16 },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
+  cryptoItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  stockSymbol: {
-    fontWeight: 'bold',
-  },
-  priceText: {
-    color: 'green',
-    fontWeight: 'bold',
-  },
-  stockDetails: {
-    padding: 16,
-  },
-  description: {
-    marginVertical: 8,
-    fontStyle: 'italic',
-  },
-  detailText: {
-    marginVertical: 4,
-    fontSize: 16,
-    color: '#333',
-  },
-  buyButton: {
-    backgroundColor: '#28a745',
-    padding: 10,
-    borderRadius: 5,
-  },
-  buyButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    padding: 20,
+  cryptoSymbol: { fontWeight: 'bold', fontSize: 16 },
+  priceText: { color: 'green', fontWeight: 'bold' },
+  cryptoDetails: { padding: 16 },
+  cryptoTitle: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+
+  infoContainer: {
+    backgroundColor: '#f9f9f9',
     borderRadius: 10,
-    width: '80%',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalInput: {
-    borderColor: '#ccc',
+    padding: 16,
+    marginBottom: 20,
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    height: 40,
-    marginBottom: 10,
+    borderColor: '#ddd',
+    alignSelf: 'flex-start', 
+    width: '100%',
   },
-  modalButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: 8,
   },
-  cancelButton: {
-    backgroundColor: '#FF494B',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    alignSelf: 'center',
-    marginTop: 20,
-    width: '40%',
+  infoLabel: { fontWeight: 'bold', fontSize: 16, color: '#333', width: 120 },
+  infoValue: { fontSize: 16, color: '#555' },
+
+  chartSection: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
-  modalButtonText: {
-    color: '#333',
-    fontWeight: 'bold',
-    fontSize: 14,
-    textAlign: 'center',
+  dropdownWrapper: {
+    marginBottom: 20,
   },
-  chartContainer: {
-    height: 300,
-    width: '85%',
-    alignSelf: 'center',
-    marginVertical: 20,
-  },
-  modalLabel: {
+  dropdownLabel: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#333',
   },
-  dropdownContainer: {
-    marginBottom: 16, // Add spacing below the dropdown
-  },
-  pickerWrapper: {
+  customPickerContainer: {
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    overflow: 'hidden', // Ensures the picker looks neat
-    backgroundColor: '#fff', // Optional for a better contrast
+    backgroundColor: '#fff',
+    overflow: 'hidden',
   },
-  picker: {
+  pickerStyle: {
     height: 40,
-    paddingHorizontal: 10,
-    color: '#333', // Text color
   },
-  modalText: {
-    fontSize: 16, // Adjust the font size as needed
-    color: '#333', // Dark gray text color
-    marginBottom: 10, // Spacing below the text
-    textAlign: 'center', // Center align the text
+  chartContainer: { height: 300, width: '100%', marginVertical: 20 },
+
+  descriptionContainer: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 16,
+    marginBottom: 20,
   },
+  description: { fontStyle: 'italic', fontSize: 16, textAlign: 'center', color: '#333' },
+
+  backButton: { backgroundColor: '#007bff', padding: 8, borderRadius: 5, alignSelf: 'center', marginVertical: 10, width: '40%' },
+  backButtonText: { color: 'white', fontWeight: 'bold', alignSelf: 'center' },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+    alignItems: 'center',
   },
-  alertButton: {
-    backgroundColor: '#FFAA00', // Yellow color for the alert button
+  buyButton: {
+    backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
-    marginLeft: 10, // Spacing between buttons
+    marginRight: 8,
   },
-  alertButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  
+  buyButtonText: { color: 'white', fontWeight: 'bold' },
+  alertButton: { backgroundColor: '#FFAA00', padding: 10, borderRadius: 5 },
+  alertButtonText: { color: 'white', fontWeight: 'bold' },
+
+  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  modalContainerSmall: { backgroundColor: 'white', padding: 20, borderRadius: 10, width: '70%' },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
+  modalText: { fontSize: 16, marginBottom: 10, textAlign: 'center', color: '#333' },
+  modalInput: { height: 40, borderColor: '#ccc', borderWidth: 1, borderRadius: 5, paddingHorizontal: 10, marginBottom: 10 },
+  modalButtonContainer: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10 },
+  modalButton: { backgroundColor: '#007bff', padding: 12, borderRadius: 5, alignItems: 'center', flex: 1, marginHorizontal: 5 },
+  modalCancelButton: { backgroundColor: '#FF494B' },
+  modalButtonText: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
+  flexButton: { flex: 1, marginHorizontal: 5 },
+
+  dropdownContainer: { marginBottom: 16 },
+  modalLabel: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: '#333' },
 });
 
 export default StockSearch;

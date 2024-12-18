@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import for navigation
-import { View, Text, StyleSheet, ActivityIndicator, TextInput, Button, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import { useSessionToken, useUser } from '../components/userContext';
 import BitcoinChart from '../components/BitcoinChart';
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const Home: React.FC = () => {
   const { username } = useUser();
@@ -11,6 +18,7 @@ const Home: React.FC = () => {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [addAmount, setAddAmount] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>(''); // State for error messages
   const navigate = useNavigate(); // React Router navigation
 
   useEffect(() => {
@@ -32,9 +40,11 @@ const Home: React.FC = () => {
           setBalance(data.balance);
         } else {
           console.error('Failed to fetch balance:', data);
+          setErrorMessage('Failed to fetch balance. Please try again.');
         }
       } catch (error) {
         console.error('Error fetching balance:', error);
+        setErrorMessage('An error occurred while fetching balance.');
       } finally {
         setLoading(false);
       }
@@ -44,8 +54,22 @@ const Home: React.FC = () => {
   }, [sessionToken]);
 
   const handleAddBalance = async () => {
-    if (!addAmount || isNaN(Number(addAmount))) {
-      Alert.alert('Invalid Amount', 'Please enter a valid number.');
+    // Clear any previous error messages
+    setErrorMessage('');
+
+    // Trim whitespace from input
+    const trimmedAmount = addAmount.trim();
+
+    // Validation: Check if input is empty
+    if (trimmedAmount === '') {
+      setErrorMessage('Please input an amount.');
+      return;
+    }
+
+    // Validation: Check if input is a valid positive number
+    const numericAmount = Number(trimmedAmount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      setErrorMessage('Please input a valid positive number.');
       return;
     }
 
@@ -55,23 +79,27 @@ const Home: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_token: sessionToken,
-          usd_quantity: Number(addAmount),
+          usd_quantity: numericAmount,
         }),
       });
 
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       if (data.status === 'Success') {
-        // Redirect to CheckoutForm with the clientSecret
+        // Redirect to CheckoutForm with clientSecret and amount
         navigate('/checkout', {
-          state: { clientSecret: data.client_secret, dpmCheckerLink: data.dpmCheckerLink },
+          state: { 
+            clientSecret: data.client_secret, 
+            dpmCheckerLink: data.dpmCheckerLink,
+            amount: numericAmount, // Pass the amount here
+          },
         });
       } else {
-        Alert.alert('Error', 'Failed to initiate payment. Please try again.');
+        setErrorMessage(data.message || 'Failed to initiate payment. Please try again.');
       }
     } catch (error) {
       console.error('Error initiating payment:', error);
-      Alert.alert('Error', 'An error occurred while initiating payment.');
+      setErrorMessage('An error occurred while initiating payment.');
     }
   };
 
@@ -82,14 +110,25 @@ const Home: React.FC = () => {
           <Text style={styles.title}>Welcome to TradeAgently, {username}!</Text>
         </View>
         <Text style={styles.description}>
-          This platform is designed to help users efficiently manage and track their investments.
+          TradeAgently is your trusted partner in managing and tracking your investments with real-time data and insightful analytics.
         </Text>
         <View style={styles.featureContainer}>
           <MaterialIcons name="show-chart" size={28} color="#2e86de" />
           <Text style={styles.featureText}>Real-time tracking of investment performance to keep you ahead.</Text>
         </View>
-        <Text style={styles.description}>
-          To get started, log in or register, and begin tracking your investments today!
+        <View style={styles.featureContainer}>
+          <MaterialIcons name="security" size={28} color="#2e86de" />
+          <Text style={styles.featureText}>Secure and reliable platform ensuring your data safety.</Text>
+        </View>
+        {/* Conditionally render the "Get Started" message if not logged in */}
+        {!sessionToken && (
+          <Text style={styles.ctaText}>
+            To get started, log in or register, and begin tracking your investments today!
+          </Text>
+        )}
+        {/* Additional information about the website */}
+        <Text style={styles.additionalInfo}>
+          Whether you're a seasoned investor or just starting out, TradeAgently provides the tools you need to make informed decisions and grow your portfolio.
         </Text>
       </View>
       <View style={styles.rightContainer}>
@@ -110,8 +149,14 @@ const Home: React.FC = () => {
                     value={addAmount}
                     onChangeText={setAddAmount}
                   />
-                  <Button title="Add Balance" onPress={handleAddBalance} />
+                  <TouchableOpacity style={styles.addBalanceButton} onPress={handleAddBalance}>
+                    <Text style={styles.addBalanceButtonText}>Add Balance</Text>
+                  </TouchableOpacity>
                 </View>
+                {/* Display Error Message */}
+                {errorMessage !== '' && (
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                )}
               </>
             )}
           </View>
@@ -164,6 +209,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
     marginLeft: 10,
+    flexShrink: 1, // Allow text to wrap if needed
+  },
+  ctaText: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 15,
+    lineHeight: 26,
+    fontWeight: '500',
+  },
+  additionalInfo: {
+    fontSize: 16,
+    color: '#555',
+    marginTop: 10,
+    lineHeight: 24,
   },
   rightContainer: {
     flex: 1,
@@ -183,6 +242,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#fff',
     fontWeight: 'bold',
+    marginBottom: 10,
   },
   addBalanceContainer: {
     marginTop: 10,
@@ -197,5 +257,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     width: '80%',
+    backgroundColor: '#fff',
+    color: '#333',
+  },
+  addBalanceButton: {
+    backgroundColor: '#27ae60', // Green color
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    width: '80%',
+    alignItems: 'center',
+  },
+  addBalanceButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  errorText: {
+    color: '#e74c3c',
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: 'center',
   },
 });

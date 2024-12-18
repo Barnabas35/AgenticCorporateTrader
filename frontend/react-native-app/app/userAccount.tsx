@@ -3,7 +3,6 @@ import {
   View, 
   Text, 
   Image, 
-  Button, 
   StyleSheet, 
   Modal, 
   Pressable, 
@@ -27,8 +26,9 @@ const UserAccount: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [debugMessage, setDebugMessage] = useState('');
   const [userType, setUserType] = useState<string | null>(null);
-  const [priceAlerts, setPriceAlerts] = useState<any[]>([]); // Store price alerts
-  const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false); // Manage price alert modal
+  const [priceAlerts, setPriceAlerts] = useState<any[]>([]); 
+  const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,7 +93,7 @@ const UserAccount: React.FC = () => {
     };
 
     fetchUserData();
-  }, [sessionToken, username, email, profileIconUrl, navigate, setUsername, setEmail, setProfileIconUrl]);
+  }, [sessionToken, username, email, profileIconUrl, navigate, setUsername, setEmail, setProfileIconUrl, userType]);
 
   const handleLogout = () => {
     setSessionToken(null);
@@ -142,6 +142,10 @@ const UserAccount: React.FC = () => {
       if (data.status === 'Success') {
         setPriceAlerts(data.alerts || []);
         setPriceAlertModalVisible(true);
+      } else if (data.status === 'No alerts found.') {
+        // No alerts scenario
+        setPriceAlerts([]);
+        setPriceAlertModalVisible(true);
       } else {
         setDebugMessage('Failed to fetch price alerts');
       }
@@ -149,7 +153,6 @@ const UserAccount: React.FC = () => {
       setDebugMessage(`Error fetching price alerts: ${error}`);
     }
   };
-  
 
   const deletePriceAlert = async (alertId: string) => {
     try {
@@ -183,28 +186,39 @@ const UserAccount: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* User Details Container including all buttons */}
       <View style={styles.detailsBox}>
-        <View>
-          {profileIconUrl ? (
-            <Image
-              source={{ uri: profileIconUrl }}
-              style={styles.profileIcon}
-            />
-          ) : (
-            <Text>No Profile Icon Available</Text>
-          )}
+        {profileIconUrl ? (
+          <Image
+            source={{ uri: profileIconUrl }}
+            style={styles.profileIcon}
+          />
+        ) : (
+          <Text style={styles.noProfileIconText}>No Profile Icon Available</Text>
+        )}
+        <View style={styles.userInfo}>
+          <Text style={styles.infoLabel}>Username:</Text>
+          <Text style={styles.infoValue}>{username}</Text>
         </View>
-        <Text style={styles.text}>Username: {username}</Text>
-        <Text style={styles.text}>Email: {email}</Text>
-        <Text style={styles.text}>
-          User Type: {userType === 'fm' ? 'Fund Manager' : userType === 'fa' ? 'Fund Admin' : userType}
-        </Text>
-        <TouchableOpacity style={styles.arrowButton} onPress={fetchPriceAlerts}>
-          <Text style={styles.arrowButtonText}>View Price Alerts</Text>
-        </TouchableOpacity>
+        <View style={styles.userInfo}>
+          <Text style={styles.infoLabel}>Email:</Text>
+          <Text style={styles.infoValue}>{email}</Text>
+        </View>
+        <View style={styles.userInfo}>
+          <Text style={styles.infoLabel}>User Type:</Text>
+          <Text style={styles.infoValue}>
+            {userType === 'fm' ? 'Fund Manager' : userType === 'fa' ? 'Fund Admin' : userType}
+          </Text>
+        </View>
+
         <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
           <Text style={styles.actionButtonText}>Logout</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.actionButton, styles.alertsButton]} onPress={fetchPriceAlerts}>
+          <Text style={styles.actionButtonText}>View Price Alerts</Text>
+        </TouchableOpacity>
+
         {userType !== 'admin' && (
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#FF494B' }]}
@@ -225,31 +239,35 @@ const UserAccount: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Your Price Alerts</Text>
-            <FlatList
-              data={priceAlerts}
-              keyExtractor={(item) => item.alert_id}
-              renderItem={({ item }) => (
-                <View style={styles.alertCard}>
-                  <View style={styles.alertContent}>
-                    <Text style={styles.alertText}>
-                      <Text style={styles.alertLabel}>Market:</Text> {item.market}
-                    </Text>
-                    <Text style={styles.alertText}>
-                      <Text style={styles.alertLabel}>Ticker:</Text> {item.ticker}
-                    </Text>
-                    <Text style={styles.alertText}>
-                      <Text style={styles.alertLabel}>Price:</Text> {item.price}
-                    </Text>
+            {priceAlerts.length === 0 ? (
+              <Text style={styles.noAlertsText}>You have no price alerts.</Text>
+            ) : (
+              <FlatList
+                data={priceAlerts}
+                keyExtractor={(item) => item.alert_id}
+                renderItem={({ item }) => (
+                  <View style={styles.alertCard}>
+                    <View style={styles.alertContent}>
+                      <Text style={styles.alertText}>
+                        <Text style={styles.alertLabel}>Market:</Text> {item.market}
+                      </Text>
+                      <Text style={styles.alertText}>
+                        <Text style={styles.alertLabel}>Ticker:</Text> {item.ticker}
+                      </Text>
+                      <Text style={styles.alertText}>
+                        <Text style={styles.alertLabel}>Price:</Text> {item.price}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => deletePriceAlert(item.alert_id)}
+                    >
+                      <Text style={styles.deleteButtonText}>Delete</Text>
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => deletePriceAlert(item.alert_id)}
-                  >
-                    <Text style={styles.deleteButtonText}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
+                )}
+              />
+            )}
             <Pressable
               style={[styles.button, styles.buttonCancel]}
               onPress={() => setPriceAlertModalVisible(false)}
@@ -294,7 +312,6 @@ const UserAccount: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // Existing styles
   container: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -303,22 +320,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     width: '100%',
   },
-  arrowButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  arrowButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  alertItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  detailsBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
     alignItems: 'center',
-    marginBottom: 10,
+    width: '30%',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   profileIcon: {
     width: 100,
@@ -326,21 +338,48 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 20,
   },
-  text: {
-    fontSize: 18,
-    marginBottom: 10,
+  noProfileIconText: {
+    fontSize: 16,
     color: '#333',
-  },
-  detailsBox: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    width: '30%',
     marginBottom: 20,
   },
-  spacer: {
-    height: 20,
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  infoLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 5,
+    color: '#555',
+  },
+  infoValue: {
+    fontSize: 16,
+    color: '#333',
+  },
+  actionButton: {
+    backgroundColor: '#007bff', 
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: '80%', 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertsButton: {
+    backgroundColor: '#FFA500',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  debugText: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 10,
   },
   modalBackground: {
     flex: 1,
@@ -354,11 +393,19 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
+    maxHeight: '70%'
   },
   modalText: {
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 15,
+    color: '#333',
+  },
+  noAlertsText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 15,
+    textAlign: 'center',
   },
   button: {
     width: '80%',
@@ -367,7 +414,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonCancel: {
-    backgroundColor: '#FF3F41',
+    backgroundColor: '#808080',
   },
   buttonDelete: {
     backgroundColor: '#FF3B30',
@@ -376,11 +423,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  debugText: {
-    fontSize: 12,
-    color: 'red',
-    marginTop: 10,
   },
   alertCard: {
     backgroundColor: '#fff',
@@ -422,21 +464,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 14,
-  },
-  actionButton: {
-    backgroundColor: '#007bff', // Default blue color for buttons
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-    width: '80%', // Make the button consistent in size
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
   },
 });
 
