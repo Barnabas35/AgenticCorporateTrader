@@ -1,8 +1,4 @@
-#get asset report
-#-session token
-#-market
-#-ticker
-#-client id
+
 #+profit = (total usd value of asset quantity) - (total_usd_quantity_invested)
 #+total_usd_quantity_invested = (sum of usd_quantity in purchase) - (sum of usd_quantity in sell)
 

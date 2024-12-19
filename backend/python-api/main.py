@@ -310,6 +310,27 @@ def get_ai_asset_report():
     return jsonify(q_get_ai_asset_report(request.json)), 200
 
 
+# Get subscription
+@app.route("/get-subscription", methods=["POST"])
+def get_subscription():
+    from query_library.get_subscription import q_get_subscription
+    return jsonify(q_get_subscription(request.json)), 200
+
+
+# Activate subscription
+@app.route("/activate-subscription", methods=["POST"])
+def activate_subscription():
+    from query_library.activate_subscription import q_activate_subscription
+    return jsonify(q_activate_subscription(request.json)), 200
+
+
+# Cancel subscription
+@app.route("/cancel-subscription", methods=["POST"])
+def cancel_subscription():
+    from query_library.cancel_subscription import q_cancel_subscription
+    return jsonify(q_cancel_subscription(request.json)), 200
+
+
 if __name__ == "__main__":
 
     # Start background task to check price alerts

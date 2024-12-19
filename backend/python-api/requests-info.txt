@@ -843,3 +843,21 @@ Example:
 {
   "status": "Success"
 }
+
+
+### Get AI asset report ---------------------------------
+URL & Method: POST /get-ai-asset-report
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "market": "string",            // "stocks" or "crypto"
+  "ticker": "string"             // Ticker symbol with no -USD suffix
+}
+Response: JSON - Asset report and status message
+Example:
+{
+    "response": "This asset has a long history of...",      // AI generated report
+     "status": "success"
+}
