@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "68009005920",
+    "firebase_url": "https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "agenticcorporatetrader",
+    "storage_bucket": "agenticcorporatetrader.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68009005920:android:2c5b77919be0a2d0e60405",
+        "android_client_info": {
+          "package_name": "com.tradeagently.act_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "68009005920-5rt7hd6smaml8ul9ub32libhij1m7mkr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tradeagently.act_app",
+            "certificate_hash": "9575d2732528b9ddec6fd0ef3b88e1447e47b958"
+          }
+        },
+        {
+          "client_id": "68009005920-gkrtmda8m8hrq0273t5ptgsr1voivf0n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "68009005920-gkrtmda8m8hrq0273t5ptgsr1voivf0n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

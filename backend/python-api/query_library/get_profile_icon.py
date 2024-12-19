@@ -33,7 +33,7 @@ def q_get_profile_icon(request_json):
     bucket = DBAccess.get_bucket()
 
     # Construct path to profile icon
-    path = f"user_profiles/{doc_id}.jpg"
+    path = f"user_profiles/{doc_id}.png"
 
     # Get profile icon from storage
     blob = bucket.blob(path)

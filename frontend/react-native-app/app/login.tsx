@@ -1,119 +1,89 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigate } from 'react-router-dom';
-import { useSessionToken, useUser } from '../components/userContext'; // Adjust the path as needed
+import { useSessionToken, useUser } from '../components/userContext';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import firebaseApp from '../components/firebase';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // State to display error messages
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
-  const { setUsername, setEmail: setUserEmail, setSessionToken, setProfileIconUrl } = useUser(); // Get the setters from context
+  const { setSessionToken, setUsername, setEmail: setUserEmail } = useUser();
 
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email validation regex
-    return emailRegex.test(email);
-  };
+  const auth = getAuth(firebaseApp);
+  const googleProvider = new GoogleAuthProvider();
 
-  const handleLogin = async () => {
-    // Reset the error message on every login attempt
-    setErrorMessage('');
-
-    // Check if the email is in valid format
-    if (!isValidEmail(email.trim())) {
-      window.alert('Invalid Email: Please enter a valid email address.');
-      return; // Prevent login if email format is invalid
-    }
-
-    if (!email || !password) {
-      window.alert('Missing Fields: Please fill out both email and password.');
-      return;
-    }
-
-    const url = 'https://tradeagently.dev/login';
-    const bodyData = {
-      email: email.trim(),
-      password: password.trim(),
-    };
-
+  const handleGoogleLogin = async () => {
     try {
-      const response = await fetch(url, {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      if (!user) {
+        throw new Error('No user information returned from Google Sign-In.');
+      }
+
+      // Retrieve ID token from the current user
+      const idToken = await user.getIdToken(true); // Force refresh to ensure a valid token
+      console.log('Google User ID Token:', idToken);
+
+      // Call the backend to exchange tokens
+      const response = await fetch('https://tradeagently.dev/exchange-tokens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify({ auth_token: idToken }),
       });
 
       const data = await response.json();
+      console.log('Exchange Tokens Response:', data);
 
-      if (data.session_token != null) {
-        // Store the session token in context
+      if (data.status === 'Success' && data.session_token) {
         setSessionToken(data.session_token);
-        console.log('Session Token:', data.session_token);
-
-        // Fetch username with the session token
-        const usernameResponse = await fetch('https://tradeagently.dev/get-username', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_token: data.session_token }),
-        });
-
-        const usernameData = await usernameResponse.json();
-
-        if (usernameData.status === 'Success') {
-          console.log('Username:', usernameData.username);
-          // Store the username in context
-          setUsername(usernameData.username);
-        } else {
-          window.alert(usernameData.message || 'Failed to fetch username.');
-        }
-
-        // Fetch email with the session token
-        const emailResponse = await fetch('https://tradeagently.dev/get-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_token: data.session_token }),
-        });
-
-        const emailData = await emailResponse.json();
-
-        if (emailData.status === 'Success') {
-          setUserEmail(emailData.email);
-        } else {
-          window.alert(emailData.message || 'Failed to fetch email.');
-        }
-
-        // Fetch profile icon with the session token
-        const profileIconResponse = await fetch('https://tradeagently.dev/get-profile-icon', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_token: data.session_token }),
-        });
-
-        const profileIconData = await profileIconResponse.json();
-
-        if (profileIconData.status === 'Success') {
-          setProfileIconUrl(profileIconData.profile_icon_url);
-        } else {
-          window.alert(profileIconData.message || 'Failed to fetch profile icon.');
-        }
-
-        // Navigate to the home page or any other protected route
-        navigate('/');
+        setUsername(user.displayName || 'User');
+        setUserEmail(user.email || '');
+        navigate('/'); // Redirect to the home page
+      } else if (data.status === 'Success: Register User') {
+        Alert.alert('New User', 'Please complete registration.');
+        navigate('/register');
       } else {
-        // Handle errors (e.g., invalid credentials)
-        window.alert(data.message || 'Login failed. Please try again.');
+        throw new Error(data.message || 'Failed to exchange tokens.');
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      window.alert('An unexpected error occurred. Please try again.');
+      console.error('Error during Google Login:', error);
+      Alert.alert('Login Failed', 'An error occurred during Google Login. Please try again.');
+    }
+  };
+
+  const handleLogin = async () => {
+    setErrorMessage('');
+
+    if (!email || !password) {
+      Alert.alert('Missing Fields', 'Please fill out both email and password.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'Success' && data.session_token) {
+        setSessionToken(data.session_token);
+        navigate('/');
+      } else {
+        Alert.alert('Login Failed', data.message || 'Invalid credentials.');
+      }
+    } catch (error) {
+      console.error('Login Error:', error);
+      Alert.alert('Error', 'An error occurred during login. Please try again.');
     }
   };
 
@@ -139,6 +109,9 @@ const Login: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+        <Text style={styles.buttonText}>Login with Google</Text>
+      </TouchableOpacity>
       {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <TouchableOpacity onPress={() => navigate('/register')} style={styles.registerLink}>
         <Text style={styles.registerText}>Don't have an account? Register here</Text>
@@ -151,10 +124,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center', // Center horizontally
+    alignItems: 'center',
     width: '100%',
     padding: 20,
-    backgroundColor: '#f0f0f0', // Background color of the login screen
+    backgroundColor: '#f0f0f0',
   },
   title: {
     fontSize: 32,
@@ -173,10 +146,20 @@ const styles = StyleSheet.create({
   button: {
     width: '30%',
     height: 50,
-    backgroundColor: '#4CAF50', // Green background for the button
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
+    marginBottom: 15,
+  },
+  googleButton: {
+    width: '30%',
+    height: 50,
+    backgroundColor: '#DB4437',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 15,
   },
   buttonText: {
     color: 'white',
@@ -190,7 +173,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   registerText: {
-    color: '#4CAF50', // Color for the register link
+    color: '#4CAF50',
     fontSize: 16,
   },
 });

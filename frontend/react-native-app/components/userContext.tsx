@@ -1,6 +1,4 @@
-// src/components/userContext.tsx
-
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 // Define the shape of the context data
 interface UserContextType {
@@ -23,10 +21,52 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [username, setUsername] = useState(''); // State and setter for username
-  const [email, setEmail] = useState(''); // State and setter for email
-  const [profileIconUrl, setProfileIconUrl] = useState(''); // State and setter for profile icon URL
-  const [sessionToken, setSessionToken] = useState<string | null>(null); // State and setter for session token
+  // Initialize state with localStorage values if they exist
+  const [username, setUsername] = useState<string>(() => {
+    return localStorage.getItem('username') || '';
+  });
+  const [email, setEmail] = useState<string>(() => {
+    return localStorage.getItem('email') || '';
+  });
+  const [profileIconUrl, setProfileIconUrl] = useState<string>(() => {
+    return localStorage.getItem('profileIconUrl') || '';
+  });
+  const [sessionToken, setSessionToken] = useState<string | null>(() => {
+    return localStorage.getItem('sessionToken');
+  });
+
+  // Update localStorage whenever any user state changes
+  useEffect(() => {
+    if (username) {
+      localStorage.setItem('username', username);
+    } else {
+      localStorage.removeItem('username');
+    }
+  }, [username]);
+
+  useEffect(() => {
+    if (email) {
+      localStorage.setItem('email', email);
+    } else {
+      localStorage.removeItem('email');
+    }
+  }, [email]);
+
+  useEffect(() => {
+    if (profileIconUrl) {
+      localStorage.setItem('profileIconUrl', profileIconUrl);
+    } else {
+      localStorage.removeItem('profileIconUrl');
+    }
+  }, [profileIconUrl]);
+
+  useEffect(() => {
+    if (sessionToken) {
+      localStorage.setItem('sessionToken', sessionToken);
+    } else {
+      localStorage.removeItem('sessionToken');
+    }
+  }, [sessionToken]);
 
   // Value to provide to the context
   const value = {

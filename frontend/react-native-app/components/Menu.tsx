@@ -19,6 +19,7 @@ const Menu: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState<boolean>(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -42,8 +43,36 @@ const Menu: React.FC = () => {
       }
     };
 
+    const fetchBalance = async () => {
+      try {
+        const response = await fetch('https://tradeagently.dev/get-balance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_token: sessionToken }),
+        });
+
+        const data = await response.json();
+        if (data.status === 'Success') {
+          setBalance(data.balance);
+        } else {
+          console.error('Failed to fetch balance');
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
+
     if (sessionToken) {
       fetchUserType();
+      fetchBalance();
+
+      const intervalId = setInterval(() => {
+        fetchBalance();
+      }, 10000); // Every 10 seconds
+
+      return () => clearInterval(intervalId); // Clear the interval when the component unmounts
     }
 
     const handleResize = () => {
@@ -73,6 +102,14 @@ const Menu: React.FC = () => {
           />
         </NavLink>
 
+        {/* Display Balance */}
+        {balance !== null && (
+          <View style={styles.balanceContainer}>
+            <Text style={styles.balanceText}>Balance: ${balance.toFixed(2)}</Text>
+          </View>
+        )}
+
+
         {/* Mobile View - Burger Menu */}
         {isMobileView ? (
           <TouchableOpacity
@@ -82,7 +119,6 @@ const Menu: React.FC = () => {
             <FontAwesome name="bars" size={32} color="white" />
             {isMenuOpen && (
               <ScrollView style={styles.dropdownMenu}>
-                
                 {sessionToken ? (
                   <>
                     {userType === 'admin' && (
@@ -94,7 +130,6 @@ const Menu: React.FC = () => {
                       >
                         <FontAwesome name="wrench" size={16} color="white" /> Admin Tools
                       </NavLink>
-                      
                     )}
                     <View style={styles.spacer} />
                     {userType === 'fa' && (
@@ -160,15 +195,20 @@ const Menu: React.FC = () => {
             >
               <FontAwesome name="home" size={18} color="white" /> Home
             </NavLink>
-            <View style={styles.spacer} />
-            <NavLink
-              to="/about"
-              style={({ isActive }) =>
-                isActive ? styles.activeMenuItem : styles.menuItem
-              }
-            >
-              <FontAwesome name="info-circle" size={18} color="white" /> About
-            </NavLink>
+              {!sessionToken && (
+              <>
+                <View style={styles.spacer} />
+                <NavLink
+                  to="/about"
+                  style={({ isActive }) =>
+                    isActive ? styles.activeMenuItem : styles.menuItem
+                  }
+                >
+                  <FontAwesome name="info-circle" size={18} color="white" /> About
+                </NavLink>
+              </>
+              )}
+
             <View style={styles.spacer} />
             {sessionToken ? (
               <>
@@ -232,7 +272,7 @@ const Menu: React.FC = () => {
               </>
             ) : (
               <NavLink
-                to="/login-register"
+                to="/login"
                 style={({ isActive }) =>
                   isActive ? styles.activeMenuItem : styles.menuItem
                 }
@@ -398,6 +438,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     textAlign: 'center',
+  },
+  balanceContainer: {
+    backgroundColor: '#4CAF50', // Same green color as other menu options
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  balanceText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

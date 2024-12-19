@@ -2,6 +2,8 @@
 from firebase_admin import auth
 from db_access import DBAccess
 from function_library.security_string_parsing import firestore_safe
+import requests
+
 
 def q_register_with_token(request_json):
 
@@ -20,6 +22,9 @@ def q_register_with_token(request_json):
     if user_type != "admin" and user_type != "fa" and user_type != "fm":
         return {"status": "Invalid user type."}
 
+    # Connect to the database
+    db = DBAccess.get_db()
+
     # Verify the auth token
     try:
         decoded_token = auth.verify_id_token(auth_token)
@@ -29,10 +34,8 @@ def q_register_with_token(request_json):
     # Retrieve email, uid, and name from the decoded token
     email = decoded_token["email"]
     uid = decoded_token["uid"]
-    username = decoded_token["display_name"]
-
-    # Connect to the database
-    db = DBAccess.get_db()
+    username = decoded_token["name"]
+    profile_pic = decoded_token["picture"]
 
     # Finding matching email in database
     result = db.collection("users").where(field_path="email", op_string="==", value=email).get()
@@ -47,6 +50,26 @@ def q_register_with_token(request_json):
                                 "user_type": user_type,
                                 "session_token": "",
                                 "uid": uid})
+
+    # Get user id
+    result = db.collection("users").where(field_path="email", op_string="==", value=email).get()
+    user_id = result[0].id
+
+    # Fetching profile picture from URL
+    response = requests.get(profile_pic, stream=True)
+
+    # If response is successful, upload profile picture to Firebase Storage
+    if response.status_code == 200:
+
+        # Get bucket reference
+        bucket = DBAccess.get_bucket()
+
+        # Creating new user profile picture
+        path = f"user_profiles/{user_id}.png"
+        blob = bucket.blob(path)
+
+        # Upload profile picture
+        blob.upload_from_string(response.content, content_type="image/png")
 
     # Return status
     return {"status": "Success"}

@@ -25,10 +25,13 @@ def q_get_asset_report(request_json):
 
     user_id = result[0].id
 
-    result = (db.collection("clients").document(client_id).get())
+    # Check if client is fa
+    if user_id != client_id:
 
-    if not result.exists:
-        return {"status": "Client does not exist."}
+        result = (db.collection("clients").document(client_id).get())
+
+        if not result.exists:
+            return {"status": "Client does not exist."}
 
     # Used in calculating
     total_usd_quantity_invested = 0
@@ -42,7 +45,8 @@ def q_get_asset_report(request_json):
         snapshot = client.get_snapshot_ticker("stocks", ticker)
         asset_usd_unit_price_current = snapshot.day.close
     elif market == "crypto":
-        asset_usd_unit_price_current = yf.Ticker(ticker).history(period="1d")["Close"].iloc[0]
+        crypto_usd = f"{ticker}-USD"
+        asset_usd_unit_price_current = yf.Ticker(crypto_usd).history(period="1d")["Close"].iloc[0]
     else:
         return {"status": "Invalid market."}
 

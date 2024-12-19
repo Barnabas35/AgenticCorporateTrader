@@ -1,18 +1,20 @@
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
 
 android {
-    namespace = "com.example.act_app"
+    namespace = "com.tradeagently.act_app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.act_app"
+        applicationId = "com.tradeagently.act_app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,22 +44,44 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-
+    implementation(libs.androidx.room.compiler) {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+    implementation(libs.play.services.basement)
+    implementation(libs.firebase.common.ktx)
 
     // Testing dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // Retrofit for networking
+    // Networking with Retrofit and OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.github.bumptech.glide:glide:4.12.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
-
-
-    // OkHttp for logging HTTP requests/responses (optional, but useful for debugging)
+    implementation("com.squareup.okhttp3:okhttp:4.9.3") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
+    // Image loading with Glide
+    implementation("com.github.bumptech.glide:glide:4.12.0") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    // MPAndroidChart for charting
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    //Stripe
+    implementation ("com.stripe:stripe-android:21.2.0")
+
+    // Firebase Authentication
+    implementation ("com.google.firebase:firebase-auth-ktx:22.1.1")
+
+    // Google Sign-In
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
 }
+

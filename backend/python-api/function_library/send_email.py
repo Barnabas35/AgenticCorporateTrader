@@ -1,8 +1,11 @@
+from http.client import responses
 
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 import smtplib
 import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 def send_email_aws(dest_email, from_email, subject, body):
@@ -62,6 +65,37 @@ def send_email_smtp(dest_email, subject, body):
         message = 'Subject: {}\n\n{}'.format(subject, body)
         server.sendmail("tradeagently@gmail.com", dest_email, message)
         server.quit()
+
+    except Exception as e:
+        return {"status": str(e)}
+
+    return {"status": "Success"}
+
+
+def send_email_sg(dest_email, subject, body):
+
+    # Get SendGrid API key from environment variable
+    SENDGRID_API_KEY_ENV = os.getenv("SENDGRID_API_KEY")
+
+    # If SENDGRID_API_KEY_ENV environment variable is not set, use fallback config.txt line 8
+    if SENDGRID_API_KEY_ENV is None:
+        try:
+            with open("../config.txt", "r") as f:
+                SENDGRID_API_KEY_ENV = f.readlines()[7].strip("\n")
+                f.close()
+        except FileNotFoundError:
+            return {"status": "No SendGrid API key found."}
+
+    try:
+        message = Mail(
+            from_email="pricealert@smtp.tradeagently.com",
+            to_emails=dest_email,
+            subject=subject,
+            plain_text_content=body)
+
+        sg = SendGridAPIClient(SENDGRID_API_KEY_ENV)
+
+        response = sg.send(message)
 
     except Exception as e:
         return {"status": str(e)}

@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Button, StyleSheet, Modal, Pressable } from 'react-native';
+import { 
+  View, 
+  Text, 
+  Image, 
+  StyleSheet, 
+  Modal, 
+  Pressable, 
+  FlatList, 
+  TouchableOpacity 
+} from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { 
   useUsername, 
@@ -15,8 +24,11 @@ const UserAccount: React.FC = () => {
   const [profileIconUrl, setProfileIconUrl] = useProfileIconUrl();
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [debugMessage, setDebugMessage] = useState(''); // Debug message state
-  const [userType, setUserType] = useState<string | null>(null); // Store user type
+  const [debugMessage, setDebugMessage] = useState('');
+  const [userType, setUserType] = useState<string | null>(null);
+  const [priceAlerts, setPriceAlerts] = useState<any[]>([]); 
+  const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +38,7 @@ const UserAccount: React.FC = () => {
     }
 
     if (!sessionToken) {
-      navigate('/login-register');
+      navigate('/login');
       return;
     }
 
@@ -34,36 +46,28 @@ const UserAccount: React.FC = () => {
       try {
         const iconResponse = await fetch('https://tradeagently.dev/get-profile-icon', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const iconData = await iconResponse.json();
 
         const usernameResponse = await fetch('https://tradeagently.dev/get-username', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const usernameData = await usernameResponse.json();
 
         const emailResponse = await fetch('https://tradeagently.dev/get-email', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const emailData = await emailResponse.json();
 
         const userTypeResponse = await fetch('https://tradeagently.dev/get-user-type', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session_token: sessionToken }),
         });
         const userTypeData = await userTypeResponse.json();
@@ -77,7 +81,7 @@ const UserAccount: React.FC = () => {
           setUsername(usernameData.username);
           setEmail(emailData.email);
           setProfileIconUrl(iconData.url);
-          setUserType(userTypeData.user_type); // Set user type
+          setUserType(userTypeData.user_type);
         } else {
           setModalVisible(true);
         }
@@ -89,7 +93,7 @@ const UserAccount: React.FC = () => {
     };
 
     fetchUserData();
-  }, [sessionToken, username, email, profileIconUrl, navigate, setUsername, setEmail, setProfileIconUrl]);
+  }, [sessionToken, username, email, profileIconUrl, navigate, setUsername, setEmail, setProfileIconUrl, userType]);
 
   const handleLogout = () => {
     setSessionToken(null);
@@ -100,7 +104,7 @@ const UserAccount: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    setModalVisible(true); // Show delete confirmation modal
+    setModalVisible(true);
   };
 
   const confirmDeleteAccount = async () => {
@@ -115,7 +119,7 @@ const UserAccount: React.FC = () => {
       const result = await response.json();
 
       if (result.status === 'Success') {
-        handleLogout(); // Log the user out and clear session
+        handleLogout();
       } else {
         setDebugMessage('Failed to delete account');
       }
@@ -123,6 +127,51 @@ const UserAccount: React.FC = () => {
       setDebugMessage(`Error during deletion: ${error}`);
     } finally {
       setModalVisible(false);
+    }
+  };
+
+  const fetchPriceAlerts = async () => {
+    try {
+      const response = await fetch('https://tradeagently.dev/get-price-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const data = await response.json();
+  
+      if (data.status === 'Success') {
+        setPriceAlerts(data.alerts || []);
+        setPriceAlertModalVisible(true);
+      } else if (data.status === 'No alerts found.') {
+        // No alerts scenario
+        setPriceAlerts([]);
+        setPriceAlertModalVisible(true);
+      } else {
+        setDebugMessage('Failed to fetch price alerts');
+      }
+    } catch (error) {
+      setDebugMessage(`Error fetching price alerts: ${error}`);
+    }
+  };
+
+  const deletePriceAlert = async (alertId: string) => {
+    try {
+      const response = await fetch('https://tradeagently.dev/delete-price-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken, alert_id: alertId }),
+      });
+      const data = await response.json();
+
+      if (data.status === 'Success') {
+        setPriceAlerts((prevAlerts) =>
+          prevAlerts.filter((alert) => alert.alert_id !== alertId)
+        );
+      } else {
+        setDebugMessage('Failed to delete price alert');
+      }
+    } catch (error) {
+      setDebugMessage(`Error deleting price alert: ${error}`);
     }
   };
 
@@ -137,28 +186,99 @@ const UserAccount: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* User Details Container including all buttons */}
       <View style={styles.detailsBox}>
-        <View>
-          {profileIconUrl ? (
-            <Image
-              source={{ uri: profileIconUrl }}
-              style={styles.profileIcon}
-            />
-          ) : (
-            <Text>No Profile Icon Available</Text>
-          )}
+        {profileIconUrl ? (
+          <Image
+            source={{ uri: profileIconUrl }}
+            style={styles.profileIcon}
+          />
+        ) : (
+          <Text style={styles.noProfileIconText}>No Profile Icon Available</Text>
+        )}
+        <View style={styles.userInfo}>
+          <Text style={styles.infoLabel}>Username:</Text>
+          <Text style={styles.infoValue}>{username}</Text>
         </View>
-        <Text style={styles.text}>Username: {username}</Text>
-        <Text style={styles.text}>Email: {email}</Text>
-        <Text style={styles.text}>User Type: {userType}</Text>
-        <Button title="Logout" onPress={handleLogout} />
-        <View style={styles.spacer} />
-        {/* Conditionally render the Delete Account button */}
+        <View style={styles.userInfo}>
+          <Text style={styles.infoLabel}>Email:</Text>
+          <Text style={styles.infoValue}>{email}</Text>
+        </View>
+        <View style={styles.userInfo}>
+          <Text style={styles.infoLabel}>User Type:</Text>
+          <Text style={styles.infoValue}>
+            {userType === 'fm' ? 'Fund Manager' : userType === 'fa' ? 'Fund Admin' : userType}
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
+          <Text style={styles.actionButtonText}>Logout</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.actionButton, styles.alertsButton]} onPress={fetchPriceAlerts}>
+          <Text style={styles.actionButtonText}>View Price Alerts</Text>
+        </TouchableOpacity>
+
         {userType !== 'admin' && (
-          <Button title="Delete Account" color="red" onPress={handleDeleteAccount} />
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: '#FF494B' }]}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={styles.actionButtonText}>Delete Account</Text>
+          </TouchableOpacity>
         )}
       </View>
 
+      {/* Modal for Price Alerts */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={priceAlertModalVisible}
+        onRequestClose={() => setPriceAlertModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Your Price Alerts</Text>
+            {priceAlerts.length === 0 ? (
+              <Text style={styles.noAlertsText}>You have no price alerts.</Text>
+            ) : (
+              <FlatList
+                data={priceAlerts}
+                keyExtractor={(item) => item.alert_id}
+                renderItem={({ item }) => (
+                  <View style={styles.alertCard}>
+                    <View style={styles.alertContent}>
+                      <Text style={styles.alertText}>
+                        <Text style={styles.alertLabel}>Market:</Text> {item.market}
+                      </Text>
+                      <Text style={styles.alertText}>
+                        <Text style={styles.alertLabel}>Ticker:</Text> {item.ticker}
+                      </Text>
+                      <Text style={styles.alertText}>
+                        <Text style={styles.alertLabel}>Price:</Text> {item.price}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => deletePriceAlert(item.alert_id)}
+                    >
+                      <Text style={styles.deleteButtonText}>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            )}
+            <Pressable
+              style={[styles.button, styles.buttonCancel]}
+              onPress={() => setPriceAlertModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal for Delete Account Confirmation */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -200,27 +320,66 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     width: '100%',
   },
+  detailsBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    width: '30%',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
   profileIcon: {
     width: 100,
     height: 100,
     borderRadius: 50,
     marginBottom: 20,
   },
-  text: {
-    fontSize: 18,
-    marginBottom: 10,
+  noProfileIconText: {
+    fontSize: 16,
     color: '#333',
-  },
-  detailsBox: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    width: '30%',
     marginBottom: 20,
   },
-  spacer: {
-    height: 20,
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  infoLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 5,
+    color: '#555',
+  },
+  infoValue: {
+    fontSize: 16,
+    color: '#333',
+  },
+  actionButton: {
+    backgroundColor: '#007bff', 
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: '80%', 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertsButton: {
+    backgroundColor: '#FFA500',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  debugText: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 10,
   },
   modalBackground: {
     flex: 1,
@@ -234,11 +393,19 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
+    maxHeight: '70%'
   },
   modalText: {
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 15,
+    color: '#333',
+  },
+  noAlertsText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 15,
+    textAlign: 'center',
   },
   button: {
     width: '80%',
@@ -247,7 +414,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonCancel: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#808080',
   },
   buttonDelete: {
     backgroundColor: '#FF3B30',
@@ -257,10 +424,46 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  debugText: {
-    fontSize: 12,
-    color: 'red',
-    marginTop: 10,
+  alertCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  alertContent: {
+    flex: 1,
+  },
+  alertText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 4,
+  },
+  alertLabel: {
+    fontWeight: 'bold',
+    color: '#555',
+  },
+  deleteButton: {
+    backgroundColor: '#FF494B',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
 

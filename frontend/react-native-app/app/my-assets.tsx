@@ -3,7 +3,6 @@ import {
   View,
   Text,
   FlatList,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   TextInput,
@@ -22,58 +21,89 @@ const MyAssets: React.FC = () => {
   const [sessionToken] = useSessionToken();
   const [clientId, setClientId] = useState<string | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
-  const [market, setMarket] = useState<'stocks' | 'crypto'>('stocks'); // Default to "stocks"
-  const [ticker, setTicker] = useState<string>(''); // Ticker symbol for purchase
-  const [usdQuantity, setUsdQuantity] = useState<string>(''); // Amount in USD for purchase
+  const [market, setMarket] = useState<'stocks' | 'crypto'>('stocks');
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [sellQuantity, setSellQuantity] = useState<string>('');
   const [selectedTicker, setSelectedTicker] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<{
+    ticker: string;
+    profit: number | null;
+    total_usd_invested: number | null;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  
+  // For Buy Modal
+  const [buyModalVisible, setBuyModalVisible] = useState(false);
+  const [buyUsdQuantity, setBuyUsdQuantity] = useState<string>('');
 
-  // Fetch client list to get the client_id
+  // Track selected asset quantity when selling
+  const [selectedAssetQuantity, setSelectedAssetQuantity] = useState<number | null>(null);
+
+  // Validation error state for sell modal
+  const [sellModalError, setSellModalError] = useState<string>('');
+
+  const openSellModal = (ticker: string) => {
+    setSelectedTicker(ticker);
+    const asset = assets.find(a => a.ticker === ticker);
+    if (asset && asset.quantity !== null) {
+      setSelectedAssetQuantity(asset.quantity);
+    } else {
+      setSelectedAssetQuantity(null);
+    }
+    setSellQuantity('');
+    setSellModalError('');
+    setSellModalVisible(true);
+  };
+
+  const closeSellModal = () => {
+    setSellModalVisible(false);
+    setSellQuantity('');
+    setSelectedTicker('');
+    setSelectedAssetQuantity(null);
+    setSellModalError('');
+  };
+
+  const openBuyModal = (ticker: string) => {
+    setSelectedTicker(ticker);
+    setBuyModalVisible(true);
+  };
+
+  const closeBuyModal = () => {
+    setBuyModalVisible(false);
+    setBuyUsdQuantity('');
+    setSelectedTicker('');
+  };
+
   const fetchClientId = async () => {
-    setLoading(true);
-    setError(null);
-
     try {
       const response = await fetch('https://tradeagently.dev/get-client-list', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken }),
       });
 
       const data = await response.json();
 
       if (data.status === 'Success' && data.clients?.length > 0) {
-        setClientId(data.clients[0].client_id); // Use the first client ID
+        setClientId(data.clients[0].client_id);
       } else {
         setError('Failed to fetch client list.');
       }
     } catch (err) {
       console.error('Error fetching client list:', err);
       setError('An error occurred while fetching the client list.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Fetch user assets for the client
   const fetchUserAssets = async () => {
     if (!clientId) return;
-
-    setLoading(true);
-    setError(null);
 
     try {
       const response = await fetch('https://tradeagently.dev/get-user-assets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_token: sessionToken,
           client_id: clientId,
@@ -87,34 +117,34 @@ const MyAssets: React.FC = () => {
         const assetDetails = await Promise.all(
           data.ticker_symbols.map(async (ticker: string) => {
             const quantity = await fetchAssetQuantity(ticker);
-            const report = await fetchAssetReport(ticker);
-            return { ticker, quantity, report };
+            return { ticker, quantity, report: null };
           })
         );
-        setAssets(assetDetails);
+
+        const filteredAssets = assetDetails.filter(
+          (asset) => asset.quantity !== null && asset.quantity > 0
+        );
+
+        setAssets(filteredAssets);
       } else {
         setError('Failed to fetch assets.');
       }
     } catch (err) {
       console.error('Error fetching assets:', err);
       setError('An error occurred while fetching assets.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Fetch balance
   const fetchBalance = async () => {
     try {
       const response = await fetch('https://tradeagently.dev/get-balance', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken }),
       });
 
       const data = await response.json();
+
       if (data.status === 'Success') {
         setBalance(data.balance);
       } else {
@@ -125,14 +155,12 @@ const MyAssets: React.FC = () => {
       setError('An error occurred while fetching balance.');
     }
   };
-  // Fetch individual asset quantity
+
   const fetchAssetQuantity = async (ticker: string): Promise<number | null> => {
     try {
       const response = await fetch('https://tradeagently.dev/get-asset', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_token: sessionToken,
           client_id: clientId,
@@ -142,92 +170,83 @@ const MyAssets: React.FC = () => {
       });
 
       const data = await response.json();
-
-      if (data.status === 'Success') {
-        return data.total_asset_quantity;
-      } else {
-        console.error(`Failed to fetch asset quantity for ${ticker}`);
-        return null;
-      }
+      return data.status === 'Success' ? data.total_asset_quantity : null;
     } catch (err) {
       console.error(`Error fetching asset quantity for ${ticker}:`, err);
       return null;
     }
   };
 
-  // Fetch asset report
   const fetchAssetReport = async (ticker: string) => {
     try {
       const response = await fetch('https://tradeagently.dev/get-asset-report', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_token: sessionToken,
+          market: market,
           client_id: clientId,
-          market,
-          ticker_symbol: ticker,
+          ticker: ticker,
         }),
       });
 
       const data = await response.json();
 
       if (data.status === 'Success') {
-        return { profit: data.profit, total_usd_invested: data.total_usd_invested };
+        setSelectedReport({
+          ticker,
+          profit: data.profit,
+          total_usd_invested: data.total_usd_invested,
+        });
+        setReportModalVisible(true);
       } else {
-        console.error(`Failed to fetch asset report for ${ticker}`);
-        return { profit: null, total_usd_invested: null };
+        Alert.alert('Error', `Failed to fetch report for ${ticker}.`);
       }
     } catch (err) {
-      console.error(`Error fetching asset report for ${ticker}:`, err);
-      return { profit: null, total_usd_invested: null };
+      console.error(`Error fetching report for ${ticker}:`, err);
+      Alert.alert('Error', `An error occurred while fetching the report for ${ticker}.`);
     }
   };
 
-  // Open sell modal
-  const openSellModal = (ticker: string) => {
-    setSelectedTicker(ticker);
-    setSellModalVisible(true);
-  };
-
-  // Close sell modal
-  const closeSellModal = () => {
-    setSellModalVisible(false);
-    setSellQuantity('');
-    setSelectedTicker('');
-  };
-
-  // Handle asset selling
   const handleSellAsset = async () => {
-    if (!sellQuantity || isNaN(parseFloat(sellQuantity))) {
-      Alert.alert('Error', 'Please enter a valid quantity.');
+    // Validate sell quantity before selling
+    const quantity = parseFloat(sellQuantity);
+
+    if (!sellQuantity.trim()) {
+      setSellModalError('Please input an amount.');
+      return;
+    }
+
+    if (isNaN(quantity) || quantity <= 0) {
+      setSellModalError('Please input a valid amount.');
+      return;
+    }
+
+    if (selectedAssetQuantity !== null && quantity > selectedAssetQuantity) {
+      setSellModalError(`You can only sell up to ${selectedAssetQuantity.toFixed(5)} units of ${selectedTicker}.`);
       return;
     }
 
     try {
       const response = await fetch('https://tradeagently.dev/sell-asset', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_token: sessionToken,
           client_id: clientId,
           market,
           ticker: selectedTicker,
-          asset_quantity: parseFloat(sellQuantity),
+          asset_quantity: quantity,
         }),
       });
 
       const data = await response.json();
 
       if (data.status === 'Success') {
-        Alert.alert('Success', `${sellQuantity} of ${selectedTicker} sold successfully.`);
-        fetchUserAssets(); // Refresh the assets
+        Alert.alert('Success', `${quantity} of ${selectedTicker} sold successfully.`);
+        fetchUserAssets();
         closeSellModal();
       } else {
-        console.error('Failed to sell asset.', data);
         Alert.alert('Error', 'Failed to sell asset.');
       }
     } catch (err) {
@@ -235,6 +254,47 @@ const MyAssets: React.FC = () => {
       Alert.alert('Error', 'An error occurred while selling the asset.');
     }
   };
+
+  const handleBuyAsset = async () => {
+    if (!buyUsdQuantity || isNaN(parseFloat(buyUsdQuantity)) || parseFloat(buyUsdQuantity) <= 0) {
+      Alert.alert('Error', 'Please enter a valid USD amount.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/purchase-asset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          client_id: clientId,
+          market,
+          ticker: selectedTicker,
+          usd_quantity: parseFloat(buyUsdQuantity),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'Success') {
+        Alert.alert('Success', `${buyUsdQuantity} USD of ${selectedTicker} purchased successfully.`);
+        fetchUserAssets();
+        closeBuyModal();
+      } else {
+        Alert.alert('Error', 'Failed to purchase asset.');
+      }
+    } catch (err) {
+      console.error('Error purchasing asset:', err);
+      Alert.alert('Error', 'An error occurred while purchasing the asset.');
+    }
+  };
+
+  const handleSellAll = () => {
+    if (selectedAssetQuantity !== null) {
+      setSellQuantity(selectedAssetQuantity.toString());
+    }
+  };
+
   useEffect(() => {
     if (sessionToken) {
       fetchClientId();
@@ -242,15 +302,14 @@ const MyAssets: React.FC = () => {
     }
   }, [sessionToken]);
 
-  // Fetch user assets when clientId changes or market changes
   useEffect(() => {
     if (clientId) {
       fetchUserAssets();
     }
   }, [clientId, market]);
+
   return (
     <View style={styles.container}>
-      {/* Balance Display */}
       <View style={styles.balanceContainer}>
         <Text style={styles.balanceText}>Balance: ${balance?.toFixed(2) ?? 'N/A'}</Text>
       </View>
@@ -259,7 +318,6 @@ const MyAssets: React.FC = () => {
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
-      {/* Market Switch */}
       <View style={styles.marketSwitchContainer}>
         <TouchableOpacity
           style={[styles.marketButton, market === 'stocks' && styles.activeMarketButton]}
@@ -275,7 +333,6 @@ const MyAssets: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Assets List */}
       <FlatList
         data={assets}
         keyExtractor={(item, index) => `${item.ticker}-${index}`}
@@ -283,21 +340,29 @@ const MyAssets: React.FC = () => {
           <View style={styles.assetItem}>
             <View>
               <Text style={styles.assetText}>
-                {item.ticker} - Amount: {item.quantity !== null ? item.quantity.toFixed(5) : 'N/A'}
+                {item.ticker} - Amount: {item.quantity?.toFixed(5) ?? 'N/A'}
               </Text>
-              {item.report && (
-                <Text style={styles.reportText}>
-                  Profit: ${item.report.profit?.toFixed(2) || 'N/A'} | Total Invested: $
-                  {item.report.total_usd_invested?.toFixed(2) || 'N/A'}
-                </Text>
-              )}
             </View>
-            <TouchableOpacity
-              style={styles.sellButton}
-              onPress={() => openSellModal(item.ticker)}
-            >
-              <Text style={styles.sellButtonText}>Sell</Text>
-            </TouchableOpacity>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={styles.buyButton}
+                onPress={() => openBuyModal(item.ticker)}
+              >
+                <Text style={styles.buyButtonTextText}>Buy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sellButton}
+                onPress={() => openSellModal(item.ticker)}
+              >
+                <Text style={styles.sellButtonText}>Sell</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.reportButton}
+                onPress={() => fetchAssetReport(item.ticker)}
+              >
+                <Text style={styles.reportButtonText}>View Report</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>No assets found.</Text>}
@@ -313,17 +378,34 @@ const MyAssets: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Sell Asset</Text>
+            {selectedTicker && (
+              <Text style={styles.modalText}>
+                You own: {selectedAssetQuantity?.toFixed(5) ?? 'N/A'} {selectedTicker}
+              </Text>
+            )}
             <Text style={styles.modalText}>Enter the quantity of {selectedTicker} to sell:</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Quantity"
               keyboardType="numeric"
               value={sellQuantity}
-              onChangeText={setSellQuantity}
+              onChangeText={(val) => {
+                setSellQuantity(val);
+                setSellModalError('');
+              }}
             />
+            {sellModalError ? (
+              <Text style={styles.modalErrorText}>{sellModalError}</Text>
+            ) : null}
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity style={styles.modalButton} onPress={handleSellAsset}>
                 <Text style={styles.modalButtonText}>Sell</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.sellAllButton]}
+                onPress={handleSellAll}
+              >
+                <Text style={styles.modalButtonText}>Sell All</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.modalCancelButton]}
@@ -332,6 +414,70 @@ const MyAssets: React.FC = () => {
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Buy Modal */}
+      <Modal
+        visible={buyModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeBuyModal}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Buy Asset</Text>
+            <Text style={styles.modalText}>Enter the USD amount to invest in {selectedTicker}:</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="USD Amount"
+              keyboardType="numeric"
+              value={buyUsdQuantity}
+              onChangeText={setBuyUsdQuantity}
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleBuyAsset}>
+                <Text style={styles.modalButtonText}>Buy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={closeBuyModal}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Report Modal */}
+      <Modal
+        visible={reportModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Asset Report</Text>
+            {selectedReport && (
+              <View>
+                <Text style={styles.modalText}>Asset: {selectedReport.ticker}</Text>
+                <Text style={styles.modalText}>
+                  Profit: ${selectedReport.profit?.toFixed(2) ?? 'N/A'}
+                </Text>
+                <Text style={styles.modalText}>
+                  Total Invested: ${selectedReport.total_usd_invested?.toFixed(2) ?? 'N/A'}
+                </Text>
+              </View>
+            )}
+            <TouchableOpacity
+              style={[styles.modalButton, styles.modalCloseButton]}
+              onPress={() => setReportModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -375,7 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#ddd',
     marginHorizontal: 5,
-    width: 120,
+    width: 250,
     alignItems: 'center',
   },
   activeMarketButton: {
@@ -403,10 +549,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  reportText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 10,
   },
   sellButton: {
     backgroundColor: '#FF5555',
@@ -415,6 +560,26 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   sellButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  buyButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  buyButtonTextText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  reportButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  reportButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
@@ -438,17 +603,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: '50%',
     alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
   modalText: {
     fontSize: 16,
     marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalErrorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontWeight: 'bold',
   },
   modalInput: {
     height: 40,
@@ -461,6 +634,7 @@ const styles = StyleSheet.create({
   },
   modalButtonContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-around',
     width: '100%',
   },
@@ -468,8 +642,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
-    width: '40%',
+    minWidth: '25%',
     alignItems: 'center',
+    marginTop: 5,
   },
   modalCancelButton: {
     backgroundColor: '#ccc',
@@ -477,6 +652,15 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  sellAllButton: {
+    backgroundColor: '#FF8C00',
+  },
+  modalCloseButton: {
+    backgroundColor: '#007bff',
+    marginTop: 10,
+    width: '40%',
   },
 });
 
