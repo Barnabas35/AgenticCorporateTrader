@@ -23,6 +23,7 @@ RUN pip install flask
 RUN pip install flask-cors
 RUN pip install polygon-api-client
 RUN pip install yfinance
+RUN pip install sendgrid
 RUN pip install stripe
 RUN pip install boto3
 RUN pip install groq

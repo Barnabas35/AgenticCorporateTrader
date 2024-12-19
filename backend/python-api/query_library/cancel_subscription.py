@@ -28,4 +28,4 @@ def q_cancel_subscription(request_json):
     db.collection("users").document(result[0].id).update({"renew_subscription": False})
 
     # Return success
-    return {"status": "Success"}
+    return {"status": "success"}

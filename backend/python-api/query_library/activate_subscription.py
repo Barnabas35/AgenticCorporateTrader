@@ -49,7 +49,7 @@ def q_activate_subscription(request_json):
 
         if current_time < subscription_end:
             db.collection("users").document(result[0].id).update({"subscription_start": int(time.time()), "renew_subscription": True})
-            return {"status": "success."}
+            return {"status": "success"}
 
     # Check if user has enough balance
     if user_balance < SUB_COST:
@@ -71,4 +71,4 @@ def q_activate_subscription(request_json):
                                                                                 "ticker_symbol": "USD",
                                                                                 "unix_timestamp": int(time.time())})
 
-    return {"status": "success."}
+    return {"status": "success"}
