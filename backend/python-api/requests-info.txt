@@ -858,6 +858,55 @@ Body (JSON):
 Response: JSON - Asset report and status message
 Example:
 {
-    "response": "This asset has a long history of...",      // AI generated report
-     "status": "success"
+    "response": "This asset has a long history of...",      // AI generated report (~200 words)
+    "status": "success"
 }
+
+
+### Get subscription (Gets details of the subscription) -
+URL & Method: POST /get-subscription
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Subscription details and status message
+Example:
+{
+    "status": "success",                        // Status message
+    "subscription_start": 2151661,              // Subscription start time UNIX timestamp
+    "subscription_end": 52351361,               // Subscription end time UNIX timestamp 30 days from start
+    "subscription_active": true,                // Subscription active status (Can the user access the AI?)
+    "renew_subscription": false,                // Renew subscription status (Will the user be charged again?)
+}
+
+
+### Cancel subscription (Sets renew to false) -----------
+URL & Method: POST /cancel-subscription
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Status message
+Example:
+{
+    "status": "success"
+}
+
+
+### Activate subscription -------------------------------
+URL & Method: POST /activate-subscription
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string"
+}
+Response: JSON - Status message
+Example:
+{
+    "status": "success"               // If successful, the subscription will be active for 30 days, auto-renews
+}                                     // If previous subscription has not run out yet, simply turns on renew
