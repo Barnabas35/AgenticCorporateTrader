@@ -861,6 +861,8 @@ Example:
 {
     "response": "This asset has a long history of...",      // AI generated report (~200 words)
     "status": "success"
+    "future": "Increase"                                    // Prediction for the future value of the asset
+    "recommend": "BUY"                                      // Recommended action for the user
 }
 
 
