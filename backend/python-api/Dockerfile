@@ -14,7 +14,6 @@ ADD background_tasks/ ./background_tasks/
 ADD yfinance_requests/ ./yfinance_requests/
 ADD polygon_request_library/ ./polygon_request_library/
 
-
 # Expose port 5000
 EXPOSE 5000
 
@@ -26,7 +25,7 @@ RUN pip install polygon-api-client
 RUN pip install yfinance
 RUN pip install stripe
 RUN pip install boto3
-RUN pip install sendgrid
+RUN pip install groq
 
 # Run the application
 CMD ["python", "main.py"]
