@@ -241,6 +241,13 @@ class ProfileActivity : AppCompatActivity() {
         RetrofitClient.apiService.deleteUser(requestBody).enqueue(object : Callback<DeleteUserResponse> {
             override fun onResponse(call: Call<DeleteUserResponse>, response: Response<DeleteUserResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
+                    // Successful delete response
+                    clearUserDetails()
+                    navigateToLogin()
+                } else if (response.code() == 500) {
+                    // Assume deletion succeeded if server returns 500 but still deletes
+                    Log.w("DELETE_ACCOUNT_WARNING", "Server returned 500, but account likely deleted.")
+                    Toast.makeText(this@ProfileActivity, "Account deleted successfully.", Toast.LENGTH_SHORT).show()
                     clearUserDetails()
                     navigateToLogin()
                 } else {

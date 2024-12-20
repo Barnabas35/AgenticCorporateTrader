@@ -1,9 +1,12 @@
 package com.tradeagently.act_app
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import retrofit2.Call
@@ -19,10 +22,12 @@ class SupportPageActivity : AppCompatActivity() {
         // Set up the bottom navigation
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Get references to the EditTexts and Button
+        // Get references to the EditTexts, Button, and phone number TextView
         val issueSubjectEditText: EditText = findViewById(R.id.editTextIssueSubject)
-        val issueDescriptionEditText: EditText = findViewById(R.id.editTextReview)  // Updated reference
+        val issueDescriptionEditText: EditText =
+            findViewById(R.id.editTextReview)  // Updated reference
         val submitButton: Button = findViewById(R.id.buttonSubmitSupportTicket)
+        val phoneNumberTextView: TextView = findViewById(R.id.textViewPhoneNumber)
 
         // Retrieve session token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -55,24 +60,49 @@ class SupportPageActivity : AppCompatActivity() {
                 // Make the API call to submit the support ticket
                 RetrofitClient.apiService.submitSupportTicket(supportTicketRequest)
                     .enqueue(object : Callback<ApiResponse> {
-                        override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                        override fun onResponse(
+                            call: Call<ApiResponse>,
+                            response: Response<ApiResponse>
+                        ) {
                             if (response.isSuccessful && response.body()?.status == "Success") {
-                                Toast.makeText(this@SupportPageActivity, "Support ticket submitted!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@SupportPageActivity,
+                                    "Support ticket submitted!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 // Clear input fields after successful submission
                                 issueSubjectEditText.text.clear()
                                 issueDescriptionEditText.text.clear()
                             } else {
-                                Toast.makeText(this@SupportPageActivity, "Failed to submit ticket", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@SupportPageActivity,
+                                    "Failed to submit ticket",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
 
                         override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                            Toast.makeText(this@SupportPageActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@SupportPageActivity,
+                                "Error: ${t.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     })
             } else {
-                Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT)
+                    .show()
             }
+        }
+
+        // Set up the phone number click listener
+        phoneNumberTextView.setOnClickListener {
+            val phoneNumber = "08001818181"
+            val intent = Intent(Intent.ACTION_DIAL).apply {
+                data = Uri.parse("tel:$phoneNumber")
+            }
+            startActivity(intent)
         }
     }
 }

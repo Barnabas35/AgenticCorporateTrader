@@ -107,6 +107,11 @@
             android:name=".PriceAlertsActivity"
             android:exported="false" /> <!-- Internal activity -->
 
+        <!-- Subscription Activity -->
+        <activity
+            android:name=".SubscriptionActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
     </application>
 
 </manifest>

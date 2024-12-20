@@ -2,9 +2,12 @@ package com.tradeagently.act_app
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.Color.BLUE
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
@@ -33,6 +36,9 @@ class StockProfileActivity : AppCompatActivity() {
     private lateinit var lineChart: LineChart
     private lateinit var timeframeSpinner: Spinner
     private lateinit var searchButton: Button
+    private lateinit var descriptionStockButton: Button
+    private lateinit var aiForecastStockButton: Button
+    private lateinit var aiForecastResponseTextView: TextView
 
     private var userType: String = ""
     private var clientId: String = ""
@@ -68,7 +74,7 @@ class StockProfileActivity : AppCompatActivity() {
         }
 
         // Handle Buy Button Click
-        val buyButton: Button = findViewById(R.id.buyCryptoButton)
+        val buyButton: Button = findViewById(R.id.buyStockButton)
         buyButton.setOnClickListener {
             val ticker = intent.getStringExtra("symbol") ?: "AAPL" // Default to AAPL
             openBuyDialog(ticker)
@@ -89,6 +95,9 @@ class StockProfileActivity : AppCompatActivity() {
         lineChart = findViewById(R.id.lineChart)
         timeframeSpinner = findViewById(R.id.timeframeSpinner)
         searchButton = findViewById(R.id.searchButton)
+        descriptionStockButton = findViewById(R.id.descriptionStock)
+        aiForecastStockButton = findViewById(R.id.aiForecastStock)
+        aiForecastResponseTextView = findViewById(R.id.aiForecastResponseTextView)
 
         // Populate timeframeSpinner with options
         val options = listOf("Last Hour", "Last Day", "Last Week", "Last Month", "Last Year")
@@ -96,6 +105,23 @@ class StockProfileActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         timeframeSpinner.adapter = adapter
         timeframeSpinner.setSelection(1) // Default to Last Day
+
+        // Set default visibility for description and button colors
+        showDescription() // Default to showing description
+        toggleButtonColors(descriptionStockButton, aiForecastStockButton)
+
+        // Handle "Description" Button Click
+        descriptionStockButton.setOnClickListener {
+            showDescription()
+            toggleButtonColors(descriptionStockButton, aiForecastStockButton)
+        }
+
+        // Handle "AI Forecast" Button Click
+        aiForecastStockButton.setOnClickListener {
+            val ticker = intent.getStringExtra("symbol") ?: "AAPL"
+            fetchAiAssetReport(ticker)
+            toggleButtonColors(aiForecastStockButton, descriptionStockButton)
+        }
     }
 
     private fun fetchUserDetails() {
@@ -176,6 +202,58 @@ class StockProfileActivity : AppCompatActivity() {
         homepageTextView.text = homepage ?: "No homepage available"
     }
 
+    private fun toggleButtonColors(selectedButton: Button, otherButton: Button) {
+        selectedButton.setBackgroundResource(R.drawable.btn_bg) // Use drawable for round button
+        selectedButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4caf50")) // Selected color (Green)
+        selectedButton.setTextColor(Color.WHITE)
+
+        otherButton.setBackgroundResource(R.drawable.btn_bg) // Use drawable for round button
+        otherButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333")) // Unselected color (Gray)
+        otherButton.setTextColor(Color.WHITE)
+    }
+
+    private fun showDescription() {
+        aiForecastResponseTextView.visibility = View.GONE
+        descriptionTextView.visibility = View.VISIBLE
+    }
+
+    private fun fetchAiAssetReport(ticker: String) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) {
+            Toast.makeText(this, "Session token is missing. Please log in.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        aiForecastStockButton.isEnabled = false
+
+        val request = AiAssetReportRequest(session_token = sessionToken, market = "stocks", ticker = ticker)
+        RetrofitClient.apiService.getAiAssetReport(request).enqueue(object : Callback<AiAssetReportResponse> {
+            override fun onResponse(call: Call<AiAssetReportResponse>, response: Response<AiAssetReportResponse>) {
+                aiForecastStockButton.isEnabled = true
+
+                if (response.isSuccessful && response.body()?.status == "success") {
+                    val aiResponse = response.body()
+                    val future = aiResponse?.future ?: "No future prediction"
+                    val recommend = aiResponse?.recommend ?: "No recommendation"
+
+                    val detailedReport = "${aiResponse?.response}\n\nPrediction: $future\nRecommendation: $recommend"
+                    aiForecastResponseTextView.text = detailedReport
+                    aiForecastResponseTextView.visibility = View.VISIBLE
+                    descriptionTextView.visibility = View.GONE
+                } else {
+                    Toast.makeText(this@StockProfileActivity, "Failed to fetch AI Forecast.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<AiAssetReportResponse>, t: Throwable) {
+                aiForecastStockButton.isEnabled = true
+                Toast.makeText(this@StockProfileActivity, "Error fetching AI Forecast.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     private fun fetchDefaultAggregates() {
         // Default to "Last Day"
         currentTimeframe = "Last Day"
@@ -206,7 +284,7 @@ class StockProfileActivity : AppCompatActivity() {
             }
             "Last Year" -> {
                 now.add(Calendar.YEAR, -1)
-                Pair(now, "day")
+                Pair(now, "week")
             }
             else -> {
                 now.add(Calendar.DAY_OF_YEAR, -1)

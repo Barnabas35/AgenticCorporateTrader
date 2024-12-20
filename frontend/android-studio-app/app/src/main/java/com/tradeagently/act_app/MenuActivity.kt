@@ -14,11 +14,12 @@ import retrofit2.Response
 class MenuActivity : AppCompatActivity() {
 
     private lateinit var profileButton: Button
+    private lateinit var aiSubscriptionButton: Button
+    private lateinit var priceAlertsButton: Button
     private lateinit var reviewpageButton: Button
     private lateinit var supportButton: Button
     private lateinit var clientManagementButton: Button
     private lateinit var adminToolsButton: Button
-    private lateinit var priceAlertsButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +30,7 @@ class MenuActivity : AppCompatActivity() {
 
         // Initialize buttons
         profileButton = findViewById(R.id.profileButton)
+        aiSubscriptionButton = findViewById(R.id.aiSubscriptionButton)
         reviewpageButton = findViewById(R.id.reviewpageButton)
         supportButton = findViewById(R.id.supportButton)
         clientManagementButton = findViewById(R.id.clientManagementButton)
@@ -50,6 +52,12 @@ class MenuActivity : AppCompatActivity() {
         // Set click listeners for each button
         profileButton.setOnClickListener {
             val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+        }
+
+        aiSubscriptionButton.setOnClickListener {
+            val intent = Intent(this, SubscriptionActivity::class.java)
             startActivity(intent)
             overridePendingTransition(0, 0)
         }
