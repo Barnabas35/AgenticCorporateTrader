@@ -11,9 +11,9 @@
     <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/assetsToolbar"
-        android:layout_width="410dp"
-        android:layout_height="51dp"
-        android:background="@color/primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/activeIconColor"
         android:minHeight="?attr/actionBarSize"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,6 +25,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="My Assets"
+            android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>

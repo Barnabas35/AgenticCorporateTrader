@@ -2,9 +2,12 @@ package com.tradeagently.act_app
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.Color.BLUE
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
@@ -32,10 +35,14 @@ class CryptoProfileActivity : AppCompatActivity() {
     private lateinit var lineChart: LineChart
     private lateinit var timeframeSpinner: Spinner
     private lateinit var searchButton: Button
+    private lateinit var descriptionCryptoButton: Button
+    private lateinit var aiForecastCryptoButton: Button
+    private lateinit var aiForecastResponseTextView: TextView
 
     private var userType: String = ""
     private var clientId: String = ""
     private var clients: List<Client> = emptyList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,81 +52,14 @@ class CryptoProfileActivity : AppCompatActivity() {
         // Initialize views
         initializeViews()
 
-        // Fetch user type and client_id
-        fetchUserDetails()
-
-        // Display crypto information from the Intent
+        // Display crypto information from Intent
         displayCryptoInfoFromIntent()
 
-        // Initially fetch default aggregates (e.g., Last Day by default)
+        // Fetch default aggregates
         fetchDefaultAggregates()
 
-        // Handle "SEARCH" button click
-        searchButton.setOnClickListener {
-            val selectedTimeframe = timeframeSpinner.selectedItem.toString()
-            applyTimeframeFilter(selectedTimeframe)
-        }
-
-        // Handle Buy Button Click
-        val buyCryptoButton: Button = findViewById(R.id.buyCryptoButton)
-        buyCryptoButton.setOnClickListener {
-            val ticker = intent.getStringExtra("symbol") ?: "BTC" // Default to BTC
-            openBuyDialog(ticker)
-        }
-    }
-
-    private fun fetchUserDetails() {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val sessionToken = sharedPreferences.getString("session_token", null)
-
-        if (sessionToken.isNullOrEmpty()) {
-            Toast.makeText(this, "Session token is missing. Please log in.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Fetch user type
-        val userTypeRequest = TokenRequest(sessionToken)
-        RetrofitClient.apiService.getUserType(userTypeRequest).enqueue(object : Callback<UserTypeResponse> {
-            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    userType = response.body()?.user_type.toString()
-                    Log.d("CryptoProfileActivity", "User type: $userType")
-
-                    // Fetch client_id if user is a Fund Administrator (FA)
-                    if (userType == "fa") {
-                        fetchClientId(sessionToken)
-                    }
-                } else {
-                    Toast.makeText(this@CryptoProfileActivity, "Failed to fetch user type.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
-                Log.e("CryptoProfileActivity", "Error fetching user type: ${t.message}")
-            }
-        })
-    }
-
-    private fun fetchClientId(sessionToken: String) {
-        RetrofitClient.apiService.getClientList(TokenRequest(sessionToken)).enqueue(object : Callback<ClientListResponse> {
-            override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val clients = response.body()?.clients
-                    if (!clients.isNullOrEmpty()) {
-                        clientId = clients.first().client_id // Select the first client for simplicity
-                        Log.d("CryptoProfileActivity", "Client ID: $clientId")
-                    } else {
-                        Toast.makeText(this@CryptoProfileActivity, "No clients found for this account.", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this@CryptoProfileActivity, "Failed to fetch client list.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
-                Log.e("CryptoProfileActivity", "Error fetching client list: ${t.message}")
-            }
-        })
+        // Setup buttons
+        setupButtons()
     }
 
     private fun initializeViews() {
@@ -134,20 +74,39 @@ class CryptoProfileActivity : AppCompatActivity() {
         lineChart = findViewById(R.id.cryptoLineChart)
         timeframeSpinner = findViewById(R.id.timeframeSpinner)
         searchButton = findViewById(R.id.searchButton)
+        descriptionCryptoButton = findViewById(R.id.descriptionCrypto)
+        aiForecastCryptoButton = findViewById(R.id.aiForecastCrypto)
+        aiForecastResponseTextView = findViewById(R.id.aiForecastResponseTextView)
 
-        // Populate timeframeSpinner with options
         val options = listOf("Last Hour", "Last Day", "Last Week", "Last Month", "Last Year")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         timeframeSpinner.adapter = adapter
-        timeframeSpinner.setSelection(1) // Default to Last Day
+        timeframeSpinner.setSelection(1)
+
+        // Set default visibility for description and button colors
+        showDescription() // Default to showing description
+        toggleButtonColors(descriptionCryptoButton, aiForecastCryptoButton)
+
+        // Handle "Description" Button Click
+        descriptionCryptoButton.setOnClickListener {
+            showDescription()
+            toggleButtonColors(descriptionCryptoButton, aiForecastCryptoButton)
+        }
+
+        // Handle "AI Forecast" Button Click
+        aiForecastCryptoButton.setOnClickListener {
+            val ticker = intent.getStringExtra("symbol") ?: "AAPL"
+            fetchAiAssetReport(ticker)
+            toggleButtonColors(aiForecastCryptoButton, descriptionCryptoButton)
+        }
     }
 
     private fun displayCryptoInfoFromIntent() {
-        val symbol = intent.getStringExtra("symbol")
-        val name = intent.getStringExtra("name")
+        val symbol = intent.getStringExtra("symbol") ?: "BTC"
+        val name = intent.getStringExtra("name") ?: "Bitcoin"
         val latestPrice = intent.getDoubleExtra("latest_price", 0.0)
-        val description = intent.getStringExtra("description")
+        val description = intent.getStringExtra("description") ?: "No description available"
         val high = intent.getDoubleExtra("high", 0.0)
         val low = intent.getDoubleExtra("low", 0.0)
         val volume = intent.getLongExtra("volume", 0)
@@ -161,6 +120,71 @@ class CryptoProfileActivity : AppCompatActivity() {
         lowPriceTextView.text = "Low: ${String.format("%.6f", low)}"
         volumeTextView.text = "Volume: $volume"
         openPriceTextView.text = "Open: ${String.format("%.6f", open)}"
+    }
+
+    private fun setupButtons() {
+        descriptionCryptoButton.setOnClickListener {
+            showDescription()
+            toggleButtonColors(descriptionCryptoButton, aiForecastCryptoButton)
+        }
+
+        aiForecastCryptoButton.setOnClickListener {
+            val ticker = intent.getStringExtra("symbol") ?: "BTC"
+            fetchAiAssetReport(ticker)
+            toggleButtonColors(aiForecastCryptoButton, descriptionCryptoButton)
+        }
+    }
+
+    private fun fetchAiAssetReport(ticker: String) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = sharedPreferences.getString("session_token", null)
+
+        if (sessionToken.isNullOrEmpty()) {
+            Toast.makeText(this, "Session token is missing. Please log in.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        aiForecastCryptoButton.isEnabled = false
+
+        val request = AiAssetReportRequest(session_token = sessionToken, market = "crypto", ticker = ticker)
+        RetrofitClient.apiService.getAiAssetReport(request).enqueue(object : Callback<AiAssetReportResponse> {
+            override fun onResponse(call: Call<AiAssetReportResponse>, response: Response<AiAssetReportResponse>) {
+                aiForecastCryptoButton.isEnabled = true
+
+                if (response.isSuccessful && response.body()?.status == "success") {
+                    val aiResponse = response.body()
+                    val future = aiResponse?.future ?: "No prediction available"
+                    val recommend = aiResponse?.recommend ?: "No recommendation"
+                    val report = aiResponse?.response ?: "No AI report available"
+
+                    aiForecastResponseTextView.text = "$report\n\nPrediction: $future\nRecommendation: $recommend"
+                    aiForecastResponseTextView.visibility = View.VISIBLE
+                    descriptionTextView.visibility = View.GONE
+                } else {
+                    Toast.makeText(this@CryptoProfileActivity, "Failed to fetch AI Forecast.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<AiAssetReportResponse>, t: Throwable) {
+                aiForecastCryptoButton.isEnabled = true
+                Toast.makeText(this@CryptoProfileActivity, "Error fetching AI Forecast.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun showDescription() {
+        aiForecastResponseTextView.visibility = View.GONE
+        descriptionTextView.visibility = View.VISIBLE
+    }
+
+    private fun toggleButtonColors(selectedButton: Button, otherButton: Button) {
+        selectedButton.setBackgroundResource(R.drawable.btn_bg)
+        selectedButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4caf50"))
+        selectedButton.setTextColor(Color.WHITE)
+
+        otherButton.setBackgroundResource(R.drawable.btn_bg)
+        otherButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333"))
+        otherButton.setTextColor(Color.WHITE)
     }
 
     private fun fetchDefaultAggregates() {
@@ -195,7 +219,7 @@ class CryptoProfileActivity : AppCompatActivity() {
             }
             "Last Year" -> {
                 now.add(Calendar.YEAR, -1)
-                Pair(now, "1d")
+                Pair(now, "1wk")
             }
             else -> {
                 // Fallback to Last Day
