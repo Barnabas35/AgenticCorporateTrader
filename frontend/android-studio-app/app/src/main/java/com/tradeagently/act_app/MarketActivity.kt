@@ -150,6 +150,9 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun setupStockSearchView() {
+        stockSearchView.setOnClickListener {
+            stockSearchView.isIconified = false // Expands the search bar
+        }
         stockSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
@@ -171,6 +174,9 @@ class MarketActivity : AppCompatActivity() {
     }
 
     private fun setupCryptoSearchView() {
+        cryptoSearchView.setOnClickListener {
+            cryptoSearchView.isIconified = false // Expands the search bar
+        }
         cryptoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {

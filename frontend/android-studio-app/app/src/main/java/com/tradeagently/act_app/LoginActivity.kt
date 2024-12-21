@@ -8,22 +8,58 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.SignInButton
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 1001 // Request code for Google Sign-In
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // Initialize Firebase
+        initializeFirebase()
 
         val emailEditText: EditText = findViewById(R.id.editTextEmail)
         val passwordEditText: EditText = findViewById(R.id.editTextPassword)
         val loginButton: Button = findViewById(R.id.buttonLogin)
         val registerTextView: TextView = findViewById(R.id.textViewRegister)
+        val googleSignInButton: SignInButton = findViewById(R.id.buttonGoogleSignIn)
 
+        // Configure Google Sign-In
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("68009005920-gkrtmda8m8hrq0273t5ptgsr1voivf0n.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        // Handle Google Sign-In button click
+        googleSignInButton.setOnClickListener {
+            // Clear cached token before initiating sign-in
+            googleSignInClient.signOut().addOnCompleteListener {
+                val signInIntent = googleSignInClient.signInIntent
+                startActivityForResult(signInIntent, RC_SIGN_IN)
+            }
+        }
+
+        // Handle manual login
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
@@ -38,173 +74,212 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Create login request
-            val loginRequest = LoginRequest(email, password)
+            performLogin(email, password)
+        }
 
-            // Make API call for login
-            RetrofitClient.apiService.login(loginRequest).enqueue(object : Callback<ApiResponse> {
-                override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                    if (response.isSuccessful) {
-                        val apiResponse = response.body()
+        // Handle register link click
+        registerTextView.setOnClickListener {
+            startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
+        }
+    }
 
-                        // Log the raw response for debugging purposes
-                        Log.d("API_RESPONSE", "Raw response: $apiResponse")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-                        if (apiResponse?.status == "Success" && apiResponse.session_token != null) {
-                            Toast.makeText(this@LoginActivity, "Login Successful!", Toast.LENGTH_SHORT).show()
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                if (account != null) {
+                    handleGoogleSignIn(account)
+                }
+            } catch (e: ApiException) {
+                Toast.makeText(this, "Google Sign-In failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
-                            // Save token to SharedPreferences
-                            val token = apiResponse.session_token
-                            saveUserDetails(token)
-
-                            // Fetch additional user details and information
-                            fetchUserDetails(token)
-
-                            // Navigate to MyAssetsActivity
-                            val intent = Intent(this@LoginActivity, MyAssetsActivity::class.java)
-                            startActivity(intent)
-                            finish() // Close the login activity
+    private fun handleGoogleSignIn(account: GoogleSignInAccount) {
+        val googleIdToken = account.idToken
+        if (googleIdToken != null) {
+            val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
+            FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // Firebase sign-in successful
+                        val user = FirebaseAuth.getInstance().currentUser
+                        if (user != null) {
+                            // Get the Firebase Auth token
+                            user.getIdToken(true).addOnCompleteListener { tokenTask ->
+                                if (tokenTask.isSuccessful) {
+                                    val firebaseToken = tokenTask.result?.token
+                                    if (!firebaseToken.isNullOrEmpty()) {
+                                        // Now you have a Firebase token suitable for your backend
+                                        exchangeTokens(firebaseToken)
+                                    } else {
+                                        Toast.makeText(this, "Could not retrieve Firebase token", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    Toast.makeText(this, "Failed to get Firebase token: ${tokenTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         } else {
-                            Log.d("API_RESPONSE_ERROR", "API Message: ${apiResponse?.status}")
-                            Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "No Firebase user available after sign-in", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(this@LoginActivity, "Error: ${response.code()} - ${response.message()}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Firebase sign-in failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
-
-                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                    Log.e("NETWORK_ERROR", "Failure: ${t.message}")
-                    Toast.makeText(this@LoginActivity, "Network Error: ${t.message}", Toast.LENGTH_LONG).show()
-                }
-            })
-        }
-
-        // Register link click listener
-        registerTextView.setOnClickListener {
-            val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
-            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Failed to retrieve Google ID token", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Save token and other details to SharedPreferences
+    private fun exchangeTokens(authToken: String) {
+        val request = ExchangeTokensRequest(auth_token = authToken)
+
+        // Make API call
+        RetrofitClient.apiService.exchangeTokens(request).enqueue(object : Callback<ExchangeTokensResponse> {
+            override fun onResponse(
+                call: Call<ExchangeTokensResponse>,
+                response: Response<ExchangeTokensResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val exchangeResponse = response.body()
+                    when (exchangeResponse?.status) {
+                        "Success" -> {
+                            // Save the session token and proceed
+                            exchangeResponse.session_token?.let {
+                                saveSessionToken(it)
+                            }
+                            navigateToAssetsActivity()
+                        }
+                        "Success: Register User" -> {
+                            // User does not exist, redirect to register with token
+                            showUserTypeSelectionDialog(authToken)
+                        }
+                        "Invalid auth token." -> {
+                            // Show a message and sign out to retry
+                            Toast.makeText(this@LoginActivity, "Invalid token. Please try signing in again.", Toast.LENGTH_LONG).show()
+                            googleSignInClient.signOut().addOnCompleteListener {
+                                val signInIntent = googleSignInClient.signInIntent
+                                startActivityForResult(signInIntent, RC_SIGN_IN)
+                            }
+                        }
+                        else -> {
+                            Toast.makeText(this@LoginActivity, "Unexpected status: ${exchangeResponse?.status}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this@LoginActivity, "Error exchanging tokens.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ExchangeTokensResponse>, t: Throwable) {
+                Toast.makeText(this@LoginActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun saveSessionToken(sessionToken: String) {
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putString("session_token", sessionToken).apply()
+    }
+
+    private fun showUserTypeSelectionDialog(firebaseToken: String) {
+        val userTypeOptions = arrayOf("Fund Administrator", "Fund Manager")
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Select User Type")
+        builder.setItems(userTypeOptions) { dialog, which ->
+            val selectedUserType = when (userTypeOptions[which]) {
+                "Fund Administrator" -> "fa"
+                "Fund Manager" -> "fm"
+                else -> throw IllegalArgumentException("Unknown user type selected.")
+            }
+
+            dialog.dismiss()
+            // Now call registerWithToken again, this time with the chosen userType
+            registerWithToken(firebaseToken, selectedUserType)
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun registerWithToken(authToken: String, userType: String) {
+        val request = RegisterWithTokenRequest(auth_token = authToken, user_type = userType)
+
+        RetrofitClient.apiService.registerWithToken(request).enqueue(object : Callback<RegisterWithTokenResponse> {
+            override fun onResponse(call: Call<RegisterWithTokenResponse>, response: Response<RegisterWithTokenResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    Toast.makeText(this@LoginActivity, "Registration successful!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@LoginActivity, "Failed to register with token.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<RegisterWithTokenResponse>, t: Throwable) {
+                Toast.makeText(this@LoginActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun performLogin(email: String, password: String) {
+        val loginRequest = LoginRequest(email, password)
+
+        RetrofitClient.apiService.login(loginRequest).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.isSuccessful) {
+                    val apiResponse = response.body()
+
+                    if (apiResponse?.status == "Success" && apiResponse.session_token != null) {
+                        saveUserDetails(apiResponse.session_token)
+                        navigateToAssetsActivity()
+                    } else {
+                        Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this@LoginActivity, "Error: ${response.code()} - ${response.message()}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("NETWORK_ERROR", "Failure: ${t.message}")
+                Toast.makeText(this@LoginActivity, "Network Error: ${t.message}", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
     private fun saveUserDetails(token: String) {
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("session_token", token)
-        editor.apply()
-        Log.d("SessionToken", "Saving token: $token") // Log for debugging
+        sharedPreferences.edit().putString("session_token", token).apply()
     }
 
-    // Fetch user details after login
-    private fun fetchUserDetails(token: String) {
-        fetchAndSaveUsername(token)
-        fetchAndSaveEmail(token)
-        fetchAndSaveProfileIcon(token)
-        fetchAndSaveUserType(token)
+    private fun navigateToAssetsActivity() {
+        startActivity(Intent(this@LoginActivity, MyAssetsActivity::class.java))
+        finish()
     }
 
-    // Fetch and save username
-    private fun fetchAndSaveUsername(token: String) {
-        RetrofitClient.apiService.getUsername(TokenRequest(token)).enqueue(object : Callback<UsernameResponse> {
-            override fun onResponse(call: Call<UsernameResponse>, response: Response<UsernameResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val username = response.body()?.username ?: "Unknown"
-                    Log.d("USERNAME_FETCHED", "Fetched username: $username")
-                    saveUsername(username)
-                } else {
-                    Log.e("API_ERROR", "Failed to fetch username: ${response.errorBody()?.string()}")
-                }
+    private fun initializeFirebase() {
+        val options = FirebaseOptions.Builder()
+            .setApiKey("AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko") // Corrected API key
+            .setApplicationId("1:68009005920:android:2c5b77919be0a2d0e60405") // Corrected app ID
+            .setProjectId("agenticcorporatetrader") // Verified project ID
+            .setDatabaseUrl("https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app") // Corrected database URL
+            .build()
+
+        try {
+            // Initialize Firebase only if not already initialized
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                FirebaseApp.initializeApp(this, options)
             }
-
-            override fun onFailure(call: Call<UsernameResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Error fetching username: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveUsername(username: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("user_name", username)
-        editor.apply()
-    }
-
-    // Fetch and save email
-    private fun fetchAndSaveEmail(token: String) {
-        RetrofitClient.apiService.getEmail(TokenRequest(token)).enqueue(object : Callback<EmailResponse> {
-            override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val email = response.body()?.email ?: "Unknown"
-                    Log.d("EMAIL_FETCHED", "Fetched email: $email")
-                    saveEmail(email)
-                } else {
-                    Log.e("API_ERROR", "Failed to fetch email: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Error fetching email: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveEmail(email: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("user_email", email)
-        editor.apply()
-    }
-
-    // Fetch and save profile icon
-    private fun fetchAndSaveProfileIcon(token: String) {
-        RetrofitClient.apiService.getProfileIcon(TokenRequest(token)).enqueue(object : Callback<ProfileIconResponse> {
-            override fun onResponse(call: Call<ProfileIconResponse>, response: Response<ProfileIconResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val profileIconUrl = response.body()?.url ?: "Unknown"
-                    Log.d("PROFILE_ICON_FETCHED", "Fetched profile icon URL: $profileIconUrl")
-                    saveProfileIconUrl(profileIconUrl)
-                } else {
-                    Log.e("API_ERROR", "Failed to fetch profile icon URL: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<ProfileIconResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Error fetching profile icon: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveProfileIconUrl(profileIconUrl: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("profile_icon_url", profileIconUrl)
-        editor.apply()
-    }
-
-    // Fetch and save user type
-    private fun fetchAndSaveUserType(token: String) {
-        RetrofitClient.apiService.getUserType(TokenRequest(token)).enqueue(object : Callback<UserTypeResponse> {
-            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val userType = response.body()?.user_type ?: "Unknown"
-                    Log.d("USER_TYPE_FETCHED", "Fetched user type: $userType")
-                    saveUserType(userType)
-                } else {
-                    Log.e("API_ERROR", "Failed to fetch user type: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Error fetching user type: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveUserType(userType: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("user_type", userType)
-        editor.apply()
+        } catch (e: Exception) {
+            Log.e("FirebaseInit", "Error initializing Firebase: ${e.message}")
+        }
     }
 }

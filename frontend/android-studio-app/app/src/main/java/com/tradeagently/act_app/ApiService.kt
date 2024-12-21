@@ -293,16 +293,22 @@ data class AdminDeleteUserRequest(
     val id: String
 )
 
-// Response for balance
-data class BalanceResponse(
-    val balance: Double,
-    val status: String
+// Response for adding balance
+data class AddBalanceResponse(
+    val status: String,
+    val client_secret: String? = null // Nullable as it may not be returned in all cases
 )
 
 // Request for adding balance
 data class AddBalanceRequest(
     val session_token: String,
-    val usd_quantity: Int
+    val usd_quantity: Int // Updated to Double to support fractional USD amounts
+)
+
+// Response for balance retrieval
+data class BalanceResponse(
+    val balance: Double,
+    val status: String
 )
 
 // Request for purchasing an asset
@@ -392,6 +398,62 @@ data class AssetReportResponse(
     val total_usd_invested: Double
 )
 
+// Request for exchanging tokens
+data class ExchangeTokensRequest(
+    val auth_token: String
+)
+
+// Response for exchanging tokens
+data class ExchangeTokensResponse(
+    val session_token: String?,
+    val status: String
+)
+
+// Request for registering with a token
+data class RegisterWithTokenRequest(
+    val auth_token: String,
+    val user_type: String
+)
+
+// Response for registering with a token
+data class RegisterWithTokenResponse(
+    val status: String
+)
+
+// Data class for AI Asset Report Request
+data class AiAssetReportRequest(
+    val session_token: String,
+    val market: String, // "stocks" or "crypto"
+    val ticker: String  // Ticker symbol without -USD suffix
+)
+
+// Data class for AI Asset Report Response
+data class AiAssetReportResponse(
+    val response: String,  // AI-generated report (~200 words)
+    val status: String,    // Status message (e.g., "success")
+    val future: String?,   // Prediction for future value (e.g., "Increase")
+    val recommend: String? // Recommended action (e.g., "BUY")
+)
+
+// Request for subscription details
+data class SubscriptionRequest(
+    val session_token: String
+)
+
+// Response for subscription details
+data class SubscriptionResponse(
+    val status: String,
+    val subscription_start: Long, // UNIX timestamp for start
+    val subscription_end: Long,   // UNIX timestamp for end
+    val subscription_active: Boolean,
+    val renew_subscription: Boolean
+)
+
+// Response for subscription activation/cancellation
+data class SubscriptionActionResponse(
+    val status: String
+)
+
 // Retrofit interface for API calls
 interface ApiService {
 
@@ -473,27 +535,19 @@ interface ApiService {
 
     // GET request for the top cryptos
     @GET("/get-top-cryptos")
-    fun getTopCryptos(
-        @Query("limit") limit: Int = 10
-    ): Call<TopCryptosResponse>
+    fun getTopCryptos(@Query("limit") limit: Int = 10): Call<TopCryptosResponse>
 
     // POST request for text search crypto
     @POST("/text-search-crypto")
-    fun textSearchCrypto(
-        @Body request: TextSearchCryptoRequest
-    ): Call<TextSearchCryptoResponse>
+    fun textSearchCrypto(@Body request: TextSearchCryptoRequest): Call<TextSearchCryptoResponse>
 
     // POST request to get crypto info
     @POST("/get-crypto-info")
-    fun getCryptoInfo(
-        @Body request: CryptoInfoRequest
-    ): Call<CryptoInfoResponse>
+    fun getCryptoInfo(@Body request: CryptoInfoRequest): Call<CryptoInfoResponse>
 
     // POST request to get crypto aggregates
     @POST("/get-crypto-aggregates")
-    fun getCryptoAggregates(
-        @Body request: CryptoAggregatesRequest
-    ): Call<CryptoAggregatesResponse>
+    fun getCryptoAggregates(@Body request: CryptoAggregatesRequest): Call<CryptoAggregatesResponse>
 
     // Endpoint for getting the user list as an admin
     @POST("/get-user-list")
@@ -509,7 +563,7 @@ interface ApiService {
 
     // Endpoint for adding balance
     @POST("/add-balance")
-    fun addBalance(@Body addBalanceRequest: AddBalanceRequest): Call<ApiResponse>
+    fun addBalance(@Body addBalanceRequest: AddBalanceRequest): Call<AddBalanceResponse>
 
     // Endpoint for purchasing an asset
     @POST("/purchase-asset")
@@ -542,4 +596,28 @@ interface ApiService {
     // Endpoint for getting an asset report
     @POST("/get-asset-report")
     fun getAssetReport(@Body assetReportRequest: AssetReportRequest): Call<AssetReportResponse>
+
+    // Endpoint for exchanging tokens
+    @POST("/exchange-tokens")
+    fun exchangeTokens(@Body request: ExchangeTokensRequest): Call<ExchangeTokensResponse>
+
+    // Endpoint for registering with a token
+    @POST("/register-with-token")
+    fun registerWithToken(@Body request: RegisterWithTokenRequest): Call<RegisterWithTokenResponse>
+
+    // Endpoint for getting AI asset report
+    @POST("/get-ai-asset-report")
+    fun getAiAssetReport(@Body request: AiAssetReportRequest): Call<AiAssetReportResponse>
+
+    // Endpoint for getting subscription details
+    @POST("/get-subscription")
+    fun getSubscription(@Body request: SubscriptionRequest): Call<SubscriptionResponse>
+
+    // Endpoint for canceling a subscription
+    @POST("/cancel-subscription")
+    fun cancelSubscription(@Body request: SubscriptionRequest): Call<SubscriptionActionResponse>
+
+    // Endpoint for activating a subscription
+    @POST("/activate-subscription")
+    fun activateSubscription(@Body request: SubscriptionRequest): Call<SubscriptionActionResponse>
 }

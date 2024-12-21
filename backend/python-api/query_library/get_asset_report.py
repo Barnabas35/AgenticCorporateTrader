@@ -1,4 +1,7 @@
 
+#+profit = (total usd value of asset quantity) - (total_usd_quantity_invested)
+#+total_usd_quantity_invested = (sum of usd_quantity in purchase) - (sum of usd_quantity in sell)
+
 from db_access import DBAccess
 import yfinance as yf
 from stock_api_access import StockAPIAccess

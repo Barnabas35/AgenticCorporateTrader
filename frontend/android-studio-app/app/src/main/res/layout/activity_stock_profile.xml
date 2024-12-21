@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/StockProfileLayout"
     android:layout_width="match_parent"
@@ -46,9 +45,10 @@
 
             <TextView
                 android:id="@+id/companyNameTextView"
-                android:layout_width="277dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:text="Apple Inc."
                 android:textSize="24sp" />
@@ -60,87 +60,38 @@
                 android:layout_marginTop="16dp"
                 android:background="#E0E0E0" />
 
-            <!-- Input fields for startDate, endDate, and interval -->
+            <!-- Timeframe Spinner and Search Button -->
             <LinearLayout
-                android:id="@+id/inputFieldsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:orientation="horizontal"
                 android:gravity="center"
+                android:orientation="horizontal"
                 android:padding="8dp">
 
-                <!-- Start Date Input -->
-                <EditText
-                    android:id="@+id/startDateInput"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="2024-11-15"
-                    android:inputType="date"
-                    android:padding="8dp"
-                    android:background="@drawable/input_field_background"
-                    android:textSize="14sp" />
-
-                <!-- End Date Input -->
-                <EditText
-                    android:id="@+id/endDateInput"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:hint="2024-11-17"
-                    android:inputType="date"
-                    android:padding="8dp"
-                    android:background="@drawable/input_field_background"
-                    android:textSize="14sp" />
-
-                <!-- Spinner for Interval Selection -->
                 <Spinner
-                    android:id="@+id/intervalSpinner"
+                    android:id="@+id/timeframeSpinner"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
                     android:background="@drawable/input_field_background"
                     android:padding="8dp"
-                    android:spinnerMode="dropdown"
-                    android:entries="@array/int_options" />
+                    android:spinnerMode="dropdown" />
 
+                <Button
+                    android:id="@+id/searchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/btn_bg"
+                    android:backgroundTint="@color/primary"
+                    android:padding="8dp"
+                    android:text="SEARCH"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
             </LinearLayout>
-
-            <!-- Submit Button -->
-            <Button
-                android:id="@+id/submitButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="8dp"
-                android:backgroundTint="@color/primary"
-                android:background="@drawable/btn_bg"
-                android:text="Submit"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:layout_marginBottom="16dp" />
 
             <!-- Stock Details (Open, Close, High, Low) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/stockDetailsTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Stock Details"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
             <TextView
                 android:id="@+id/openPriceTextView"
                 android:layout_width="wrap_content"
@@ -187,37 +138,83 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:layout_marginStart="8dp"
                 android:gravity="center_horizontal"
-                android:layout_marginBottom="16dp">
+                android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/buyCryptoButton"
+                    android:id="@+id/buyStockButton"
                     android:layout_width="120dp"
                     android:layout_height="44dp"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/btn_bg"
                     android:backgroundTint="@color/primary"
+                    android:padding="8dp"
                     android:text="BUY"
                     android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:padding="8dp" />
+                    android:textSize="16sp" />
             </LinearLayout>
 
+            <!-- Button container for Description and AI Forecast buttons -->
+            <LinearLayout
+                android:id="@+id/buttonContainer"
+                android:layout_width="285dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="58.5dp"
+                android:background="@drawable/btn_bg"
+                android:backgroundTint="#E0E0E0"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <Button
+                    android:id="@+id/descriptionStock"
+                    android:layout_width="130dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/btn_bg"
+                    android:text="Description"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/aiForecastStock"
+                    android:layout_width="130dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/btn_bg"
+                    android:text="AI Forecast"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/descriptionTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Company: Description..." />
+                android:text="Company: Description..."
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/aiForecastResponseTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="AI Forecast..."
+                android:textSize="16sp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/homepageTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Homepage: " />
+                android:text="Homepage: "
+                android:textSize="16sp" />
         </LinearLayout>
     </ScrollView>
 
@@ -229,5 +226,12 @@
         app:itemTextColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="205dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -276,10 +276,7 @@ class MyAssetsActivity : AppCompatActivity() {
     private fun updateRecyclerViewWithAssets(assets: List<String>) {
         displayableAssets = assets
         val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-            override fun onCreateViewHolder(
-                parent: ViewGroup,
-                viewType: Int
-            ): RecyclerView.ViewHolder {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                 val view = layoutInflater.inflate(R.layout.asset_item, parent, false)
                 return object : RecyclerView.ViewHolder(view) {}
             }
@@ -292,20 +289,20 @@ class MyAssetsActivity : AppCompatActivity() {
                 val settingsButton: ImageButton = holder.itemView.findViewById(R.id.settingsButton)
 
                 val ticker = displayableAssets[position]
+                val market = if (buttonStock.isSelected) "stocks" else "crypto"
+
                 assetName.text = ticker
 
+                // Fetch and display the asset quantity
                 val request = GetAssetRequest(
                     session_token = sessionToken,
-                    market = if (buttonStock.isSelected) "stocks" else "crypto",
+                    market = market,
                     ticker = ticker,
                     client_id = client_id
                 )
                 RetrofitClient.apiService.getAsset(request)
                     .enqueue(object : Callback<AssetResponse> {
-                        override fun onResponse(
-                            call: Call<AssetResponse>,
-                            response: Response<AssetResponse>
-                        ) {
+                        override fun onResponse(call: Call<AssetResponse>, response: Response<AssetResponse>) {
                             if (response.isSuccessful && response.body()?.status == "Success") {
                                 val quantity = response.body()?.total_asset_quantity ?: 0.0
                                 assetQuantity.text = "Owned: %.5f".format(quantity)
@@ -321,18 +318,30 @@ class MyAssetsActivity : AppCompatActivity() {
                         }
                     })
 
+                // Open specific profile activity on item click
+                holder.itemView.setOnClickListener {
+                    if (market == "stocks") {
+                        fetchTickerInfoAndOpenStockProfile(ticker)
+                    } else {
+                        fetchCryptoInfoAndOpenCryptoProfile(ticker)
+                    }
+                }
+
+                // Handle Buy button click
                 buyButton.setOnClickListener {
                     openBuyDialog(ticker)
                 }
 
+                // Handle Sell button click
                 sellButton.setOnClickListener {
                     openSellDialog(ticker)
                 }
 
+                // Handle More button click
                 settingsButton.setOnClickListener {
                     val options = arrayOf("Asset Report", "Asset Email Notification")
                     val builder = AlertDialog.Builder(this@MyAssetsActivity)
-                    builder.setTitle("Settings")
+                    builder.setTitle("More")
                     builder.setItems(options) { _, which ->
                         when (which) {
                             0 -> fetchAssetReport(ticker)
@@ -341,13 +350,73 @@ class MyAssetsActivity : AppCompatActivity() {
                     }
                     builder.create().show()
                 }
-
             }
 
             override fun getItemCount() = displayableAssets.size
         }
 
         recyclerView.adapter = adapter
+    }
+
+    private fun fetchTickerInfoAndOpenStockProfile(ticker: String) {
+        val tickerRequest = TickerRequest(ticker = ticker, session_token = sessionToken)
+        RetrofitClient.apiService.getTickerInfo(tickerRequest).enqueue(object : Callback<TickerInfoResponse> {
+            override fun onResponse(call: Call<TickerInfoResponse>, response: Response<TickerInfoResponse>) {
+                if (response.isSuccessful && response.body()?.ticker_info != null) {
+                    val tickerInfo = response.body()?.ticker_info!!
+                    val intent = Intent(this@MyAssetsActivity, StockProfileActivity::class.java).apply {
+                        putExtra("company_name", tickerInfo.company_name)
+                        putExtra("symbol", tickerInfo.symbol)
+                        putExtra("close_price", tickerInfo.close_price)
+                        putExtra("change_percentage", tickerInfo.change_percentage)
+                        putExtra("company_description", tickerInfo.company_description)
+                        putExtra("high_price", tickerInfo.high_price)
+                        putExtra("low_price", tickerInfo.low_price)
+                        putExtra("open_price", tickerInfo.open_price)
+                        putExtra("volume", tickerInfo.volume)
+                        putExtra("currency", tickerInfo.currency)
+                        putExtra("homepage", tickerInfo.homepage)
+                    }
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@MyAssetsActivity, "Failed to fetch stock info", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<TickerInfoResponse>, t: Throwable) {
+                Toast.makeText(this@MyAssetsActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("MyAssetsActivity", "Failed to fetch stock info", t)
+            }
+        })
+    }
+
+    private fun fetchCryptoInfoAndOpenCryptoProfile(ticker: String) {
+        val cryptoRequest = CryptoInfoRequest(crypto = ticker, session_token = sessionToken)
+        RetrofitClient.apiService.getCryptoInfo(cryptoRequest).enqueue(object : Callback<CryptoInfoResponse> {
+            override fun onResponse(call: Call<CryptoInfoResponse>, response: Response<CryptoInfoResponse>) {
+                if (response.isSuccessful && response.body()?.crypto_info != null) {
+                    val cryptoInfo = response.body()?.crypto_info!!
+                    val intent = Intent(this@MyAssetsActivity, CryptoProfileActivity::class.java).apply {
+                        putExtra("symbol", cryptoInfo.symbol)
+                        putExtra("name", cryptoInfo.name)
+                        putExtra("latest_price", cryptoInfo.latest_price)
+                        putExtra("description", cryptoInfo.description)
+                        putExtra("high", cryptoInfo.high)
+                        putExtra("low", cryptoInfo.low)
+                        putExtra("volume", cryptoInfo.volume)
+                        putExtra("open", cryptoInfo.open)
+                    }
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@MyAssetsActivity, "Failed to fetch crypto info", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<CryptoInfoResponse>, t: Throwable) {
+                Toast.makeText(this@MyAssetsActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("MyAssetsActivity", "Failed to fetch crypto info", t)
+            }
+        })
     }
 
     private fun navigateToAddBalance() {

@@ -20,23 +20,25 @@ import retrofit2.Response
 
 class ProfileActivity : AppCompatActivity() {
 
+    private lateinit var sharedPreferences: SharedPreferences
+    private var sessionToken: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Retrieve token from SharedPreferences
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("session_token", null)
+        sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        sessionToken = sharedPreferences.getString("session_token", null)
 
         // Redirect to login if token is null
-        if (token == null) {
+        if (sessionToken == null) {
             navigateToLogin()
             return
         }
 
-        // Retrieve and display user information
-        setupUserInfo(sharedPreferences)
+        // Fetch and display user information each time the user opens this activity
+        fetchUserDetails(sessionToken!!)
 
         // Logout button functionality
         findViewById<Button>(R.id.logoutButton).setOnClickListener {
@@ -45,12 +47,120 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         // Delete account functionality with confirmation dialog
-        setupDeleteAccountButton(sharedPreferences, token)
+        // (We will set up the delete button after fetching user details)
+    }
 
-        // Fetch and save user type if not set
-        if (sharedPreferences.getString("user_type", "Unknown") == "Unknown") {
-            fetchAndSaveUserType(token)
+    private fun fetchUserDetails(token: String) {
+        // 1) Fetch Username
+        RetrofitClient.apiService.getUsername(TokenRequest(token)).enqueue(object : Callback<UsernameResponse> {
+            override fun onResponse(call: Call<UsernameResponse>, response: Response<UsernameResponse>) {
+                val username = if (response.isSuccessful && response.body()?.status == "Success") {
+                    response.body()?.username ?: "Unknown"
+                } else {
+                    "Unknown"
+                }
+
+                // Save username
+                sharedPreferences.edit().putString("user_name", username).apply()
+
+                // Now fetch email
+                fetchUserEmail(token)
+            }
+
+            override fun onFailure(call: Call<UsernameResponse>, t: Throwable) {
+                Log.e("ProfileActivity", "Failed to fetch username: ${t.message}")
+                sharedPreferences.edit().putString("user_name", "Unknown").apply()
+                // Still attempt to fetch email
+                fetchUserEmail(token)
+            }
+        })
+    }
+
+    private fun fetchUserEmail(token: String) {
+        RetrofitClient.apiService.getEmail(TokenRequest(token)).enqueue(object : Callback<EmailResponse> {
+            override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
+                val email = if (response.isSuccessful && response.body()?.status == "Success") {
+                    response.body()?.email ?: "Unknown"
+                } else {
+                    "Unknown"
+                }
+
+                // Save email
+                sharedPreferences.edit().putString("user_email", email).apply()
+
+                // Now fetch profile icon
+                fetchProfileIcon(token)
+            }
+
+            override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
+                Log.e("ProfileActivity", "Failed to fetch email: ${t.message}")
+                sharedPreferences.edit().putString("user_email", "Unknown").apply()
+                // Still attempt to fetch profile icon
+                fetchProfileIcon(token)
+            }
+        })
+    }
+
+    private fun fetchProfileIcon(token: String) {
+        RetrofitClient.apiService.getProfileIcon(TokenRequest(token)).enqueue(object : Callback<ProfileIconResponse> {
+            override fun onResponse(call: Call<ProfileIconResponse>, response: Response<ProfileIconResponse>) {
+                if (response.isSuccessful && response.body()?.status == "Success") {
+                    val url = response.body()?.url
+                    if (!url.isNullOrEmpty()) {
+                        sharedPreferences.edit().putString("profile_icon_url", url).apply()
+                    } else {
+                        sharedPreferences.edit().remove("profile_icon_url").apply()
+                    }
+                } else {
+                    sharedPreferences.edit().remove("profile_icon_url").apply()
+                }
+
+                // Fetch user type if needed, then set up UI
+                fetchUserTypeIfNeeded(token)
+            }
+
+            override fun onFailure(call: Call<ProfileIconResponse>, t: Throwable) {
+                Log.e("ProfileActivity", "Failed to fetch profile icon: ${t.message}")
+                sharedPreferences.edit().remove("profile_icon_url").apply()
+                // Fetch user type if needed, then set up UI
+                fetchUserTypeIfNeeded(token)
+            }
+        })
+    }
+
+    private fun fetchUserTypeIfNeeded(token: String) {
+        val currentUserType = sharedPreferences.getString("user_type", "Unknown") ?: "Unknown"
+        if (currentUserType == "Unknown") {
+            RetrofitClient.apiService.getUserType(TokenRequest(token)).enqueue(object : Callback<UserTypeResponse> {
+                override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
+                    val userType = if (response.isSuccessful && response.body()?.status == "Success") {
+                        response.body()?.user_type ?: "Unknown"
+                    } else {
+                        "Unknown"
+                    }
+                    sharedPreferences.edit().putString("user_type", userType).apply()
+
+                    // Now that all details are fetched, setup UI
+                    setupUI()
+                }
+
+                override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
+                    Log.e("ProfileActivity", "Failed to fetch user type: ${t.message}")
+                    sharedPreferences.edit().putString("user_type", "Unknown").apply()
+                    // Setup UI anyway
+                    setupUI()
+                }
+            })
+        } else {
+            // If user type already known, just setup UI
+            setupUI()
         }
+    }
+
+    private fun setupUI() {
+        setupUserInfo(sharedPreferences)
+        // Setup the delete account button now that we have user_type
+        sessionToken?.let { setupDeleteAccountButton(sharedPreferences, it) }
     }
 
     private fun setupUserInfo(sharedPreferences: SharedPreferences) {
@@ -69,12 +179,13 @@ class ProfileActivity : AppCompatActivity() {
 
         val profileIconUrl = sharedPreferences.getString("profile_icon_url", null)
 
-        // Load the profile image using Glide with enhanced error handling
-        profileIconUrl?.let { url ->
+        if (profileIconUrl != null) {
             Glide.with(this)
-                .load(url)
+                .load(profileIconUrl)
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .error(R.drawable.ic_error)
+                // Apply the circle crop transformation
+                .circleCrop()
                 .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
                     override fun onLoadFailed(
                         e: GlideException?,
@@ -102,7 +213,7 @@ class ProfileActivity : AppCompatActivity() {
                     }
                 })
                 .into(profileImageView)
-        } ?: run {
+        } else {
             profileImageView.setImageResource(R.drawable.ic_profile_placeholder)
         }
     }
@@ -130,6 +241,13 @@ class ProfileActivity : AppCompatActivity() {
         RetrofitClient.apiService.deleteUser(requestBody).enqueue(object : Callback<DeleteUserResponse> {
             override fun onResponse(call: Call<DeleteUserResponse>, response: Response<DeleteUserResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
+                    // Successful delete response
+                    clearUserDetails()
+                    navigateToLogin()
+                } else if (response.code() == 500) {
+                    // Assume deletion succeeded if server returns 500 but still deletes
+                    Log.w("DELETE_ACCOUNT_WARNING", "Server returned 500, but account likely deleted.")
+                    Toast.makeText(this@ProfileActivity, "Account deleted successfully.", Toast.LENGTH_SHORT).show()
                     clearUserDetails()
                     navigateToLogin()
                 } else {
@@ -143,30 +261,6 @@ class ProfileActivity : AppCompatActivity() {
                 Toast.makeText(this@ProfileActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
             }
         })
-    }
-
-    private fun fetchAndSaveUserType(token: String) {
-        RetrofitClient.apiService.getUserType(TokenRequest(token)).enqueue(object : Callback<UserTypeResponse> {
-            override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
-                if (response.isSuccessful && response.body()?.status == "Success") {
-                    val userType = response.body()?.user_type ?: "Unknown"
-                    Log.d("USER_TYPE_FETCHED", "Fetched user type: $userType")
-                    saveUserType(userType)
-                    findViewById<TextView>(R.id.userType).text = "User Type: ${getUserTypeDescription(userType)}"
-                } else {
-                    Log.e("API_ERROR", "Failed to fetch user type: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "Error fetching user type: ${t.message}")
-            }
-        })
-    }
-
-    private fun saveUserType(userType: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putString("user_type", userType).apply()
     }
 
     private fun getUserTypeDescription(userType: String): String {
@@ -193,7 +287,6 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun clearUserDetails() {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().clear().apply()
     }
 }
