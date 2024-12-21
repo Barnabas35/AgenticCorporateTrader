@@ -338,6 +338,13 @@ def cancel_subscription():
     return jsonify(q_cancel_subscription(request.json)), 200
 
 
+# Download asset reports
+@app.route("/download-asset-reports", methods=["POST"])
+def download_asset_reports():
+    from query_library.download_asset_reports import q_download_asset_reports
+    return jsonify(q_download_asset_reports(request.json)), 200
+
+
 if __name__ == "__main__":
 
     # Start background task to check price alerts
