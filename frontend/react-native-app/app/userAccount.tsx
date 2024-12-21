@@ -29,14 +29,27 @@ const UserAccount: React.FC = () => {
   const [priceAlerts, setPriceAlerts] = useState<any[]>([]); 
   const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
 
+  // Subscription state
+  const [subscriptionActive, setSubscriptionActive] = useState<boolean | null>(null);
+  const [subscriptionStart, setSubscriptionStart] = useState<number | null>(null);
+  const [subscriptionEnd, setSubscriptionEnd] = useState<number | null>(null);
+  const [renewSubscription, setRenewSubscription] = useState<boolean | null>(null);
+
   const navigate = useNavigate();
+
+  if (!sessionToken) {
+    navigate('/login');
+    return null;
+  }
 
   useEffect(() => {
     if (username && email && profileIconUrl && userType) {
-      setLoading(false);
-      return;
+      // Once user data is loaded, fetch subscription
+      fetchSubscriptionDetails();
     }
+  }, [username, email, profileIconUrl, userType]);
 
+  useEffect(() => {
     if (!sessionToken) {
       navigate('/login');
       return;
@@ -44,33 +57,35 @@ const UserAccount: React.FC = () => {
 
     const fetchUserData = async () => {
       try {
-        const iconResponse = await fetch('https://tradeagently.dev/get-profile-icon', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_token: sessionToken }),
-        });
-        const iconData = await iconResponse.json();
+        const [iconResponse, usernameResponse, emailResponse, userTypeResponse] = await Promise.all([
+          fetch('https://tradeagently.dev/get-profile-icon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_token: sessionToken }),
+          }),
+          fetch('https://tradeagently.dev/get-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_token: sessionToken }),
+          }),
+          fetch('https://tradeagently.dev/get-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_token: sessionToken }),
+          }),
+          fetch('https://tradeagently.dev/get-user-type', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_token: sessionToken }),
+          })
+        ]);
 
-        const usernameResponse = await fetch('https://tradeagently.dev/get-username', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_token: sessionToken }),
-        });
-        const usernameData = await usernameResponse.json();
-
-        const emailResponse = await fetch('https://tradeagently.dev/get-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_token: sessionToken }),
-        });
-        const emailData = await emailResponse.json();
-
-        const userTypeResponse = await fetch('https://tradeagently.dev/get-user-type', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_token: sessionToken }),
-        });
-        const userTypeData = await userTypeResponse.json();
+        const [iconData, usernameData, emailData, userTypeData] = await Promise.all([
+          iconResponse.json(),
+          usernameResponse.json(),
+          emailResponse.json(),
+          userTypeResponse.json()
+        ]);
 
         if (
           usernameData.status === 'Success' &&
@@ -92,8 +107,35 @@ const UserAccount: React.FC = () => {
       }
     };
 
-    fetchUserData();
+    if (!username || !email || !profileIconUrl || !userType) {
+      fetchUserData();
+    } else {
+      setLoading(false);
+    }
   }, [sessionToken, username, email, profileIconUrl, navigate, setUsername, setEmail, setProfileIconUrl, userType]);
+
+  const fetchSubscriptionDetails = async () => {
+    try {
+      const response = await fetch('https://tradeagently.dev/get-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setSubscriptionActive(data.subscription_active);
+        setSubscriptionStart(data.subscription_start);
+        setSubscriptionEnd(data.subscription_end);
+        setRenewSubscription(data.renew_subscription);
+      } else {
+        // If no subscription details found or error
+        setSubscriptionActive(false);
+      }
+    } catch (err) {
+      // If error occurred fetching subscription, assume not active
+      setSubscriptionActive(false);
+    }
+  };
 
   const handleLogout = () => {
     setSessionToken(null);
@@ -175,6 +217,42 @@ const UserAccount: React.FC = () => {
     }
   };
 
+  const activateSubscription = async () => {
+    try {
+      const response = await fetch('https://tradeagently.dev/activate-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        await fetchSubscriptionDetails();
+      } else {
+        setDebugMessage('Failed to activate subscription');
+      }
+    } catch (err) {
+      setDebugMessage(`Error activating subscription: ${err}`);
+    }
+  };
+
+  const cancelSubscription = async () => {
+    try {
+      const response = await fetch('https://tradeagently.dev/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        await fetchSubscriptionDetails();
+      } else {
+        setDebugMessage('Failed to cancel subscription');
+      }
+    } catch (err) {
+      setDebugMessage(`Error cancelling subscription: ${err}`);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -183,6 +261,58 @@ const UserAccount: React.FC = () => {
       </View>
     );
   }
+
+  const renderSubscriptionDetails = () => {
+    if (subscriptionActive === null) {
+      return <Text>Loading subscription details...</Text>;
+    }
+
+    if (!subscriptionActive) {
+      // No active subscription
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={styles.subscriptionText}>AI subscription: Not Active</Text>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: 'green' }]}
+            onPress={activateSubscription}
+          >
+            <Text style={styles.actionButtonText}>Activate Subscription</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    } else {
+      // Subscription is active
+      const startDate = subscriptionStart ? new Date(subscriptionStart * 1000).toLocaleString() : 'N/A';
+      const endDate = subscriptionEnd ? new Date(subscriptionEnd * 1000).toLocaleString() : 'N/A';
+
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={styles.subscriptionText}>AI subscription: Active</Text>
+          <Text style={styles.subscriptionDetails}>Start: {startDate}</Text>
+          <Text style={styles.subscriptionDetails}>End: {endDate}</Text>
+          <Text style={styles.subscriptionDetails}>
+            Auto-Renew: {renewSubscription ? 'Yes' : 'No'}
+          </Text>
+          
+          {renewSubscription ? (
+            <TouchableOpacity 
+              style={[styles.actionButton, { backgroundColor: '#FF494B', marginTop: 10 }]}
+              onPress={cancelSubscription}
+            >
+              <Text style={styles.actionButtonText}>Cancel Subscription Renewal</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity 
+              style={[styles.actionButton, { backgroundColor: 'green', marginTop: 10 }]}
+              onPress={activateSubscription}
+            >
+              <Text style={styles.actionButtonText}>Reactivate Subscription Renewal</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -209,6 +339,11 @@ const UserAccount: React.FC = () => {
           <Text style={styles.infoValue}>
             {userType === 'fm' ? 'Fund Manager' : userType === 'fa' ? 'Fund Admin' : userType}
           </Text>
+        </View>
+
+        {/* Subscription Details */}
+        <View style={{ marginVertical: 20, width: '100%', alignItems: 'center' }}>
+          {renderSubscriptionDetails()}
         </View>
 
         <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
@@ -357,6 +492,17 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 16,
     color: '#333',
+  },
+  subscriptionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  subscriptionDetails: {
+    fontSize: 14,
+    color: '#333',
+    marginVertical: 2,
   },
   actionButton: {
     backgroundColor: '#007bff', 

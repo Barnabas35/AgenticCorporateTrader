@@ -8,7 +8,10 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  Modal,
+  Pressable,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useSessionToken } from '../components/userContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +20,7 @@ const ClientManagement: React.FC = () => {
   const [clients, setClients] = useState<any[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [assets, setAssets] = useState<string[]>([]);
+  const [assetDetails, setAssetDetails] = useState<{ [ticker: string]: number }>({});
   const [purchaseAmount, setPurchaseAmount] = useState<string>(''); // Amount for purchase
   const [market, setMarket] = useState<string>('stocks'); // Default market
   const [ticker, setTicker] = useState<string>(''); // Asset ticker
@@ -24,6 +28,11 @@ const ClientManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('Manage Assets'); // Active tab
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal states for asset report
+  const [reportModalVisible, setReportModalVisible] = useState<boolean>(false);
+  const [reportData, setReportData] = useState<{ profit?: number; total_usd_invested?: number } | null>(null);
+
   const navigate = useNavigate();
 
   if (!sessionToken) {
@@ -116,7 +125,6 @@ const ClientManagement: React.FC = () => {
       Alert.alert('Error', 'An error occurred while removing the client.');
     }
   };
-  
 
   // Fetch user assets for a client
   const fetchUserAssets = async (clientId: string) => {
@@ -136,6 +144,8 @@ const ClientManagement: React.FC = () => {
       const data = await response.json();
       if (data.status === 'Success') {
         setAssets(data.ticker_symbols);
+        // Once we have the assets, fetch their details (quantity)
+        await fetchAssetDetails(data.ticker_symbols, clientId);
         Alert.alert('Success', `Assets fetched for client ${clientId}.`);
       } else {
         Alert.alert('Error', 'Failed to fetch user assets.');
@@ -143,6 +153,33 @@ const ClientManagement: React.FC = () => {
     } catch (err) {
       Alert.alert('Error', 'An error occurred while fetching user assets.');
     }
+  };
+
+  const fetchAssetDetails = async (tickers: string[], clientId: string) => {
+    const details: { [ticker: string]: number } = {};
+    for (const tk of tickers) {
+      try {
+        const resp = await fetch('https://tradeagently.dev/get-asset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_token: sessionToken,
+            market: market,
+            ticker: tk,
+            client_id: clientId,
+          }),
+        });
+        const assetData = await resp.json();
+        if (assetData.status === 'Success') {
+          details[tk] = assetData.total_asset_quantity;
+        } else {
+          details[tk] = 0;
+        }
+      } catch {
+        details[tk] = 0;
+      }
+    }
+    setAssetDetails(details);
   };
 
   // Purchase asset for a client
@@ -172,11 +209,46 @@ const ClientManagement: React.FC = () => {
         Alert.alert('Success', `Purchased ${ticker} for $${purchaseAmount}.`);
         setPurchaseAmount('');
         setTicker('');
+        // Refresh assets after purchase
+        if (selectedClientId) {
+          fetchUserAssets(selectedClientId);
+        }
       } else {
         Alert.alert('Error', 'Failed to purchase asset.');
       }
     } catch (err) {
       Alert.alert('Error', 'An error occurred while purchasing the asset.');
+    }
+  };
+
+  // Get asset report
+  const getAssetReport = async (assetTicker: string) => {
+    if (!selectedClientId || !assetTicker) {
+      Alert.alert('Error', 'Invalid client or ticker.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://tradeagently.dev/get-asset-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          market,
+          client_id: selectedClientId,
+          ticker: assetTicker,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status === 'Success') {
+        setReportData({ profit: data.profit, total_usd_invested: data.total_usd_invested });
+        setReportModalVisible(true);
+      } else {
+        Alert.alert('Error', 'Failed to fetch report.');
+      }
+    } catch (err) {
+      Alert.alert('Error', 'An error occurred while fetching the asset report.');
     }
   };
 
@@ -216,7 +288,6 @@ const ClientManagement: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Tab Content */}
         {activeTab === 'Manage Assets' && (
           <>
             {/* Client List */}
@@ -245,10 +316,28 @@ const ClientManagement: React.FC = () => {
               />
             )}
 
-            {/* Selected Client Actions */}
             {selectedClientId && (
               <View>
                 <Text style={styles.sectionTitle}>Manage Assets for Client</Text>
+
+                {/* Market Selector */}
+                <View style={{ marginVertical: 10 }}>
+                  <Text>Select Market:</Text>
+                  <Picker
+                    selectedValue={market}
+                    style={{ height: 40, width: 150 }}
+                    onValueChange={(itemValue: React.SetStateAction<string>) => {
+                      setMarket(itemValue);
+                      if (selectedClientId) {
+                        // Refetch assets whenever market changes
+                        fetchUserAssets(selectedClientId);
+                      }
+                    }}
+                  >
+                    <Picker.Item label="Stocks" value="stocks" />
+                    <Picker.Item label="Crypto" value="crypto" />
+                  </Picker>
+                </View>
 
                 {/* Purchase Asset Section */}
                 <View style={styles.assetManagementContainer}>
@@ -268,12 +357,17 @@ const ClientManagement: React.FC = () => {
                   <Button title="Purchase Asset" onPress={purchaseAsset} color="green" />
                 </View>
 
-                {/* User Assets */}
+                {/* User Assets with Quantities and Report Button */}
                 <Text style={styles.sectionTitle}>Assets</Text>
                 <FlatList
                   data={assets}
                   keyExtractor={(item, index) => `${item}-${index}`}
-                  renderItem={({ item }) => <Text style={styles.assetItem}>{item}</Text>}
+                  renderItem={({ item }) => (
+                    <View style={styles.assetRow}>
+                      <Text style={styles.assetItem}>{item}: {assetDetails[item] !== undefined ? assetDetails[item].toFixed(5) : 'Loading...'}</Text>
+                      <Button title="Get Report" onPress={() => getAssetReport(item)} />
+                    </View>
+                  )}
                 />
               </View>
             )}
@@ -306,6 +400,36 @@ const ClientManagement: React.FC = () => {
             )}
           />
         )}
+
+        {/* Report Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={reportModalVisible}
+          onRequestClose={() => {
+            setReportModalVisible(false);
+          }}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>Asset Report</Text>
+              {reportData ? (
+                <>
+                  <Text>Profit: {reportData.profit}</Text>
+                  <Text>Total USD Invested: {reportData.total_usd_invested}</Text>
+                </>
+              ) : (
+                <Text>Loading...</Text>
+              )}
+              <Pressable
+                style={styles.closeModalButton}
+                onPress={() => setReportModalVisible(false)}
+              >
+                <Text style={{ color: '#fff', textAlign: 'center' }}>Close</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       </View>
     </View>
   );
@@ -388,12 +512,41 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   assetItem: {
-    paddingVertical: 5,
     fontSize: 16,
+    marginRight: 10,
+  },
+  assetRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 5,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    paddingVertical: 5,
   },
   removeButton: {
     color: 'red',
     fontSize: 18,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 8,
+    width: 300,
+    alignItems: 'flex-start',
+  },
+  closeModalButton: {
+    marginTop: 20,
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
   },
 });
 

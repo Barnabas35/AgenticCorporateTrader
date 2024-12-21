@@ -11,6 +11,12 @@ import {
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 
+/**
+ * CSV file link. We'll fetch from this URL, then create a Blob
+ * and trigger a download on the user's browser.
+ */
+const FILE_URL = `https://storage.googleapis.com/agenticcorporatetrader.appspot.com/user_reports/hello.csv?Expires=1794811810&GoogleAccessId=firebase-adminsdk-hms3b%40agenticcorporatetrader.iam.gserviceaccount.com&Signature=GMNNOBlEiZeiHcxjXfNRlcMko2DPfF93sEahbBxrq1FozyX5Mbp2P94Hp%2B3oEGwXHGJwyfNGoD%2F16khRPuAtxOc%2BwkEcb8xz0CieyGC8uDzbuO1ATpo5K1CsXkcZA61UXwh%2FsSCIFPlK%2BVxdd8Iy8SV56Wltt9eCxKU835mvdSrv7i1WfIrflAMF5Ktu9mjx7jrUb6yL86Mr1fNJpV5Ff4hNSxcWfohdoXBCq97xEKTvH4LoI5mv%2F7rEyh0pUpYQUdcUUo%2FYy5jJOwC7xfLI4TRJhxX8OOsOXMFkjgGAzghSxI%2Fpfs%2BSMKiVIED2OupHNUPtfB65j1zM7EKdlNt%2BRg%3D%3D`;
+
 interface Asset {
   ticker: string;
   quantity: number | null;
@@ -33,7 +39,7 @@ const MyAssets: React.FC = () => {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
-  
+
   // For Buy Modal
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [buyUsdQuantity, setBuyUsdQuantity] = useState<string>('');
@@ -44,9 +50,50 @@ const MyAssets: React.FC = () => {
   // Validation error state for sell modal
   const [sellModalError, setSellModalError] = useState<string>('');
 
+  // ------------------------------------------------------------
+  // 1) Download CSV on Web: fetch -> Blob -> hidden <a> -> click
+  // ------------------------------------------------------------
+  const handleDownloadAllAssetCsv = async () => {
+    try {
+      // 1) Fetch the file from the server as text or blob
+      const response = await fetch(FILE_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch CSV');
+      }
+
+      // Option A: Read as text, then convert to a Blob
+      const csvText = await response.text();
+      const blob = new Blob([csvText], { type: 'text/csv' });
+
+      // Option B: Or read as blob directly:
+      //   const blob = await response.blob();
+
+      // 2) Create a local URL for that blob
+      const url = URL.createObjectURL(blob);
+
+      // 3) Create an <a> element programmatically
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'all_assets.csv'; // The filename for the saved file
+
+      // 4) Append, click, remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 5) Revoke the blob URL (clean up)
+      URL.revokeObjectURL(url);
+
+    } catch (err) {
+      console.error('Error downloading CSV:', err);
+      Alert.alert('Error', 'An error occurred while downloading the CSV.');
+    }
+  };
+
+  // The rest of your MyAssets logic, e.g.:
   const openSellModal = (ticker: string) => {
     setSelectedTicker(ticker);
-    const asset = assets.find(a => a.ticker === ticker);
+    const asset = assets.find((a) => a.ticker === ticker);
     if (asset && asset.quantity !== null) {
       setSelectedAssetQuantity(asset.quantity);
     } else {
@@ -83,7 +130,6 @@ const MyAssets: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken }),
       });
-
       const data = await response.json();
 
       if (data.status === 'Success' && data.clients?.length > 0) {
@@ -144,7 +190,6 @@ const MyAssets: React.FC = () => {
       });
 
       const data = await response.json();
-
       if (data.status === 'Success') {
         setBalance(data.balance);
       } else {
@@ -168,7 +213,6 @@ const MyAssets: React.FC = () => {
           ticker,
         }),
       });
-
       const data = await response.json();
       return data.status === 'Success' ? data.total_asset_quantity : null;
     } catch (err) {
@@ -184,12 +228,11 @@ const MyAssets: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_token: sessionToken,
-          market: market,
+          market,
           client_id: clientId,
           ticker: ticker,
         }),
       });
-
       const data = await response.json();
 
       if (data.status === 'Success') {
@@ -209,21 +252,20 @@ const MyAssets: React.FC = () => {
   };
 
   const handleSellAsset = async () => {
-    // Validate sell quantity before selling
     const quantity = parseFloat(sellQuantity);
 
     if (!sellQuantity.trim()) {
       setSellModalError('Please input an amount.');
       return;
     }
-
     if (isNaN(quantity) || quantity <= 0) {
       setSellModalError('Please input a valid amount.');
       return;
     }
-
     if (selectedAssetQuantity !== null && quantity > selectedAssetQuantity) {
-      setSellModalError(`You can only sell up to ${selectedAssetQuantity.toFixed(5)} units of ${selectedTicker}.`);
+      setSellModalError(
+        `You can only sell up to ${selectedAssetQuantity.toFixed(5)} units of ${selectedTicker}.`
+      );
       return;
     }
 
@@ -241,7 +283,6 @@ const MyAssets: React.FC = () => {
       });
 
       const data = await response.json();
-
       if (data.status === 'Success') {
         Alert.alert('Success', `${quantity} of ${selectedTicker} sold successfully.`);
         fetchUserAssets();
@@ -275,7 +316,6 @@ const MyAssets: React.FC = () => {
       });
 
       const data = await response.json();
-
       if (data.status === 'Success') {
         Alert.alert('Success', `${buyUsdQuantity} USD of ${selectedTicker} purchased successfully.`);
         fetchUserAssets();
@@ -310,6 +350,11 @@ const MyAssets: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/** CSV download button in the top-right */}
+      <TouchableOpacity style={styles.downloadCsvButton} onPress={handleDownloadAllAssetCsv}>
+        <Text style={styles.downloadCsvButtonText}>Download All Asset CSV</Text>
+      </TouchableOpacity>
+
       <View style={styles.balanceContainer}>
         <Text style={styles.balanceText}>Balance: ${balance?.toFixed(2) ?? 'N/A'}</Text>
       </View>
@@ -383,7 +428,9 @@ const MyAssets: React.FC = () => {
                 You own: {selectedAssetQuantity?.toFixed(5) ?? 'N/A'} {selectedTicker}
               </Text>
             )}
-            <Text style={styles.modalText}>Enter the quantity of {selectedTicker} to sell:</Text>
+            <Text style={styles.modalText}>
+              Enter the quantity of {selectedTicker} to sell:
+            </Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Quantity"
@@ -428,7 +475,9 @@ const MyAssets: React.FC = () => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Buy Asset</Text>
-            <Text style={styles.modalText}>Enter the USD amount to invest in {selectedTicker}:</Text>
+            <Text style={styles.modalText}>
+              Enter the USD amount to invest in {selectedTicker}:
+            </Text>
             <TextInput
               style={styles.modalInput}
               placeholder="USD Amount"
@@ -485,12 +534,30 @@ const MyAssets: React.FC = () => {
   );
 };
 
+// ----------------------------
+// Styles
+// ----------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
     width: '100%',
+    position: 'relative', // So we can position the button top-right
+  },
+  downloadCsvButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: 'green',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    zIndex: 10,
+  },
+  downloadCsvButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   balanceContainer: {
     padding: 15,
@@ -510,6 +577,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     color: '#333',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
   },
   marketSwitchContainer: {
     flexDirection: 'row',
@@ -587,11 +659,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#aaa',
     marginTop: 20,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center',
   },
   modalBackground: {
     flex: 1,

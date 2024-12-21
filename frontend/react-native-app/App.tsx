@@ -1,4 +1,5 @@
-import React from 'react';
+// App.tsx or App.jsx
+import React, { useEffect } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
@@ -16,16 +17,21 @@ import ClientManagement from './app/client-management';
 import Admin from './app/admin';
 import MyAssets from './app/my-assets';
 import CheckoutForm from './components/CheckoutForm';
-import CompletePage from './components/CompletePage'; // Import CompletePage component
+import CompletePage from './components/CompletePage';
+import { Helmet } from 'react-helmet';
 
 // Initialize Stripe
 const stripePromise = loadStripe('pk_test_51QP2IwFp664itGdOwg1hyEpDcLxfaD29psic6hcZ5lnmO6MUZNXnu0Vft1kZk8pLx4BGc6ofKD9oZS4pHPdBj5tz00lLw5IBU5');
 
 const App: React.FC = () => {
+
   return (
     <Router>
+      <Helmet>
+        <title>Tradeagently</title>
+        <link rel="icon" href="./assets/images/logo1.png" />
+      </Helmet>
       <View style={styles.container}>
-        {/* Menu for navigation */}
         <Menu />
         <View style={styles.content}>
           <Routes>

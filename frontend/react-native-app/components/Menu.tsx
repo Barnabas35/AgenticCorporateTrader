@@ -23,12 +23,15 @@ const Menu: React.FC = () => {
 
   useEffect(() => {
     const fetchUserType = async () => {
+      if (!sessionToken) {
+        setUserType(null);
+        return;
+      }
+
       try {
         const response = await fetch('https://tradeagently.dev/get-user-type', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session_token: sessionToken }),
         });
 
@@ -44,6 +47,11 @@ const Menu: React.FC = () => {
     };
 
     const fetchBalance = async () => {
+      if (!sessionToken) {
+        setBalance(null);
+        return;
+      }
+
       try {
         const response = await fetch('https://tradeagently.dev/get-balance', {
           method: 'POST',
@@ -72,7 +80,11 @@ const Menu: React.FC = () => {
         fetchBalance();
       }, 10000); // Every 10 seconds
 
-      return () => clearInterval(intervalId); // Clear the interval when the component unmounts
+      return () => clearInterval(intervalId);
+    } else {
+      // If there's no session token, user is logged out, so clear user data
+      setUserType(null);
+      setBalance(null);
     }
 
     const handleResize = () => {
@@ -102,13 +114,12 @@ const Menu: React.FC = () => {
           />
         </NavLink>
 
-        {/* Display Balance */}
-        {balance !== null && (
+        {/* Display Balance only if logged in and balance is available */}
+        {sessionToken && balance !== null && (
           <View style={styles.balanceContainer}>
             <Text style={styles.balanceText}>Balance: ${balance.toFixed(2)}</Text>
           </View>
         )}
-
 
         {/* Mobile View - Burger Menu */}
         {isMobileView ? (
@@ -313,7 +324,6 @@ const Menu: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // Styles remain the same as provided.
   container: {
     backgroundColor: '#282424',
     height: 105,
@@ -440,7 +450,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   balanceContainer: {
-    backgroundColor: '#4CAF50', // Same green color as other menu options
+    backgroundColor: '#4CAF50',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 20,

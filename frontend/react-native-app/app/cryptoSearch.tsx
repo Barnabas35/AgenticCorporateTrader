@@ -69,10 +69,21 @@ const CryptoSearch: React.FC = () => {
   const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
   const [alertPrice, setAlertPrice] = useState<string>('');
   const [alertTicker, setAlertTicker] = useState<string | null>(null);
-  const [isFundManager, setIsFundManager] = useState(false);
+  
+  const [userType, setUserType] = useState<string | null>(null);
+  const [isFundManager, setIsFundManager] = useState<boolean>(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+
+  // States for AI Asset Report
+  const [aiReportLoading, setAiReportLoading] = useState(false);
+  const [aiReportData, setAiReportData] = useState<{
+    response?: string;
+    future?: string;
+    recommend?: string;
+  } | null>(null);
+  const [activeSubscription, setActiveSubscription] = useState<boolean>(true); // If "No active subscription." is returned, set false.
 
   useEffect(() => {
     fetchTopCryptos();
@@ -83,24 +94,25 @@ const CryptoSearch: React.FC = () => {
   useEffect(() => {
     if (selectedCrypto) {
       fetchCryptoAggregates(selectedCrypto.symbol);
+      // Automatically fetch AI asset report after crypto details are loaded
+      fetchAiAssetReport();
     }
   }, [historyWindow, selectedCrypto]);
 
-  // Helper function to map historyWindow to interval and limit
   const getIntervalAndLimit = (hw: string): { interval: string; limit: number } => {
     switch (hw) {
       case 'hour':
-        return { interval: '1m', limit: 60 }; // 1-minute intervals, 60 data points
+        return { interval: '1m', limit: 60 };
       case 'day':
-        return { interval: '1h', limit: 24 }; // 1-hour intervals, 24 data points
+        return { interval: '1h', limit: 24 };
       case 'week':
-        return { interval: '1d', limit: 7 }; // 1-day intervals, 7 data points
+        return { interval: '1d', limit: 7 };
       case 'month':
-        return { interval: '1d', limit: 30 }; // 1-day intervals, 30 data points
+        return { interval: '1d', limit: 30 };
       case 'year':
-        return { interval: '1mo', limit: 12 }; // 1-month intervals, 12 data points
+        return { interval: '1mo', limit: 12 };
       default:
-        return { interval: '1d', limit: 30 }; // Default to month
+        return { interval: '1d', limit: 30 };
     }
   };
 
@@ -115,9 +127,12 @@ const CryptoSearch: React.FC = () => {
       const data = await response.json();
       if (data.status === 'Success') {
         setBalance(data.balance);
+      } else {
+        setError(data.message || 'Failed to fetch balance.');
       }
     } catch (err) {
       console.error('Error fetching balance:', err);
+      setError('Error fetching balance.');
     }
   };
 
@@ -130,15 +145,19 @@ const CryptoSearch: React.FC = () => {
       });
       const data = await response.json();
       if (data.status === 'Success') {
+        setUserType(data.user_type);
         if (data.user_type === 'fm') {
           setIsFundManager(true);
           fetchClients();
         } else if (data.user_type === 'fa') {
           fetchClients();
         }
+      } else {
+        setError(data.message || 'Failed to fetch user type.');
       }
     } catch (err) {
       console.error('Error fetching user type:', err);
+      setError('Error fetching user type.');
     }
   };
 
@@ -156,10 +175,11 @@ const CryptoSearch: React.FC = () => {
           setSelectedClient(data.clients[0].client_id);
         }
       } else {
-        setError('Failed to fetch clients');
+        setError(data.message || 'Failed to fetch clients.');
       }
     } catch (err) {
       console.error('Error fetching clients:', err);
+      setError('Error fetching clients.');
     }
   };
 
@@ -172,10 +192,10 @@ const CryptoSearch: React.FC = () => {
       if (data.status === 'Success') {
         setTopCryptos(data.crypto_details);
       } else {
-        setError('Failed to fetch top cryptos');
+        setError(data.message || 'Failed to fetch top cryptos.');
       }
     } catch {
-      setError('Failed to fetch top cryptos');
+      setError('Failed to fetch top cryptos.');
     } finally {
       setLoading(false);
     }
@@ -203,10 +223,10 @@ const CryptoSearch: React.FC = () => {
       if (data.status === 'Success' && data.crypto_details) {
         setSearchResults(data.crypto_details);
       } else {
-        setError('No matching cryptocurrencies found');
+        setError('No matching cryptocurrencies found.');
       }
     } catch (error) {
-      setError('Error searching cryptocurrencies');
+      setError('Error searching cryptocurrencies.');
     } finally {
       setLoading(false);
     }
@@ -215,6 +235,8 @@ const CryptoSearch: React.FC = () => {
   const fetchCryptoDetails = async (symbol: string) => {
     setLoading(true);
     setError(null);
+    setAiReportData(null); 
+    setActiveSubscription(true); // Reset before fetching new report
     try {
       const response = await fetch('https://tradeagently.dev/get-crypto-info', {
         method: 'POST',
@@ -224,12 +246,11 @@ const CryptoSearch: React.FC = () => {
       const data = await response.json();
       if (data.status === 'Success') {
         setSelectedCrypto(data.crypto_info);
-        fetchCryptoAggregates(symbol);
       } else {
-        setError(data.message || 'Failed to fetch crypto details');
+        setError(data.message || 'Failed to fetch crypto details.');
       }
     } catch {
-      setError('Failed to fetch crypto details');
+      setError('Failed to fetch crypto details.');
     } finally {
       setLoading(false);
     }
@@ -242,10 +263,8 @@ const CryptoSearch: React.FC = () => {
     const endDate = end.toISOString().split('T')[0];
     let startDate = '';
 
-    // Determine start_date based on historyWindow
     switch (historyWindow) {
       case 'hour':
-        // For the hour timeframe, set start_date to today
         startDate = endDate;
         break;
       case 'day':
@@ -287,7 +306,6 @@ const CryptoSearch: React.FC = () => {
       });
 
       if (!response.ok) {
-        // Handle HTTP errors
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -295,35 +313,22 @@ const CryptoSearch: React.FC = () => {
 
       if (data.status === 'Success' && Array.isArray(data.crypto_aggregates)) {
         let validData = data.crypto_aggregates;
-
-        // Handle last hour timeframe with potential API issues
-        if (historyWindow === 'hour' && validData.length === 0) {
-          setHistoricalData({ labels: [], prices: [] });
-          setError('No data available for the last hour timeframe.');
-          setLoading(false);
-          return;
-        }
-
-        // Reverse the data so the oldest is on the left
         validData.reverse();
 
         const labels = validData.map((item: any) => {
           const dateObj = new Date(item.date);
           if (historyWindow === 'hour') {
-            // For last hour: show hour and minute
             return dateObj.toLocaleString('en-US', {
               hour: 'numeric',
               minute: 'numeric',
               hour12: true,
             });
           } else if (historyWindow === 'day') {
-            // For last day: show hour only
             return dateObj.toLocaleString('en-US', {
               hour: 'numeric',
               hour12: true,
             });
           } else {
-            // For week/month/year: show date
             return dateObj.toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -333,14 +338,13 @@ const CryptoSearch: React.FC = () => {
         });
 
         const prices = validData.map((item: any) => item.close);
-
         setHistoricalData({ labels, prices });
       } else {
-        setError(data.message || 'Failed to fetch crypto aggregates');
+        setError(data.message || 'Failed to fetch crypto aggregates.');
       }
     } catch (error) {
       console.error('Error fetching crypto aggregates:', error);
-      setError('Failed to fetch crypto aggregates');
+      setError('Failed to fetch crypto aggregates.');
     } finally {
       setLoading(false);
     }
@@ -357,7 +361,9 @@ const CryptoSearch: React.FC = () => {
       return;
     }
 
-    if ((isFundManager || clients.length > 1) && !selectedClient) {
+    const requiresClientSelection = isFundManager || userType === 'fa';
+
+    if (requiresClientSelection && !selectedClient) {
       Alert.alert('Error', 'Please select a client.');
       return;
     }
@@ -368,35 +374,52 @@ const CryptoSearch: React.FC = () => {
     }
 
     try {
+      const requestBody: any = {
+        session_token: sessionToken,
+        usd_quantity: parseFloat(buyUsdQuantity),
+        market: 'crypto',
+        ticker: buyTicker,
+      };
+
+      if (isFundManager || userType === 'fa') {
+        requestBody.client_id = selectedClient;
+      }
+
       const response = await fetch('https://tradeagently.dev/purchase-asset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_token: sessionToken,
-          usd_quantity: parseFloat(buyUsdQuantity),
-          market: 'crypto',
-          ticker: buyTicker,
-          client_id: isFundManager ? selectedClient : undefined,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
+
       if (data.status === 'Success') {
         Alert.alert(
           'Success',
           `Successfully purchased ${buyUsdQuantity} USD of ${buyTicker}${
-            isFundManager ? ` for client ${selectedClient}.` : '.'
+            isFundManager || userType === 'fa' ? ` for client ${getClientName(selectedClient)}` : '.'
           }`
         );
         setBuyModalVisible(false);
         setBuyUsdQuantity('');
-        setSelectedClient(null);
+
+        if (isFundManager) {
+          setSelectedClient(null);
+        }
+
+        fetchBalance();
       } else {
         Alert.alert('Error', data.message || 'Failed to complete the purchase.');
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while processing the purchase.');
+      console.error('Purchase Error:', error);
     }
+  };
+
+  const getClientName = (clientId: string | null): string => {
+    const client = clients.find((c) => c.client_id === clientId);
+    return client ? client.client_name : 'Unknown Client';
   };
 
   const handleSetPriceAlert = (ticker: string) => {
@@ -438,6 +461,45 @@ const CryptoSearch: React.FC = () => {
       }
     } catch (error) {
       Alert.alert('Error', 'An error occurred while setting the price alert.');
+      console.error('Price Alert Error:', error);
+    }
+  };
+
+  // Fetch the AI Asset Report automatically
+  const fetchAiAssetReport = async () => {
+    if (!selectedCrypto) return;
+    setAiReportLoading(true);
+    setAiReportData(null);
+    setError(null);
+
+    try {
+      const response = await fetch('https://tradeagently.dev/get-ai-asset-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          market: 'crypto',
+          ticker: selectedCrypto.symbol,
+        }),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setAiReportData({
+          response: data.response,
+          future: data.future,
+          recommend: data.recommend,
+        });
+      } else if (data.status === 'No active subscription.') {
+        // If no active subscription, do not show AI report
+        setActiveSubscription(false);
+      } else {
+        setError('Failed to fetch AI asset report.');
+      }
+    } catch (err) {
+      console.error('Error fetching AI asset report:', err);
+      setError('Error fetching AI asset report.');
+    } finally {
+      setAiReportLoading(false);
     }
   };
 
@@ -471,6 +533,7 @@ const CryptoSearch: React.FC = () => {
       )}
       {error && <Text style={styles.errorText}>{error}</Text>}
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
+
       {selectedCrypto ? (
         <View style={styles.cryptoDetails}>
           <Text style={styles.cryptoTitle}>
@@ -541,10 +604,10 @@ const CryptoSearch: React.FC = () => {
                     maintainAspectRatio: false,
                     scales: {
                       x: {
-                        type: historyWindow === 'hour' ? 'category' : 'category',
+                        type: 'category',
                         ticks: {
                           autoSkip: true,
-                          maxTicksLimit: historyWindow === 'hour' ? 10 : 10,
+                          maxTicksLimit: 10,
                         },
                       },
                       y: {
@@ -564,6 +627,27 @@ const CryptoSearch: React.FC = () => {
             <Text style={styles.description}>{selectedCrypto.description}</Text>
           </View>
 
+          {/* AI Asset Report Section */}
+          {activeSubscription && aiReportData && !aiReportLoading && (
+            <View style={styles.aiReportContainer}>
+              <View style={styles.aiReportCard}>
+                <Text style={styles.aiReportTitle}>AI Asset Report</Text>
+                <Text style={styles.aiReportText}>{aiReportData.response}</Text>
+                <Text style={styles.aiReportFuture}>
+                  Future Outlook: <Text style={{ fontWeight: 'bold' }}>{aiReportData.future}</Text>
+                </Text>
+                <Text style={styles.aiReportRecommend}>
+                  Recommendation: <Text style={{ fontWeight: 'bold' }}>{aiReportData.recommend}</Text>
+                </Text>
+              </View>
+            </View>
+          )}
+          {activeSubscription && aiReportLoading && (
+            <View style={styles.aiReportContainer}>
+              <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 10 }} />
+            </View>
+          )}
+
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => {
@@ -571,6 +655,8 @@ const CryptoSearch: React.FC = () => {
               setSearchResults([]);
               setHistoricalData({ labels: [], prices: [] });
               setError(null);
+              setAiReportData(null);
+              setActiveSubscription(true);
             }}
           >
             <Text style={styles.backButtonText}>Back</Text>
@@ -600,21 +686,27 @@ const CryptoSearch: React.FC = () => {
               value={buyUsdQuantity}
               onChangeText={setBuyUsdQuantity}
             />
-            {isFundManager && (
+            {(isFundManager || userType === 'fa') && (
               <View style={styles.dropdownContainer}>
                 <Text style={styles.modalLabel}>Select Client:</Text>
-                <View style={styles.customPickerContainer}>
-                  <Picker
-                    selectedValue={selectedClient}
-                    onValueChange={(value) => setSelectedClient(value)}
-                    style={styles.pickerStyle}
-                  >
-                    <Picker.Item label="Select a client" value={null} />
-                    {clients.map((client) => (
-                      <Picker.Item key={client.client_id} label={client.client_name} value={client.client_id} />
-                    ))}
-                  </Picker>
-                </View>
+                {clients.length > 1 ? (
+                  <View style={styles.customPickerContainer}>
+                    <Picker
+                      selectedValue={selectedClient}
+                      onValueChange={(value) => setSelectedClient(value)}
+                      style={styles.pickerStyle}
+                    >
+                      <Picker.Item label="Select a client" value={null} />
+                      {clients.map((client) => (
+                        <Picker.Item key={client.client_id} label={client.client_name} value={client.client_id} />
+                      ))}
+                    </Picker>
+                  </View>
+                ) : (
+                  <Text style={styles.clientNameText}>
+                    {clients.length === 1 ? clients[0].client_name : 'No clients available'}
+                  </Text>
+                )}
               </View>
             )}
             <View style={styles.modalButtonContainer}>
@@ -693,12 +785,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#ddd',
-    alignSelf: 'flex-start', // Align to the left
     width: '100%',
   },
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
     marginBottom: 8,
   },
   infoLabel: { fontWeight: 'bold', fontSize: 16, color: '#333', width: 120 },
@@ -733,7 +823,6 @@ const styles = StyleSheet.create({
   chartContainer: { height: 300, width: '100%', marginVertical: 20, justifyContent: 'center', alignItems: 'center' },
   noDataText: { textAlign: 'center', color: 'gray', marginTop: 20 },
 
-  // Description container
   descriptionContainer: {
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
@@ -743,6 +832,41 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   description: { fontStyle: 'italic', fontSize: 16, textAlign: 'center', color: '#333' },
+
+  aiReportContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  aiReportCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 16,
+    marginTop: 20,
+  },
+  aiReportTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  aiReportText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#333',
+    lineHeight: 22,
+  },
+  aiReportFuture: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#333',
+  },
+  aiReportRecommend: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#333',
+  },
 
   backButton: {
     backgroundColor: '#007bff',
@@ -768,7 +892,6 @@ const styles = StyleSheet.create({
   alertButton: { backgroundColor: '#FFAA00', padding: 10, borderRadius: 5 },
   alertButtonText: { color: 'white', fontWeight: 'bold' },
 
-  // Modal Styles
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
@@ -806,6 +929,7 @@ const styles = StyleSheet.create({
 
   dropdownContainer: { marginBottom: 16 },
   modalLabel: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: '#333' },
+  clientNameText: { fontSize: 16, color: '#555', padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 },
 });
 
 export default CryptoSearch;
