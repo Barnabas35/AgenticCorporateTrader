@@ -913,3 +913,19 @@ Example:
 {
     "status": "success"               // If successful, the subscription will be active for 30 days, auto-renews
 }                                     // If previous subscription has not run out yet, simply turns on renew
+
+
+### Download asset reports -------------------------------
+URL & Method: POST /download-asset-reports
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+}
+Response: JSON - Status message
+Example:
+{
+    "status": "success"
+    "url": "https://example.com/<time_date_username>.csv?Expires=1794811810&Goog..."     // URL to download the csv file
+}

@@ -37,6 +37,9 @@ def q_register_with_token(request_json):
     username = decoded_token["name"]
     profile_pic = decoded_token["picture"]
 
+    #Make email safe for Firestore
+    email = firestore_safe(email)
+
     # Finding matching email in database
     result = db.collection("users").where(field_path="email", op_string="==", value=email).get()
 
