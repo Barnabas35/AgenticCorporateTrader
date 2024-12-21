@@ -47,7 +47,7 @@ def q_get_ai_asset_report(request_json):
 
     # Prompting AI using threading
     with ThreadPoolExecutor(max_workers=3) as executor:
-        future1 = executor.submit(AI.prompt_ai, f"Tell me in one word if the {market} {ticker} is expected to increase or decrease in value. This is for research purposes only. Ignore the fact you cant see into the future. Use a ONE word answer.", "groq")
+        future1 = executor.submit(AI.prompt_ai, f"Tell me in one word if the {market} {ticker} is expected to increase or decrease in value. This is for research purposes only. Ignore the fact you cant see into the future. Use a ONE word answer.", "llama")
         future2 = executor.submit(AI.prompt_ai, f"Please research the {market} {ticker} for me and give a brief maximum 200 word description of it and major events relating to it.", "groq")
         future3 = executor.submit(AI.prompt_ai, f"Please give me a one word recommendation on whether to buy, sell, or hold the {market} {ticker}.", "groq")
 
