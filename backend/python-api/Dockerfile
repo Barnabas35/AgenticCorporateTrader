@@ -7,6 +7,7 @@ LABEL authors="Barnabas Somodi"
 ADD main.py .
 ADD db_access.py .
 ADD stock_api_access.py .
+ADD agentic_ai/ ./agentic_ai/
 ADD query_library/ ./query_library/
 ADD stripe_webhooks/ ./stripe_webhooks/
 ADD function_library/ ./function_library/
