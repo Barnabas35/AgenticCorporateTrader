@@ -929,3 +929,23 @@ Example:
     "status": "success"
     "url": "https://example.com/<time_date_username>.csv?Expires=1794811810&Goog..."     // URL to download the csv file
 }
+
+
+### Get AI accounting ------------------------------------
+URL & Method: POST /get-ai-accounting
+Headers:
+ - Content-Type: application/json
+Body (JSON):
+{
+  "session_token": "string",
+  "market": "string",            // "stocks" or "crypto"
+  "ticker": "string"             // Ticker symbol with no -USD suffix
+  "client_id": "string"          // Client id (or user id for "fa" user type)
+}
+Response: JSON - Accounting report and status message
+Example:
+{
+    "asset_growth": "Asset growth of ETH: 0.48%",
+    "asset_liquidity": "The asset liquidity of ETH is 0.00020256.",
+    "asset_profitability": "-2.2791582797871075%"
+}
