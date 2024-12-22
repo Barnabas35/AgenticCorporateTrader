@@ -14,8 +14,8 @@ class AI:
 
         if ai_type == "groq":
             return AI.__instance.groq(query)
-        elif ai_type == "llama":
-            return AI.__instance.llama(query)
+        elif ai_type == "llama3.2" or ai_type == "llama3.1":
+            return AI.__instance.llama(query, ai_type)
         elif ai_type == "openai":
             return AI.__instance.openai(query)
         else:
@@ -74,10 +74,10 @@ class AI:
         return chat_completion.choices[0].message.content
 
 
-    def llama(self, query):
+    def llama(self, query, model="llama3.2"):
 
         data = {
-            "model": "llama3.2",
+            "model": model,
             "prompt": f"{query}",
             "stream": False
         }
