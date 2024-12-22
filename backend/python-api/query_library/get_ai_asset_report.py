@@ -4,6 +4,7 @@ from db_access import DBAccess
 from function_library.prompt_ai import AI
 from function_library.security_string_parsing import firestore_safe
 from query_library.get_subscription import q_get_subscription
+import time
 
 def q_get_ai_asset_report(request_json):
 
@@ -37,6 +38,24 @@ def q_get_ai_asset_report(request_json):
     if not subscription_active:
         return {"status": "No active subscription."}
 
+    # Checking if a prompt with matching ticker and marked has been cached
+    result = db.collection("ai_report_cache").where(field_path="ticker", op_string="==", value=ticker).where(field_path="market", op_string="==", value=market).get()
+
+    if len(result) != 0:
+        doc_id = result[0].id
+
+        # Get timestamp of the cached report
+        timestamp = result[0].to_dict()["timestamp"]
+
+        # Check if the cached report is not older than 10 minutes
+        if not ((int(time.time()) - timestamp) > 60):
+
+            # Get the cached report
+            report = result[0].to_dict()["report"]
+
+            # Return the cached report
+            return report
+
     # Warming up the AI
     AI.prompt_ai("Warm-up", "Invalid Model")
 
@@ -57,4 +76,13 @@ def q_get_ai_asset_report(request_json):
 
     asset_blog = AI.prompt_ai(f"Given that for the {market} {ticker} one should expect the value to {asset_future} and that one should {asset_recommend} the {market} and that the history of the {market} is [{asset_research}], write a short blog style paragraph that combines these pieces of information for the general audience. Avoid titles.", "groq")
 
-    return {"response": asset_blog, "status": "success", "future": asset_future, "recommend": asset_recommend}
+    # Create the report
+    report = {"response": asset_blog, "status": "success", "future": asset_future, "recommend": asset_recommend}
+
+    # Cache the report
+    if len(result) == 0:
+        db.collection("ai_report_cache").add({"ticker": ticker, "market": market, "timestamp": int(time.time()), "report": report})
+    else:
+        db.collection("ai_report_cache").document(doc_id).update({"timestamp": int(time.time()), "report": report})
+
+    return report
