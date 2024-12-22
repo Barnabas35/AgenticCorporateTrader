@@ -42,6 +42,14 @@ const MyAssets: React.FC = () => {
   const [selectedAssetQuantity, setSelectedAssetQuantity] = useState<number | null>(null);
   const [sellModalError, setSellModalError] = useState<string>('');
 
+  // NEW: AI Accounting Modal State
+  const [aiAccountingModalVisible, setAiAccountingModalVisible] = useState<boolean>(false);
+  const [selectedAiAccounting, setSelectedAiAccounting] = useState<{
+    asset_growth: string;
+    asset_liquidity: string;
+    asset_profitability: string;
+  } | null>(null);
+
   const handleDownloadAllAssetCsv = async () => {
     try {
       const response = await fetch('https://tradeagently.dev/download-asset-reports', {
@@ -70,14 +78,13 @@ const MyAssets: React.FC = () => {
 
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = 'all_assets.csv'; 
+      link.download = 'all_assets.csv';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       // 5) Clean up
       URL.revokeObjectURL(blobUrl);
-
     } catch (err) {
       console.error('Error downloading CSV:', err);
       Alert.alert('Error', 'An error occurred while downloading the CSV.');
@@ -247,6 +254,37 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // NEW: Fetch AI Accounting
+  const fetchAiAccounting = async (ticker: string) => {
+    try {
+      const response = await fetch('https://tradeagently.dev/get-ai-accounting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          market,
+          ticker,
+          client_id: clientId,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.asset_growth || data.asset_liquidity || data.asset_profitability) {
+        setSelectedAiAccounting({
+          asset_growth: data.asset_growth,
+          asset_liquidity: data.asset_liquidity,
+          asset_profitability: data.asset_profitability,
+        });
+        setAiAccountingModalVisible(true);
+      } else {
+        Alert.alert('Error', `Failed to fetch AI accounting for ${ticker}.`);
+      }
+    } catch (err) {
+      console.error(`Error fetching AI accounting for ${ticker}:`, err);
+      Alert.alert('Error', `An error occurred while fetching AI accounting for ${ticker}.`);
+    }
+  };
+
   // Sell asset
   const handleSellAsset = async () => {
     const quantity = parseFloat(sellQuantity);
@@ -403,6 +441,14 @@ const MyAssets: React.FC = () => {
               >
                 <Text style={styles.reportButtonText}>View Report</Text>
               </TouchableOpacity>
+
+              {/* NEW: "View Accounting" Button */}
+              <TouchableOpacity
+                style={styles.accountingButton}
+                onPress={() => fetchAiAccounting(item.ticker)}
+              >
+                <Text style={styles.accountingButtonText}>View Accounting</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -520,6 +566,39 @@ const MyAssets: React.FC = () => {
             <TouchableOpacity
               style={[styles.modalButton, styles.modalCloseButton]}
               onPress={() => setReportModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* NEW: AI Accounting Modal */}
+      <Modal
+        visible={aiAccountingModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setAiAccountingModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>AI Accounting</Text>
+            {selectedAiAccounting && (
+              <View>
+                <Text style={styles.modalText}>
+                  {selectedAiAccounting.asset_growth}
+                </Text>
+                <Text style={styles.modalText}>
+                  {selectedAiAccounting.asset_liquidity}
+                </Text>
+                <Text style={styles.modalText}>
+                  {selectedAiAccounting.asset_profitability}
+                </Text>
+              </View>
+            )}
+            <TouchableOpacity
+              style={[styles.modalButton, styles.modalCloseButton]}
+              onPress={() => setAiAccountingModalVisible(false)}
             >
               <Text style={styles.modalButtonText}>Close</Text>
             </TouchableOpacity>
@@ -651,6 +730,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+
+  // NEW: Accounting button style
+  accountingButton: {
+    backgroundColor: '#6a1b9a',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  accountingButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
   emptyText: {
     textAlign: 'center',
     color: '#aaa',
