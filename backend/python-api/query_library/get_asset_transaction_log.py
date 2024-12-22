@@ -26,11 +26,13 @@ def q_get_asset_transaction_log(request_json):
         # User id
         user_id = result[0].id
 
-        # Checking client exists
-        result = (db.collection("clients").document(client_id).get())
+        if user_id != client_id:
 
-        if not result.exists:
-            return {"status": "Client does not exist."}
+            # Checking client exists
+            result = (db.collection("clients").document(client_id).get())
+
+            if not result.exists:
+                return {"status": "Client does not exist."}
 
         # Getting all transaction logs for the user where client id matches where market matches and ticker_symbol matches
         transaction_log = (db.collection("users").document(user_id).collection("transaction_log").where(field_path="client_id", op_string="==", value=client_id).stream())

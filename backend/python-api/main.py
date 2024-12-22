@@ -345,6 +345,13 @@ def download_asset_reports():
     return jsonify(q_download_asset_reports(request.json)), 200
 
 
+# Get AI accounting
+@app.route("/get-ai-accounting", methods=["POST"])
+def get_ai_accounting():
+    from query_library.get_ai_accounting import q_get_ai_accounting
+    return jsonify(q_get_ai_accounting(request.json)), 200
+
+
 if __name__ == "__main__":
 
     # Start background task to check price alerts

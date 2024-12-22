@@ -8,7 +8,7 @@ class AI:
     __instance = None
 
     @staticmethod
-    def prompt_ai(query, ai_type="groq"):
+    def prompt_ai(query, ai_type="groq", content="You are a stock and crypto market researcher AI assistant."):
         if AI.__instance is None:
             AI()
 
@@ -17,7 +17,7 @@ class AI:
         elif ai_type == "llama3.2" or ai_type == "llama3.2:1b":
             return AI.__instance.llama(query, ai_type)
         elif ai_type == "openai":
-            return AI.__instance.openai(query)
+            return AI.__instance.openai(query, content)
         else:
             return {"status": "Invalid AI type."}
 
@@ -97,7 +97,7 @@ class AI:
             return "[No Info]"
 
 
-    def openai(self, query):
+    def openai(self, query, content):
 
         data = {
             "model": "gpt-4o-mini",
