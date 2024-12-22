@@ -945,7 +945,7 @@ Body (JSON):
 Response: JSON - Accounting report and status message
 Example:
 {
-    "asset_growth": "Asset growth of ETH: 0.48%",
+    "asset_growth": "Asset growth of ETH: 0.48%",                     // Expect these values to be completely unreliable
     "asset_liquidity": "The asset liquidity of ETH is 0.00020256.",
     "asset_profitability": "-2.2791582797871075%"
 }

@@ -105,7 +105,7 @@ class AI:
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are a stock and crypto market researcher AI assistant.",
+                    "content": f"{content}",
                 },
                 {
                     "role": "user",
