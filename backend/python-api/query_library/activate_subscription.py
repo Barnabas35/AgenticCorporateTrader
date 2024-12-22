@@ -48,7 +48,7 @@ def q_activate_subscription(request_json):
         current_time = int(time.time())
 
         if current_time < subscription_end:
-            db.collection("users").document(result[0].id).update({"subscription_start": int(time.time()), "renew_subscription": True})
+            db.collection("users").document(result[0].id).update({"renew_subscription": True})
             return {"status": "success"}
 
     # Check if user has enough balance
