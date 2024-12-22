@@ -69,7 +69,7 @@ const CryptoSearch: React.FC = () => {
   const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
   const [alertPrice, setAlertPrice] = useState<string>('');
   const [alertTicker, setAlertTicker] = useState<string | null>(null);
-  
+
   const [userType, setUserType] = useState<string | null>(null);
   const [isFundManager, setIsFundManager] = useState<boolean>(false);
   const [clients, setClients] = useState<Client[]>([]);
@@ -83,7 +83,7 @@ const CryptoSearch: React.FC = () => {
     future?: string;
     recommend?: string;
   } | null>(null);
-  const [activeSubscription, setActiveSubscription] = useState<boolean>(true); // If "No active subscription." is returned, set false.
+  const [activeSubscription, setActiveSubscription] = useState<boolean>(true); 
 
   useEffect(() => {
     fetchTopCryptos();
@@ -91,11 +91,11 @@ const CryptoSearch: React.FC = () => {
     fetchBalance();
   }, []);
 
+  // Removed the automatic call to fetchAiAssetReport here
   useEffect(() => {
     if (selectedCrypto) {
       fetchCryptoAggregates(selectedCrypto.symbol);
-      // Automatically fetch AI asset report after crypto details are loaded
-      fetchAiAssetReport();
+      // fetchAiAssetReport(); <-- removed so user must click the button to get AI report
     }
   }, [historyWindow, selectedCrypto]);
 
@@ -203,7 +203,10 @@ const CryptoSearch: React.FC = () => {
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    if (!query.trim()) return setSearchResults([]);
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -235,8 +238,8 @@ const CryptoSearch: React.FC = () => {
   const fetchCryptoDetails = async (symbol: string) => {
     setLoading(true);
     setError(null);
-    setAiReportData(null); 
-    setActiveSubscription(true); // Reset before fetching new report
+    setAiReportData(null);
+    setActiveSubscription(true);
     try {
       const response = await fetch('https://tradeagently.dev/get-crypto-info', {
         method: 'POST',
@@ -465,7 +468,7 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
-  // Fetch the AI Asset Report automatically
+  // Removed the automatic call from the useEffect, create a manual button method
   const fetchAiAssetReport = async () => {
     if (!selectedCrypto) return;
     setAiReportLoading(true);
@@ -490,7 +493,7 @@ const CryptoSearch: React.FC = () => {
           recommend: data.recommend,
         });
       } else if (data.status === 'No active subscription.') {
-        // If no active subscription, do not show AI report
+        // If no active subscription, display message
         setActiveSubscription(false);
       } else {
         setError('Failed to fetch AI asset report.');
@@ -628,25 +631,37 @@ const CryptoSearch: React.FC = () => {
           </View>
 
           {/* AI Asset Report Section */}
-          {activeSubscription && aiReportData && !aiReportLoading && (
-            <View style={styles.aiReportContainer}>
-              <View style={styles.aiReportCard}>
-                <Text style={styles.aiReportTitle}>AI Asset Report</Text>
-                <Text style={styles.aiReportText}>{aiReportData.response}</Text>
-                <Text style={styles.aiReportFuture}>
-                  Future Outlook: <Text style={{ fontWeight: 'bold' }}>{aiReportData.future}</Text>
-                </Text>
-                <Text style={styles.aiReportRecommend}>
-                  Recommendation: <Text style={{ fontWeight: 'bold' }}>{aiReportData.recommend}</Text>
-                </Text>
-              </View>
-            </View>
-          )}
-          {activeSubscription && aiReportLoading && (
-            <View style={styles.aiReportContainer}>
-              <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 10 }} />
-            </View>
-          )}
+          <View style={styles.aiReportContainer}>
+            {activeSubscription ? (
+              <>
+                {aiReportLoading ? (
+                  <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 10 }} />
+                ) : aiReportData ? (
+                  <View style={styles.aiReportCard}>
+                    <Text style={styles.aiReportTitle}>AI Asset Report</Text>
+                    <Text style={styles.aiReportText}>{aiReportData.response}</Text>
+                    <Text style={styles.aiReportFuture}>
+                      Future Outlook:{' '}
+                      <Text style={{ fontWeight: 'bold' }}>{aiReportData.future}</Text>
+                    </Text>
+                    <Text style={styles.aiReportRecommend}>
+                      Recommendation:{' '}
+                      <Text style={{ fontWeight: 'bold' }}>{aiReportData.recommend}</Text>
+                    </Text>
+                  </View>
+                ) : (
+                  // Show button to fetch AI report if subscription is active but no data fetched yet
+                  <TouchableOpacity style={styles.generateReportButton} onPress={fetchAiAssetReport}>
+                    <Text style={styles.generateReportButtonText}>Generate AI Report</Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            ) : (
+              <Text style={styles.subscriptionError}>
+                To get an AI report you need a subscription!
+              </Text>
+            )}
+          </View>
 
           <TouchableOpacity
             style={styles.backButton}
@@ -698,19 +713,28 @@ const CryptoSearch: React.FC = () => {
                     >
                       <Picker.Item label="Select a client" value={null} />
                       {clients.map((client) => (
-                        <Picker.Item key={client.client_id} label={client.client_name} value={client.client_id} />
+                        <Picker.Item
+                          key={client.client_id}
+                          label={client.client_name}
+                          value={client.client_id}
+                        />
                       ))}
                     </Picker>
                   </View>
                 ) : (
                   <Text style={styles.clientNameText}>
-                    {clients.length === 1 ? clients[0].client_name : 'No clients available'}
+                    {clients.length === 1
+                      ? clients[0].client_name
+                      : 'No clients available'}
                   </Text>
                 )}
               </View>
             )}
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={[styles.modalButton, styles.flexButton]} onPress={handleConfirmBuy}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.flexButton]}
+                onPress={handleConfirmBuy}
+              >
                 <Text style={styles.modalButtonText}>Confirm Purchase</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -743,7 +767,10 @@ const CryptoSearch: React.FC = () => {
               onChangeText={setAlertPrice}
             />
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={[styles.modalButton, styles.flexButton]} onPress={confirmPriceAlert}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.flexButton]}
+                onPress={confirmPriceAlert}
+              >
                 <Text style={styles.modalButtonText}>Confirm Alert</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -867,6 +894,23 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#333',
   },
+  generateReportButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  generateReportButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  subscriptionError: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 10,
+  },
 
   backButton: {
     backgroundColor: '#007bff',
@@ -889,7 +933,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   buyButtonText: { color: 'white', fontWeight: 'bold' },
-  alertButton: { backgroundColor: '#FFAA00', padding: 10, borderRadius: 5 },
+  alertButton: {
+    backgroundColor: '#FFAA00',
+    padding: 10,
+    borderRadius: 5,
+  },
   alertButtonText: { color: 'white', fontWeight: 'bold' },
 
   modalBackground: {
@@ -929,7 +977,14 @@ const styles = StyleSheet.create({
 
   dropdownContainer: { marginBottom: 16 },
   modalLabel: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: '#333' },
-  clientNameText: { fontSize: 16, color: '#555', padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 },
+  clientNameText: {
+    fontSize: 16,
+    color: '#555',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
 });
 
 export default CryptoSearch;

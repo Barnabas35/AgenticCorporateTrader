@@ -11,12 +11,6 @@ import {
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 
-/**
- * CSV file link. We'll fetch from this URL, then create a Blob
- * and trigger a download on the user's browser.
- */
-const FILE_URL = `https://storage.googleapis.com/agenticcorporatetrader.appspot.com/user_reports/hello.csv?Expires=1794811810&GoogleAccessId=firebase-adminsdk-hms3b%40agenticcorporatetrader.iam.gserviceaccount.com&Signature=GMNNOBlEiZeiHcxjXfNRlcMko2DPfF93sEahbBxrq1FozyX5Mbp2P94Hp%2B3oEGwXHGJwyfNGoD%2F16khRPuAtxOc%2BwkEcb8xz0CieyGC8uDzbuO1ATpo5K1CsXkcZA61UXwh%2FsSCIFPlK%2BVxdd8Iy8SV56Wltt9eCxKU835mvdSrv7i1WfIrflAMF5Ktu9mjx7jrUb6yL86Mr1fNJpV5Ff4hNSxcWfohdoXBCq97xEKTvH4LoI5mv%2F7rEyh0pUpYQUdcUUo%2FYy5jJOwC7xfLI4TRJhxX8OOsOXMFkjgGAzghSxI%2Fpfs%2BSMKiVIED2OupHNUPtfB65j1zM7EKdlNt%2BRg%3D%3D`;
-
 interface Asset {
   ticker: string;
   quantity: number | null;
@@ -40,49 +34,49 @@ const MyAssets: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
 
-  // For Buy Modal
+  // Buy Modal
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [buyUsdQuantity, setBuyUsdQuantity] = useState<string>('');
 
-  // Track selected asset quantity when selling
+  // Sell-related
   const [selectedAssetQuantity, setSelectedAssetQuantity] = useState<number | null>(null);
-
-  // Validation error state for sell modal
   const [sellModalError, setSellModalError] = useState<string>('');
 
-  // ------------------------------------------------------------
-  // 1) Download CSV on Web: fetch -> Blob -> hidden <a> -> click
-  // ------------------------------------------------------------
   const handleDownloadAllAssetCsv = async () => {
     try {
-      // 1) Fetch the file from the server as text or blob
-      const response = await fetch(FILE_URL);
-      if (!response.ok) {
-        throw new Error('Failed to fetch CSV');
+      const response = await fetch('https://tradeagently.dev/download-asset-reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken }),
+      });
+
+      const data = await response.json();
+      if (data.status !== 'success' || !data.url) {
+        Alert.alert('Error', 'Failed to retrieve CSV download URL.');
+        return;
       }
 
-      // Option A: Read as text, then convert to a Blob
-      const csvText = await response.text();
+      const csvUrl = data.url;
+
+      const csvResponse = await fetch(csvUrl);
+      if (!csvResponse.ok) {
+        throw new Error('Failed to fetch CSV from returned URL.');
+      }
+
+      const csvText = await csvResponse.text();
       const blob = new Blob([csvText], { type: 'text/csv' });
 
-      // Option B: Or read as blob directly:
-      //   const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
 
-      // 2) Create a local URL for that blob
-      const url = URL.createObjectURL(blob);
-
-      // 3) Create an <a> element programmatically
       const link = document.createElement('a');
-      link.href = url;
-      link.download = 'all_assets.csv'; // The filename for the saved file
-
-      // 4) Append, click, remove
+      link.href = blobUrl;
+      link.download = 'all_assets.csv'; 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      // 5) Revoke the blob URL (clean up)
-      URL.revokeObjectURL(url);
+      // 5) Clean up
+      URL.revokeObjectURL(blobUrl);
 
     } catch (err) {
       console.error('Error downloading CSV:', err);
@@ -90,7 +84,6 @@ const MyAssets: React.FC = () => {
     }
   };
 
-  // The rest of your MyAssets logic, e.g.:
   const openSellModal = (ticker: string) => {
     setSelectedTicker(ticker);
     const asset = assets.find((a) => a.ticker === ticker);
@@ -123,6 +116,7 @@ const MyAssets: React.FC = () => {
     setSelectedTicker('');
   };
 
+  // Fetch first client ID
   const fetchClientId = async () => {
     try {
       const response = await fetch('https://tradeagently.dev/get-client-list', {
@@ -143,9 +137,9 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Fetch user assets
   const fetchUserAssets = async () => {
     if (!clientId) return;
-
     try {
       const response = await fetch('https://tradeagently.dev/get-user-assets', {
         method: 'POST',
@@ -156,7 +150,6 @@ const MyAssets: React.FC = () => {
           market,
         }),
       });
-
       const data = await response.json();
 
       if (data.status === 'Success') {
@@ -181,6 +174,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Fetch user balance
   const fetchBalance = async () => {
     try {
       const response = await fetch('https://tradeagently.dev/get-balance', {
@@ -188,8 +182,8 @@ const MyAssets: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken }),
       });
-
       const data = await response.json();
+
       if (data.status === 'Success') {
         setBalance(data.balance);
       } else {
@@ -201,6 +195,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Fetch quantity for a given ticker
   const fetchAssetQuantity = async (ticker: string): Promise<number | null> => {
     try {
       const response = await fetch('https://tradeagently.dev/get-asset', {
@@ -221,6 +216,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Fetch single asset report
   const fetchAssetReport = async (ticker: string) => {
     try {
       const response = await fetch('https://tradeagently.dev/get-asset-report', {
@@ -251,9 +247,9 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Sell asset
   const handleSellAsset = async () => {
     const quantity = parseFloat(sellQuantity);
-
     if (!sellQuantity.trim()) {
       setSellModalError('Please input an amount.');
       return;
@@ -263,9 +259,7 @@ const MyAssets: React.FC = () => {
       return;
     }
     if (selectedAssetQuantity !== null && quantity > selectedAssetQuantity) {
-      setSellModalError(
-        `You can only sell up to ${selectedAssetQuantity.toFixed(5)} units of ${selectedTicker}.`
-      );
+      setSellModalError(`You can only sell up to ${selectedAssetQuantity.toFixed(5)} of ${selectedTicker}.`);
       return;
     }
 
@@ -281,8 +275,8 @@ const MyAssets: React.FC = () => {
           asset_quantity: quantity,
         }),
       });
-
       const data = await response.json();
+
       if (data.status === 'Success') {
         Alert.alert('Success', `${quantity} of ${selectedTicker} sold successfully.`);
         fetchUserAssets();
@@ -296,6 +290,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Buy asset
   const handleBuyAsset = async () => {
     if (!buyUsdQuantity || isNaN(parseFloat(buyUsdQuantity)) || parseFloat(buyUsdQuantity) <= 0) {
       Alert.alert('Error', 'Please enter a valid USD amount.');
@@ -314,10 +309,10 @@ const MyAssets: React.FC = () => {
           usd_quantity: parseFloat(buyUsdQuantity),
         }),
       });
-
       const data = await response.json();
+
       if (data.status === 'Success') {
-        Alert.alert('Success', `${buyUsdQuantity} USD of ${selectedTicker} purchased successfully.`);
+        Alert.alert('Success', `Purchased ${buyUsdQuantity} USD of ${selectedTicker}.`);
         fetchUserAssets();
         closeBuyModal();
       } else {
@@ -329,12 +324,14 @@ const MyAssets: React.FC = () => {
     }
   };
 
+  // Sell all
   const handleSellAll = () => {
     if (selectedAssetQuantity !== null) {
       setSellQuantity(selectedAssetQuantity.toString());
     }
   };
 
+  // On mount
   useEffect(() => {
     if (sessionToken) {
       fetchClientId();
@@ -342,6 +339,7 @@ const MyAssets: React.FC = () => {
     }
   }, [sessionToken]);
 
+  // On client or market change
   useEffect(() => {
     if (clientId) {
       fetchUserAssets();
@@ -350,9 +348,8 @@ const MyAssets: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/** CSV download button in the top-right */}
       <TouchableOpacity style={styles.downloadCsvButton} onPress={handleDownloadAllAssetCsv}>
-        <Text style={styles.downloadCsvButtonText}>Download All Asset CSV</Text>
+        <Text style={styles.downloadCsvButtonText}>Download All Asset Report</Text>
       </TouchableOpacity>
 
       <View style={styles.balanceContainer}>
@@ -360,7 +357,6 @@ const MyAssets: React.FC = () => {
       </View>
 
       <Text style={styles.title}>My Assets</Text>
-
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       <View style={styles.marketSwitchContainer}>
@@ -543,7 +539,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
     width: '100%',
-    position: 'relative', // So we can position the button top-right
+    position: 'relative',
   },
   downloadCsvButton: {
     position: 'absolute',
@@ -717,7 +713,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   modalButtonText: {
-    color: 'white',
+    color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },
