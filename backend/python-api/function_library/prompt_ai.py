@@ -14,8 +14,10 @@ class AI:
 
         if ai_type == "groq":
             return AI.__instance.groq(query)
-        elif ai_type == "llama":
-            return AI.__instance.llama(query)
+        elif ai_type == "llama3.2" or ai_type == "llama3.1":
+            return AI.__instance.llama(query, ai_type)
+        elif ai_type == "openai":
+            return AI.__instance.openai(query)
         else:
             return {"status": "Invalid AI type."}
 
@@ -43,6 +45,15 @@ class AI:
                     self.LLAMA_URL = f.readlines()[8].strip("\n")
                     f.close()
 
+            # Get OPENAI_API_KEY from environment variable
+            self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+            # If OPENAI_API_KEY environment variable is not set, use fallback config.txt
+            if self.OPENAI_API_KEY is None:
+                with open("config.txt", "r") as f:
+                    self.OPENAI_API_KEY = f.readlines()[9].strip("\n")
+                    f.close()
+
 
     def groq(self, query):
 
@@ -63,10 +74,10 @@ class AI:
         return chat_completion.choices[0].message.content
 
 
-    def llama(self, query):
+    def llama(self, query, model="llama3.2"):
 
         data = {
-            "model": "llama3.2",
+            "model": model,
             "prompt": f"{query}",
             "stream": False
         }
@@ -78,6 +89,38 @@ class AI:
             # Check response status
             if response.status_code == 200:
                 return response.json()["response"]
+            else:
+                return "[No Info]"
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return "[No Info]"
+
+
+    def openai(self, query):
+
+        data = {
+            "model": "gpt-4o-mini",
+            "stream": False,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a stock and crypto market researcher AI assistant.",
+                },
+                {
+                    "role": "user",
+                    "content": f"{query}",
+                }
+            ]
+        }
+
+        try:
+            # Send POST request with JSON data
+            response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Authorization": f"Bearer {self.OPENAI_API_KEY}", "Content-Type": "application/json"}, json=data)
+
+            # Check response status
+            if response.status_code == 200:
+                return response.json()["choices"][0]["message"]["content"]
             else:
                 return "[No Info]"
 
