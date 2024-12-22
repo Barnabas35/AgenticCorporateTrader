@@ -14,7 +14,7 @@ class AI:
 
         if ai_type == "groq":
             return AI.__instance.groq(query)
-        elif ai_type == "llama3.2" or ai_type == "llama3.1":
+        elif ai_type == "llama3.2" or ai_type == "llama3.2:1b":
             return AI.__instance.llama(query, ai_type)
         elif ai_type == "openai":
             return AI.__instance.openai(query)

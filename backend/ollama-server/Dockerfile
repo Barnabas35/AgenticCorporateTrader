@@ -5,7 +5,7 @@ FROM ollama/ollama:latest
 RUN ollama serve & \
     sleep 2 && \
     ollama pull llama3.2 && \
-    ollama pull llama3.1
+    ollama pull llama3.2:1b
 
 # Expose the default port
 EXPOSE 11434
