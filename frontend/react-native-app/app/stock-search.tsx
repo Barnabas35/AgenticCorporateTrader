@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Modal,
-  Alert
+  Alert,
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 import { Line } from 'react-chartjs-2';
@@ -62,24 +62,32 @@ const StockSearch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessionToken] = useSessionToken();
+
+  // Historical data
   const [historicalData, setHistoricalData] = useState<{ labels: string[]; prices: number[] }>({
     labels: [],
     prices: [],
   });
   const [historyWindow, setHistoryWindow] = useState<string>('month');
-  const [interval, setIntervalValue] = useState<string>('day');
 
-  const [buyModalVisible, setBuyModalVisible] = useState(false);
-  const [buyAmount, setBuyAmount] = useState<string>('');
+  // User type & client/fund manager states
+  const [userType, setUserType] = useState<string | null>(null);
   const [isFundManager, setIsFundManager] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+
+  // Buy modal
+  const [buyModalVisible, setBuyModalVisible] = useState(false);
+  const [buyAmount, setBuyAmount] = useState<string>('');
+  const [buyTicker, setBuyTicker] = useState<string>('');
+
+  // Price alert modal
   const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
   const [alertPrice, setAlertPrice] = useState<string>('');
   const [alertTicker, setAlertTicker] = useState<string | null>(null);
-  const [balance, setBalance] = useState<number | null>(null);
 
-  // AI report states
+  // AI report
   const [aiReportLoading, setAiReportLoading] = useState(false);
   const [aiReportData, setAiReportData] = useState<{
     response?: string;
@@ -94,51 +102,12 @@ const StockSearch: React.FC = () => {
     fetchBalance();
   }, []);
 
-  // Removed the automatic call to fetchAiAssetReport here
+  // Load aggregates each time the timeframe or the selected stock changes
   useEffect(() => {
     if (selectedStock) {
       fetchStockAggregates(selectedStock.symbol);
-      // fetchAiAssetReport();  // <-- Removed automatic AI report call
     }
-  }, [interval, historyWindow, selectedStock]);
-
-  const fetchAiAssetReport = async () => {
-    if (!selectedStock) return;
-
-    setAiReportLoading(true);
-    setAiReportData(null);
-    setError(null);
-
-    try {
-      const response = await fetch('https://tradeagently.dev/get-ai-asset-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_token: sessionToken,
-          market: 'stocks',
-          ticker: selectedStock.symbol,
-        }),
-      });
-      const data = await response.json();
-
-      if (data.status === 'success') {
-        setAiReportData({
-          response: data.response,
-          future: data.future,
-          recommend: data.recommend,
-        });
-      } else if (data.status === 'No active subscription.') {
-        setActiveSubscription(false);
-      } else {
-        setError('Failed to fetch AI asset report.');
-      }
-    } catch (err) {
-      console.error('Error fetching AI asset report:', err);
-      setError('Error fetching AI asset report.');
-    } finally {
-      setAiReportLoading(false);
-    }
-  };
+  }, [historyWindow, selectedStock]);
 
   const fetchBalance = async () => {
     if (!sessionToken) return;
@@ -166,6 +135,9 @@ const StockSearch: React.FC = () => {
       });
       const data = await response.json();
       if (data.status === 'Success') {
+        setUserType(data.user_type);
+
+        // If fm or fa, fetch clients
         if (data.user_type === 'fm') {
           setIsFundManager(true);
           fetchClients();
@@ -187,7 +159,10 @@ const StockSearch: React.FC = () => {
       });
       const data = await response.json();
       if (data.status === 'Success') {
+        // For 'fa', typically only 1 "client" is returned, which is actually the FA’s own user ID
         setClients(data.clients);
+
+        // If there's exactly 1 client returned, set it as selected
         if (data.clients.length === 1) {
           setSelectedClient(data.clients[0].client_id);
         }
@@ -252,7 +227,7 @@ const StockSearch: React.FC = () => {
     }
   };
 
-  const fetchStockDetails = async (ticker: string, callback: () => void = () => {}) => {
+  const fetchStockDetails = async (ticker: string) => {
     setLoading(true);
     setError(null);
     setActiveSubscription(true);
@@ -268,7 +243,6 @@ const StockSearch: React.FC = () => {
 
       if (data.status === 'Success') {
         setSelectedStock(data.ticker_info);
-        callback();
       } else {
         Alert.alert('Error', 'Failed to fetch stock details.');
       }
@@ -307,28 +281,33 @@ const StockSearch: React.FC = () => {
 
     switch (historyWindow) {
       case 'hour':
-        // For hour, we just take the same date
         startDate = endDate;
         break;
-      case 'day':
+      case 'day': {
         const oneDayAgo = new Date(end.getTime() - 86400 * 1000);
         startDate = oneDayAgo.toISOString().split('T')[0];
         break;
-      case 'week':
+      }
+      case 'week': {
         const oneWeekAgo = new Date(end.getTime() - 7 * 86400 * 1000);
         startDate = oneWeekAgo.toISOString().split('T')[0];
         break;
-      case 'month':
+      }
+      case 'month': {
         const oneMonthAgo = new Date(end.getTime() - 30 * 86400 * 1000);
         startDate = oneMonthAgo.toISOString().split('T')[0];
         break;
-      case 'year':
+      }
+      case 'year': {
         const oneYearAgo = new Date(end.getTime() - 365 * 86400 * 1000);
         startDate = oneYearAgo.toISOString().split('T')[0];
         break;
-      default:
+      }
+      default: {
         const defaultStart = new Date(end.getTime() - 30 * 86400 * 1000);
         startDate = defaultStart.toISOString().split('T')[0];
+        break;
+      }
     }
 
     const { interval, limit } = getIntervalAndLimit(historyWindow);
@@ -352,16 +331,7 @@ const StockSearch: React.FC = () => {
 
       if (data.status === 'Success' && Array.isArray(data.ticker_info)) {
         let validData = data.ticker_info;
-
-        if (historyWindow === 'hour' && validData.length === 0) {
-          setHistoricalData({ labels: [], prices: [] });
-          setError('No data available for the last hour timeframe.');
-          setLoading(false);
-          return;
-        }
-
-        // Reverse so the earliest date is first
-        validData.reverse();
+        validData.reverse(); // earliest date first
 
         const labels = validData.map((item: any) => {
           const dateObj = new Date(item.timestamp);
@@ -398,34 +368,45 @@ const StockSearch: React.FC = () => {
     }
   };
 
-  const handleBuyStock = async () => {
+  // -----------------------
+  // BUY logic (fund manager / fund admin)
+  // -----------------------
+  const handleBuy = (ticker: string) => {
+    setBuyTicker(ticker);
+    setBuyModalVisible(true);
+  };
+
+  const handleConfirmBuy = async () => {
     if (!buyAmount || isNaN(parseFloat(buyAmount))) {
-      Alert.alert('Error', 'Please enter a valid amount to buy.');
+      Alert.alert('Error', 'Please enter a valid USD amount.');
       return;
     }
 
-    if ((isFundManager || clients.length > 1) && !selectedClient) {
+    // If user is FM or FA, we require a selected client
+    const requiresClientSelection = isFundManager || userType === 'fa';
+    if (requiresClientSelection && !selectedClient) {
       Alert.alert('Error', 'Please select a client.');
       return;
     }
 
-    if (!selectedStock?.symbol) {
-      Alert.alert('Error', 'No stock selected for purchase.');
+    if (!buyTicker) {
+      Alert.alert('Error', 'Ticker is missing.');
       return;
     }
 
-    const requestBody: any = {
-      session_token: sessionToken,
-      ticker: selectedStock.symbol,
-      usd_quantity: parseFloat(buyAmount),
-      market: 'stocks',
-    };
-
-    if (isFundManager || clients.length > 1) {
-      requestBody.client_id = selectedClient;
-    }
-
     try {
+      const requestBody: any = {
+        session_token: sessionToken,
+        usd_quantity: parseFloat(buyAmount),
+        market: 'stocks',
+        ticker: buyTicker,
+      };
+
+      // For FM or FA, pass client_id
+      if (requiresClientSelection) {
+        requestBody.client_id = selectedClient;
+      }
+
       const response = await fetch('https://tradeagently.dev/purchase-asset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -434,17 +415,43 @@ const StockSearch: React.FC = () => {
 
       const data = await response.json();
       if (data.status === 'Success') {
-        Alert.alert('Success', `Successfully purchased ${buyAmount} USD of ${selectedStock.symbol}.`);
+        Alert.alert(
+          'Success',
+          `Successfully purchased ${buyAmount} USD of ${buyTicker}${
+            requiresClientSelection ? ` for client ${getClientName(selectedClient)}` : ''
+          }`
+        );
         setBuyModalVisible(false);
         setBuyAmount('');
-        setSelectedClient(null);
+
+        // If user was FM or FA, optionally reset the selectedClient
+        if (requiresClientSelection) {
+          // For some flows, you might NOT want to reset, but here's an example:
+          setSelectedClient(null);
+        }
+
+        // Refresh balance
+        fetchBalance();
       } else {
-        Alert.alert('Error', data.message || 'Failed to purchase stock.');
+        Alert.alert('Error', data.message || 'Failed to complete the purchase.');
       }
-    } catch (err) {
-      console.error('Error buying stock:', err);
-      Alert.alert('Error', 'An error occurred while buying the stock.');
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred while processing the purchase.');
+      console.error('Purchase Error:', error);
     }
+  };
+
+  const getClientName = (clientId: string | null): string => {
+    const client = clients.find((c) => c.client_id === clientId);
+    return client ? client.client_name : 'Unknown Client';
+  };
+
+  // -----------------------
+  // PRICE ALERT logic
+  // -----------------------
+  const handleSetPriceAlert = (ticker: string) => {
+    setAlertTicker(ticker);
+    setPriceAlertModalVisible(true);
   };
 
   const confirmPriceAlert = async () => {
@@ -485,6 +492,46 @@ const StockSearch: React.FC = () => {
     }
   };
 
+  // AI Report
+  const fetchAiAssetReport = async () => {
+    if (!selectedStock) return;
+
+    setAiReportLoading(true);
+    setAiReportData(null);
+    setError(null);
+
+    try {
+      const response = await fetch('https://tradeagently.dev/get-ai-asset-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          market: 'stocks',
+          ticker: selectedStock.symbol,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setAiReportData({
+          response: data.response,
+          future: data.future,
+          recommend: data.recommend,
+        });
+      } else if (data.status === 'No active subscription.') {
+        setActiveSubscription(false);
+      } else {
+        setError('Failed to fetch AI asset report.');
+      }
+    } catch (err) {
+      console.error('Error fetching AI asset report:', err);
+      setError('Error fetching AI asset report.');
+    } finally {
+      setAiReportLoading(false);
+    }
+  };
+
+  // Render each stock item
   const renderStockItem = ({ item }: { item: Stock }) => (
     <View style={styles.cryptoItem}>
       <TouchableOpacity onPress={() => fetchStockDetails(item.symbol)}>
@@ -495,19 +542,10 @@ const StockSearch: React.FC = () => {
         </Text>
       </TouchableOpacity>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.buyButton}
-          onPress={() => fetchStockDetails(item.symbol, () => setBuyModalVisible(true))}
-        >
+        <TouchableOpacity style={styles.buyButton} onPress={() => handleBuy(item.symbol)}>
           <Text style={styles.buyButtonText}>Buy</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.alertButton}
-          onPress={() => {
-            setAlertTicker(item.symbol);
-            setPriceAlertModalVisible(true);
-          }}
-        >
+        <TouchableOpacity style={styles.alertButton} onPress={() => handleSetPriceAlert(item.symbol)}>
           <Text style={styles.alertButtonText}>Set Price Alert</Text>
         </TouchableOpacity>
       </View>
@@ -607,31 +645,36 @@ const StockSearch: React.FC = () => {
             </View>
 
             <View style={styles.chartContainer}>
-              <Line
-                data={{
-                  labels: historicalData.labels,
-                  datasets: [
-                    {
-                      label: 'Price',
-                      data: historicalData.prices,
-                      borderColor: 'rgba(75,192,192,1)',
-                      borderWidth: 1,
-                      fill: false,
+              {historicalData.labels.length > 0 ? (
+                <Line
+                  data={{
+                    labels: historicalData.labels,
+                    datasets: [
+                      {
+                        label: 'Price',
+                        data: historicalData.prices,
+                        borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 1,
+                        fill: false,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    plugins: { title: { display: true, text: 'Price History' } },
+                    maintainAspectRatio: false,
+                    scales: {
+                      x: {
+                        type: 'category',
+                      },
                     },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: { title: { display: true, text: 'Price History' } },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      type: historyWindow === 'hour' ? 'time' : 'category',
-                      time: { unit: historyWindow === 'hour' ? 'minute' : 'day' },
-                    },
-                  },
-                }}
-              />
+                  }}
+                />
+              ) : (
+                <Text style={styles.errorText}>
+                  No data available for the selected timeframe.
+                </Text>
+              )}
             </View>
           </View>
 
@@ -642,15 +685,10 @@ const StockSearch: React.FC = () => {
 
           {/* AI Asset Report Section */}
           <View style={styles.aiReportContainer}>
-            {/* If subscription is active, show button or report; otherwise show error text */}
             {activeSubscription ? (
               <>
                 {aiReportLoading ? (
-                  <ActivityIndicator
-                    size="small"
-                    color="#007bff"
-                    style={{ marginTop: 10 }}
-                  />
+                  <ActivityIndicator size="small" color="#007bff" style={{ marginTop: 10 }} />
                 ) : aiReportData ? (
                   <View style={styles.aiReportCard}>
                     <Text style={styles.aiReportTitle}>AI Asset Report</Text>
@@ -665,31 +703,24 @@ const StockSearch: React.FC = () => {
                     </Text>
                   </View>
                 ) : (
-                  // Button to generate AI report
-                  <TouchableOpacity
-                    style={styles.generateReportButton}
-                    onPress={fetchAiAssetReport}
-                  >
-                    <Text style={styles.generateReportButtonText}>
-                      Generate AI Report
-                    </Text>
+                  <TouchableOpacity style={styles.generateReportButton} onPress={fetchAiAssetReport}>
+                    <Text style={styles.generateReportButtonText}>Generate AI Report</Text>
                   </TouchableOpacity>
                 )}
               </>
             ) : (
-              <Text style={styles.subscriptionError}>
-                To get an AI report you need a subscription!
-              </Text>
+              <Text style={styles.subscriptionError}>To get an AI report you need a subscription!</Text>
             )}
           </View>
 
           <TouchableOpacity
-            style={[styles.backButton]}
+            style={styles.backButton}
             onPress={() => {
               setSelectedStock(null);
               setSearchResults([]);
               setAiReportData(null);
               setActiveSubscription(true);
+              setHistoricalData({ labels: [], prices: [] });
             }}
           >
             <Text style={styles.backButtonText}>Back</Text>
@@ -704,10 +735,10 @@ const StockSearch: React.FC = () => {
       )}
 
       {/* Buy Modal */}
-      <Modal visible={buyModalVisible} transparent={true} animationType="slide">
+      <Modal visible={buyModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalBackground}>
-          <View style={styles.modalContainerSmall}>
-            <Text style={styles.modalTitle}>Buy {selectedStock?.symbol}</Text>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Buy {buyTicker}</Text>
             {balance !== null && (
               <Text style={styles.modalText}>Your Balance: ${balance.toFixed(2)}</Text>
             )}
@@ -719,31 +750,42 @@ const StockSearch: React.FC = () => {
               value={buyAmount}
               onChangeText={setBuyAmount}
             />
-            {isFundManager && (
+            {/* If user is FM or FA, allow client selection */}
+            {(isFundManager || userType === 'fa') && (
               <View style={styles.dropdownContainer}>
                 <Text style={styles.modalLabel}>Select Client:</Text>
-                <View style={styles.customPickerContainer}>
-                  <Picker
-                    selectedValue={selectedClient}
-                    onValueChange={(value) => setSelectedClient(value)}
-                    style={styles.pickerStyle}
-                  >
-                    <Picker.Item label="Select a client" value={null} />
-                    {clients.map((client) => (
-                      <Picker.Item
-                        key={client.client_id}
-                        label={client.client_name}
-                        value={client.client_id}
-                      />
-                    ))}
-                  </Picker>
-                </View>
+                {clients.length > 1 ? (
+                  <View style={styles.customPickerContainer}>
+                    <Picker
+                      selectedValue={selectedClient}
+                      onValueChange={(value) => setSelectedClient(value)}
+                      style={styles.pickerStyle}
+                    >
+                      <Picker.Item label="Select a client" value={null} />
+                      {clients.map((client) => (
+                        <Picker.Item
+                          key={client.client_id}
+                          label={client.client_name}
+                          value={client.client_id}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                ) : (
+                  // If there's exactly one client, show it as read-only
+                  <Text style={styles.clientNameText}>
+                    {clients.length === 1
+                      ? clients[0].client_name
+                      : 'No clients available'}
+                  </Text>
+                )}
               </View>
             )}
+
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.flexButton]}
-                onPress={handleBuyStock}
+                onPress={handleConfirmBuy}
               >
                 <Text style={styles.modalButtonText}>Confirm Purchase</Text>
               </TouchableOpacity>
@@ -759,18 +801,16 @@ const StockSearch: React.FC = () => {
       </Modal>
 
       {/* Price Alert Modal */}
-      <Modal visible={priceAlertModalVisible} transparent={true} animationType="slide">
+      <Modal visible={priceAlertModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalBackground}>
-          <View style={styles.modalContainerSmall}>
+          <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Set Price Alert</Text>
             {selectedStock && selectedStock.symbol === alertTicker && (
               <Text style={styles.modalText}>
                 Current Price of {alertTicker}: ${selectedStock.close_price.toFixed(2)}
               </Text>
             )}
-            <Text style={styles.modalText}>
-              Enter the alert price for {alertTicker}:
-            </Text>
+            <Text style={styles.modalText}>Enter the alert price for {alertTicker}:</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Alert Price"
@@ -808,7 +848,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingHorizontal: 8,
   },
-  errorText: { color: 'red', marginBottom: 16 },
+  errorText: { color: 'red', marginBottom: 16, textAlign: 'center' },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
   cryptoItem: {
     flexDirection: 'row',
@@ -943,6 +983,7 @@ const styles = StyleSheet.create({
     width: '40%',
   },
   backButtonText: { color: 'white', fontWeight: 'bold', alignSelf: 'center' },
+
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -967,11 +1008,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContainerSmall: {
+  modalContainer: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    width: '70%',
+    width: '80%',
   },
   modalTitle: {
     fontSize: 18,
@@ -1019,6 +1060,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
   },
+
   dropdownContainer: {
     marginBottom: 16,
   },
@@ -1027,6 +1069,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
     color: '#333',
+  },
+  clientNameText: {
+    fontSize: 16,
+    color: '#555',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
   },
 });
 
