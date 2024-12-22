@@ -61,6 +61,9 @@ def q_sell_asset(request_json):
 
         asset_price = snapshot.day.close
 
+        if asset_price == 0:
+            asset_price = snapshot.prev_day.close
+
     elif market == "crypto":
 
         crypto = ticker + "-USD"
