@@ -3982,7 +3982,6 @@ id grayscale
 id group_divider
 id grouping
 id groups
-id growthTextView
 id guideline
 id guideline2
 id header_title
@@ -4033,12 +4032,9 @@ id line1
 id line3
 id lineChart
 id linear
-id liquidityTextView
 id listMode
 id list_item
 id loadingContainer
-id loadingOverlay
-id loadingProgressBar
 id lock_icon
 id loginButton
 id logo_only
@@ -4116,7 +4112,6 @@ id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
 id myAssetsLayout
-id myuserBalance
 id name
 id nameTextView
 id name_edit_text
@@ -4203,7 +4198,6 @@ id profileButton
 id profileCard
 id profileImage
 id profitTextView
-id profitabilityTextView
 id progress_bar
 id progress_circular
 id progress_horizontal
@@ -4621,7 +4615,6 @@ layout design_navigation_menu
 layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
-layout dialog_ai_accounting
 layout dialog_asset_report
 layout dialog_buy
 layout dialog_buy_manager

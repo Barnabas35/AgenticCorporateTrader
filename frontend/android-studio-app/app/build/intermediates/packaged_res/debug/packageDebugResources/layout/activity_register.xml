@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Toolbar with centered title -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/materialToolbar"
             android:layout_width="0dp"
@@ -31,7 +30,6 @@
 
         </com.google.android.material.appbar.MaterialToolbar>
 
-        <!-- Register Title -->
         <TextView
             android:id="@+id/textViewTitleRegister"
             android:layout_width="wrap_content"
@@ -45,7 +43,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Username Input -->
         <EditText
             android:id="@+id/editTextUsername"
             android:layout_width="0dp"
@@ -60,7 +57,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Email Input -->
         <EditText
             android:id="@+id/editTextEmail"
             android:layout_width="0dp"
@@ -76,7 +72,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Password Input -->
         <EditText
             android:id="@+id/editTextPassword"
             android:layout_width="0dp"
@@ -92,7 +87,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Confirm Password Input -->
         <EditText
             android:id="@+id/editTextConfirmPassword"
             android:layout_width="0dp"
@@ -108,7 +102,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- User Type Spinner (Dropdown) -->
         <Spinner
             android:id="@+id/spinnerUserType"
             android:layout_width="0dp"
@@ -123,7 +116,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Register Button -->
         <Button
             android:id="@+id/buttonRegister"
             android:layout_width="0dp"
@@ -150,7 +142,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonRegister" />
 
-        <!-- Login Link -->
         <TextView
             android:id="@+id/textViewLogin"
             android:layout_width="wrap_content"
@@ -163,7 +154,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonGoogleSignIn" />
 
-        <!-- Bottom Spacer -->
         <View
             android:layout_width="0dp"
             android:layout_height="32dp"

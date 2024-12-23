@@ -9,13 +9,6 @@
     android:background="#F0F0F0"
     tools:context=".MainActivity">
 
-    <!-- Toolbar with centered title -->
-
-    <!-- Login Button -->
-
-    <!-- Register Button -->
-
-    <!-- Toolbar with centered title -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/materialToolbar"
         android:layout_width="417dp"

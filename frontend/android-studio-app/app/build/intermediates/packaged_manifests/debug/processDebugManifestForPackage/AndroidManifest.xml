@@ -42,13 +42,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar" > <!-- App theme -->
-
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
 
         <!-- Main Activity (launcher activity) -->
         <activity
             android:name="com.tradeagently.act_app.MainActivity"
-            android:exported="true" > <!-- Exported because it has MAIN/LAUNCHER intent-filter -->
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

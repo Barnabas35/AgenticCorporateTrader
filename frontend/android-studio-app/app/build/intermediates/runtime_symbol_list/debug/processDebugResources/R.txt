@@ -3981,7 +3981,6 @@ int id grayscale 0x7f09017a
 int id group_divider 0x7f09017b
 int id grouping 0x7f09017c
 int id groups 0x7f09017d
-int id growthTextView 0x7f09035d
 int id guideline 0x7f09017e
 int id guideline2 0x7f09017f
 int id header_title 0x7f090180
@@ -4032,12 +4031,9 @@ int id line1 0x7f0901ac
 int id line3 0x7f0901ad
 int id lineChart 0x7f0901ae
 int id linear 0x7f0901af
-int id liquidityTextView 0x7f09035e
 int id listMode 0x7f0901b0
 int id list_item 0x7f0901b1
 int id loadingContainer 0x7f0901b2
-int id loadingOverlay 0x7f090359
-int id loadingProgressBar 0x7f09035a
 int id lock_icon 0x7f0901b3
 int id loginButton 0x7f0901b4
 int id logo_only 0x7f0901b5
@@ -4115,7 +4111,6 @@ int id mtrl_picker_title_text 0x7f0901fc
 int id mtrl_view_tag_bottom_padding 0x7f0901fd
 int id multiply 0x7f0901fe
 int id myAssetsLayout 0x7f0901ff
-int id myuserBalance 0x7f090360
 int id name 0x7f090200
 int id nameTextView 0x7f090201
 int id name_edit_text 0x7f090202
@@ -4202,7 +4197,6 @@ int id profileButton 0x7f090252
 int id profileCard 0x7f090253
 int id profileImage 0x7f090254
 int id profitTextView 0x7f090255
-int id profitabilityTextView 0x7f09035f
 int id progress_bar 0x7f090256
 int id progress_circular 0x7f090257
 int id progress_horizontal 0x7f090258
@@ -4620,7 +4614,6 @@ int layout design_navigation_menu 0x7f0c003f
 int layout design_navigation_menu_item 0x7f0c0040
 int layout design_text_input_end_icon 0x7f0c0041
 int layout design_text_input_start_icon 0x7f0c0042
-int layout dialog_ai_accounting 0x7f0c00bf
 int layout dialog_asset_report 0x7f0c0043
 int layout dialog_buy 0x7f0c0044
 int layout dialog_buy_manager 0x7f0c0045

@@ -1,4 +1,4 @@
-#Mon Dec 23 16:12:35 GMT 2024
+#Mon Dec 23 16:47:44 GMT 2024
 base.0=/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
 base.1=/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
 base.2=/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/build/intermediates/dex/debug/mergeProjectDexDebug/2/classes.dex
