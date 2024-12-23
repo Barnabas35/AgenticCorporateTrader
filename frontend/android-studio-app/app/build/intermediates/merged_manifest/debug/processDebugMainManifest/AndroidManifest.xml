@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.act_app"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    package="com.tradeagently.act_app"
+    android:versionCode="2"
+    android:versionName="2.0" >
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -11,11 +11,26 @@
     <!-- Add Internet permission -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- See https://developer.android.com/training/package-visibility/declaring for more details. -->
+    <queries>
+
+        <!-- Added to check if Chrome is installed for browser-based payment authentication (e.g. 3DS1). -->
+        <package android:name="com.android.chrome" />
+        <!-- Needs to be explicitly declared on Android R+ -->
+        <package android:name="com.google.android.apps.maps" />
+    </queries>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
     <permission
-        android:name="com.example.act_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:name="com.tradeagently.act_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.example.act_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+    <uses-permission android:name="com.tradeagently.act_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
         android:allowBackup="true"
@@ -27,13 +42,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar" > <!-- App theme -->
-
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
 
         <!-- Main Activity (launcher activity) -->
         <activity
-            android:name="com.example.act_app.MainActivity"
-            android:exported="true" > <!-- Exported because it has MAIN/LAUNCHER intent-filter -->
+            android:name="com.tradeagently.act_app.MainActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,36 +57,329 @@
 
         <!-- Login Activity -->
         <activity
-            android:name="com.example.act_app.LoginActivity"
+            android:name="com.tradeagently.act_app.LoginActivity"
             android:exported="false" /> <!-- Internal activity -->
 
 
         <!-- Register Activity -->
         <activity
-            android:name="com.example.act_app.RegisterActivity"
+            android:name="com.tradeagently.act_app.RegisterActivity"
             android:exported="false" /> <!-- Internal activity -->
 
 
         <!-- My Assets Activity -->
         <activity
-            android:name="com.example.act_app.MyAssetsActivity"
+            android:name="com.tradeagently.act_app.MyAssetsActivity"
             android:exported="false" /> <!-- Internal activity -->
 
 
-        <!-- Stock Activity -->
+        <!-- Market Activity -->
         <activity
-            android:name="com.example.act_app.StockActivity"
-            android:exported="false" /> <!-- Added StockActivity -->
+            android:name="com.tradeagently.act_app.MarketActivity"
+            android:exported="false" /> <!-- Internal activity -->
 
 
-        <!-- Menu Activity (optional, for burger menu navigation) -->
+        <!-- Menu Activity -->
         <activity
-            android:name="com.example.act_app.MenuActivity"
-            android:exported="false" /> <!-- Added MenuActivity -->
+            android:name="com.tradeagently.act_app.MenuActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Profile Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.ProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Review Page Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.ReviewPageActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Support Page Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.SupportPageActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Client Management Page Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.ClientManagementActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Admin Tools Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.AdminToolsActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Stock Profile Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.StockProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Crypto Profile Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.CryptoProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Stock Profile Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.TicketDetailsActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Stock Profile Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.ReviewDetailsActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Add Balance Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.AddBalanceActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Client Profile Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.ClientProfileActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Price Alerts Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.PriceAlertsActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+
+        <!-- Subscription Activity -->
+        <activity
+            android:name="com.tradeagently.act_app.SubscriptionActivity"
+            android:exported="false" /> <!-- Internal activity -->
+
+        <service
+            android:name="com.google.firebase.components.ComponentDiscoveryService"
+            android:directBootAware="true"
+            android:exported="false" >
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.auth.ktx.FirebaseAuthKtxRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar" />
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar" />
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.auth.FirebaseAuthRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar" />
+            <meta-data
+                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+                android:value="com.google.firebase.components.ComponentRegistrar" />
+        </service>
+
+        <activity
+            android:name="com.stripe.android.paymentsheet.PaymentSheetActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.PaymentOptionsActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.customersheet.CustomerSheetActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.addresselement.AddressElementActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.ui.SepaMandateActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.ExternalPaymentMethodProxyActivity"
+            android:exported="false"
+            android:theme="@style/StripePayLauncherDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.link.LinkActivity"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
+            android:exported="false"
+            android:label="@string/stripe_link"
+            android:theme="@style/StripeLinkBaseTheme"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.stripe.android.link.LinkForegroundActivity"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
+            android:launchMode="singleTop"
+            android:theme="@style/StripeTransparentTheme" />
+        <activity
+            android:name="com.stripe.android.link.LinkRedirectHandlerActivity"
+            android:autoRemoveFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/StripeTransparentTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="complete"
+                    android:path="/com.tradeagently.act_app"
+                    android:scheme="link-popup" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.stripe.android.ui.core.cardscan.CardScanActivity"
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.view.PaymentAuthWebViewActivity"
+            android:exported="false"
+            android:theme="@style/StripeDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.view.PaymentRelayActivity"
+            android:exported="false"
+            android:theme="@style/StripeTransparentTheme" />
+        <!--
+        Set android:launchMode="singleTop" so that the StripeBrowserLauncherActivity instance that
+        launched the browser Activity will also handle the return URL deep link.
+        -->
+        <activity
+            android:name="com.stripe.android.payments.StripeBrowserLauncherActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/StripeTransparentTheme" />
+        <activity
+            android:name="com.stripe.android.payments.StripeBrowserProxyReturnActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/StripeTransparentTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Must match `DefaultReturnUrl#value`. -->
+                <data
+                    android:host="payment_return_url"
+                    android:path="/com.tradeagently.act_app"
+                    android:scheme="stripesdk" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionActivity"
+            android:exported="false"
+            android:theme="@style/StripeDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.googlepaylauncher.GooglePayLauncherActivity"
+            android:exported="false"
+            android:theme="@style/StripeGooglePayDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
+            android:exported="false"
+            android:theme="@style/StripeGooglePayDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
+            android:exported="false"
+            android:theme="@style/StripePayLauncherDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity"
+            android:exported="false"
+            android:theme="@style/StripeTransparentTheme" />
+        <activity
+            android:name="com.stripe.android.stripe3ds2.views.ChallengeActivity"
+            android:exported="false"
+            android:theme="@style/Stripe3DS2Theme" />
+        <activity
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <!--
+            Service handling Google Sign-In user revocation. For apps that do not integrate with
+            Google Sign-In, this service will never be started.
+        -->
+        <service
+            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+            android:exported="true"
+            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"
+            android:visibleToInstantApps="true" />
+
+        <activity
+            android:name="com.google.firebase.auth.internal.GenericIdpActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="firebase.auth"
+                    android:path="/"
+                    android:scheme="genericidp" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.google.firebase.auth.internal.RecaptchaActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="firebase.auth"
+                    android:path="/"
+                    android:scheme="recaptcha" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="com.tradeagently.act_app.firebaseinitprovider"
+            android:directBootAware="true"
+            android:exported="false"
+            android:initOrder="100" /> <!-- Needs to be explicitly declared on P+ -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <activity
+            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.example.act_app.androidx-startup"
+            android:authorities="com.tradeagently.act_app.androidx-startup"
             android:exported="false" >
             <meta-data
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
@@ -84,6 +391,10 @@
                 android:name="androidx.profileinstaller.ProfileInstallerInitializer"
                 android:value="androidx.startup" />
         </provider>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <receiver
             android:name="androidx.profileinstaller.ProfileInstallReceiver"
@@ -104,6 +415,10 @@
                 <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
             </intent-filter>
         </receiver>
+
+        <meta-data
+            android:name="aia-compat-api-min-version"
+            android:value="1" />
     </application>
 
 </manifest>

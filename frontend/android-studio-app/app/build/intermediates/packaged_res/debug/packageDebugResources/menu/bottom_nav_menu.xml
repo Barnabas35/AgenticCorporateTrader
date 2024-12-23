@@ -1,14 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_my_assets"
-        android:icon="@drawable/ic_assets"
-        android:title="Assets" />
+        android:id="@+id/nav_dummy"
+        android:icon="@android:color/transparent"
+        android:title=""
+        android:visible="false" />
+
     <item
-        android:id="@+id/nav_stock"
-        android:icon="@drawable/ic_stock"
-        android:title="Stock" />
+        android:id="@+id/nav_my_assets"
+        android:title="My Assets"
+        android:icon="@drawable/ic_assets" />
+
+    <item
+        android:id="@+id/nav_market"
+        android:title="Market"
+        android:icon="@drawable/ic_market" />
+
     <item
         android:id="@+id/nav_menu"
-        android:icon="@drawable/ic_menu"
-        android:title="Menu" />
+        android:title="Menu"
+        android:icon="@drawable/ic_menu" />
 </menu>

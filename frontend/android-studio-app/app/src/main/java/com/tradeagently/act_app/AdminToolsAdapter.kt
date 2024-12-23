@@ -1,5 +1,6 @@
 package com.tradeagently.act_app
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -14,7 +15,7 @@ class AdminToolsAdapter(
     private val reviews: List<Review>? = null,
     private val users: List<User>? = null,
     private val context: Context,
-    private val onUserDeleteClick: ((String) -> Unit)? = null
+    private val onUserDeleteClick: ((String?) -> Unit)? = null
 ) : RecyclerView.Adapter<AdminToolsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -24,7 +25,8 @@ class AdminToolsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_admin_tools, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_admin_tools, parent, false)
         return ViewHolder(view)
     }
 
@@ -45,6 +47,7 @@ class AdminToolsAdapter(
                         putExtra("ticket_id", ticket.ticket_id)
                     }
                     context.startActivity(intent)
+                    (context as? Activity)?.overridePendingTransition(0, 0)
                 }
             }
             reviews != null -> {
@@ -59,6 +62,7 @@ class AdminToolsAdapter(
                         putExtra("comment", review.comment)
                     }
                     context.startActivity(intent)
+                    (context as? Activity)?.overridePendingTransition(0, 0)
                 }
             }
             users != null -> {
@@ -68,7 +72,7 @@ class AdminToolsAdapter(
                 holder.deleteButton.visibility = View.VISIBLE
 
                 holder.deleteButton.setOnClickListener {
-                    onUserDeleteClick?.invoke(user.client_id)
+                    onUserDeleteClick?.invoke(user.id)
                 }
             }
         }

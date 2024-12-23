@@ -7,6 +7,7 @@
     <color name="black">#FF000000</color>
     <color name="defaultIconColor">#272727</color>
     <color name="errorColor">#F44336</color>
+    <color name="ic_launcher_background">#272727</color>
     <color name="infoColor">#2196F3</color>
     <color name="primary">#4CAF50</color>
     <color name="primaryDark">#388E3C</color>
@@ -15,8 +16,8 @@
     <color name="successColor">#4CAF50</color>
     <color name="warningColor">#FF9800</color>
     <color name="white">#FFFFFFFF</color>
-    <string name="app_name">ACT-app</string>
-    <string name="my_assets">My Assets</string>
+    <string name="app_name">TradeAgently</string>
+    <string name="remove_client">Remove Client</string>
     <style name="Base.Theme.ACTapp" parent="Theme.AppCompat.Light.NoActionBar">
         
         

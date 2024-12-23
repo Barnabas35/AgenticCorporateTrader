@@ -4,15 +4,15 @@
     "type": "MERGED_MANIFESTS",
     "kind": "Directory"
   },
-  "applicationId": "com.example.act_app",
+  "applicationId": "com.tradeagently.act_app",
   "variantName": "debug",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 1,
-      "versionName": "1.0",
+      "versionCode": 2,
+      "versionName": "2.0",
       "outputFile": "AndroidManifest.xml"
     }
   ],

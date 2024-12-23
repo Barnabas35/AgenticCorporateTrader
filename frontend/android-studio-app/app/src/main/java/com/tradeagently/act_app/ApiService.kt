@@ -250,7 +250,7 @@ data class CryptoAggregate(
 )
 
 data class User(
-    val client_id: String,
+    val id: String?,
     val username: String,
     val email: String,
     val user_type: String

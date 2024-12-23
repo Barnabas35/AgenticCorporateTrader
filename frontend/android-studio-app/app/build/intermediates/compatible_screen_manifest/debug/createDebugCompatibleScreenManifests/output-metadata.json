@@ -4,7 +4,7 @@
     "type": "COMPATIBLE_SCREEN_MANIFEST",
     "kind": "Directory"
   },
-  "applicationId": "com.example.act_app",
+  "applicationId": "com.tradeagently.act_app",
   "variantName": "debug",
   "elements": []
 }
