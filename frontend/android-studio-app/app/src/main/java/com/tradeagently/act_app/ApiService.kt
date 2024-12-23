@@ -6,10 +6,8 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-// Data class for login request
 data class LoginRequest(val email: String, val password: String)
 
-// Data class for register request
 data class RegisterRequest(
     val username: String,
     val email: String,
@@ -17,41 +15,34 @@ data class RegisterRequest(
     val user_type: String
 )
 
-// Data class for the token request
 data class TokenRequest(val session_token: String)
 
-// Data class for submitting a review
 data class ReviewRequest(
     val session_token: String,
     val review_score: Int,
     val review_comment: String
 )
 
-// API response model for login/register response
 data class ApiResponse(
     val session_token: String?,
     val status: String?
 )
 
-// Data class for username response
 data class UsernameResponse(
     val username: String?,
     val status: String?
 )
 
-// Data class for email response
 data class EmailResponse(
     val email: String?,
     val status: String?
 )
 
-// Data class for profile icon response
 data class ProfileIconResponse(
     val url: String?,
     val status: String?
 )
 
-// API response model for submitting a review
 data class ReviewResponse(
     val status: String?
 )
