@@ -28,27 +28,20 @@ class ClientManagementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_client_management)
 
-        // Prevent bottom navigation from moving with keyboard
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-
-        // Set up the bottom navigation
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Get session token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
         sessionToken = sharedPreferences.getString("session_token", "") ?: ""
-
         if (sessionToken.isEmpty()) {
             Toast.makeText(this, "Session expired. Please log in again.", Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        // Set up RecyclerView for client list
         recyclerView = findViewById(R.id.clientRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Set up the Add Client button
         val addClientButton = findViewById<Button>(R.id.addClientButton)
         val clientNameEditText = findViewById<EditText>(R.id.editTextNewClient)
 
@@ -56,13 +49,12 @@ class ClientManagementActivity : AppCompatActivity() {
             val clientName = clientNameEditText.text.toString().trim()
             if (clientName.isNotEmpty()) {
                 addClient(clientName)
-                clientNameEditText.text.clear() // Clear input field after adding
+                clientNameEditText.text.clear()
             } else {
                 Toast.makeText(this, "Please enter a client name", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Fetch client list from the server
         fetchClientList()
     }
 
@@ -97,7 +89,7 @@ class ClientManagementActivity : AppCompatActivity() {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     Toast.makeText(this@ClientManagementActivity, "Client added successfully", Toast.LENGTH_SHORT).show()
-                    fetchClientList() // Refresh the client list
+                    fetchClientList()
                 } else {
                     Log.e("API_ERROR", "Failed to add client: ${response.message()}")
                     Toast.makeText(this@ClientManagementActivity, "Failed to add client.", Toast.LENGTH_SHORT).show()
@@ -117,7 +109,7 @@ class ClientManagementActivity : AppCompatActivity() {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     Toast.makeText(this@ClientManagementActivity, "Client removed successfully", Toast.LENGTH_SHORT).show()
-                    fetchClientList() // Refresh the client list
+                    fetchClientList()
                 } else {
                     Log.e("API_ERROR", "Failed to remove client: ${response.message()}")
                     Toast.makeText(this@ClientManagementActivity, "Failed to remove client.", Toast.LENGTH_SHORT).show()
@@ -136,7 +128,7 @@ class ClientManagementActivity : AppCompatActivity() {
 
         inner class ClientViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val clientNameTextView: TextView = view.findViewById(R.id.clientNameTextView)
-            val removeButton: ImageView = view.findViewById(R.id.removeClientButton) // Corrected here
+            val removeButton: ImageView = view.findViewById(R.id.removeClientButton)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClientViewHolder {

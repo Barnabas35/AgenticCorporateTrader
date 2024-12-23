@@ -25,7 +25,6 @@ class AddBalanceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(activity_add_balance)
 
-        // Initialize Stripe PaymentConfiguration
         PaymentConfiguration.init(
             applicationContext,
             "pk_test_51QP2IwFp664itGdOwg1hyEpDcLxfaD29psic6hcZ5lnmO6MUZNXnu0Vft1kZk8pLx4BGc6ofKD9oZS4pHPdBj5tz00lLw5IBU5" // Replace with your Stripe publishable key
@@ -33,7 +32,6 @@ class AddBalanceActivity : AppCompatActivity() {
 
         paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
 
-        // Get session token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
         sessionToken = sharedPreferences.getString("session_token", "") ?: ""
 
@@ -43,7 +41,6 @@ class AddBalanceActivity : AppCompatActivity() {
             return
         }
 
-        // Set up the bottom navigation to handle navigation between activities
         NavigationHelper.setupBottomNavigation(this, R.id.nav_dummy)
 
         balanceInput = findViewById(R.id.balanceInput)
@@ -90,7 +87,7 @@ class AddBalanceActivity : AppCompatActivity() {
         when (paymentSheetResult) {
             is PaymentSheetResult.Completed -> {
                 Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show()
-                fetchUpdatedBalance() // Fetch and update the balance after successful payment
+                fetchUpdatedBalance()
             }
             is PaymentSheetResult.Canceled -> {
                 Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show()

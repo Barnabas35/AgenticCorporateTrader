@@ -9,13 +9,15 @@
         android:layout_height="wrap_content"
         android:text="Select a Client"
         android:textSize="16sp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:textColor="#000000"/>
 
     <Spinner
         android:id="@+id/clientSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:spinnerMode="dropdown" />
+        android:spinnerMode="dropdown"
+        android:textColor="#000000"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,12 +25,14 @@
         android:text="Enter Quantity to Buy in Dollars"
         android:textSize="16sp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:textColor="#000000"/>
 
     <EditText
         android:id="@+id/quantityInputbuyManager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="numberDecimal"
-        android:hint="Quantity" />
+        android:hint="Quantity"
+        android:textColor="#000000"/>
 </LinearLayout>

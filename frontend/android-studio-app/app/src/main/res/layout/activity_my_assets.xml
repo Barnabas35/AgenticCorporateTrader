@@ -8,7 +8,6 @@
     android:background="@color/backgroundLight"
     tools:context=".MyAssetsActivity">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/assetsToolbar"
         android:layout_width="0dp"
@@ -30,7 +29,6 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- User Balance -->
     <TextView
         android:id="@+id/userBalance"
         android:layout_width="wrap_content"
@@ -43,7 +41,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/assetsToolbar" />
 
-    <!-- Add Balance Button -->
     <Button
         android:id="@+id/addBalanceButton"
         android:layout_width="147dp"
@@ -62,10 +59,6 @@
         app:layout_constraintStart_toEndOf="@+id/userBalance"
         app:layout_constraintTop_toBottomOf="@id/assetsToolbar" />
 
-    <!-- Button Container for Stock and Crypto -->
-
-    <!-- RecyclerView for displaying either client list or assets -->
-
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="180dp"
@@ -80,7 +73,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addBalanceButton">
 
-        <!-- Stock Button -->
         <Button
             android:id="@+id/buttonStock"
             android:layout_width="80dp"
@@ -91,7 +83,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 
-        <!-- Crypto Button -->
         <Button
             android:id="@+id/buttonCrypto"
             android:layout_width="80dp"
@@ -101,7 +92,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
     </LinearLayout>
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAssets"
@@ -133,7 +123,6 @@
         app:layout_constraintTop_toTopOf="@id/recyclerViewAssets"
         app:layout_constraintVertical_bias="0.127" />
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

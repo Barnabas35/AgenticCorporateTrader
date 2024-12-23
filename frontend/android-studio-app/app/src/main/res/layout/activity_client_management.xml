@@ -7,7 +7,6 @@
     android:background="@color/backgroundLight"
     tools:context=".ClientManagementActivity">
 
-    <!-- Toolbar for Client Management -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/assetsToolbar"
         android:layout_width="0dp"
@@ -29,7 +28,6 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- CardView for adding new client -->
     <androidx.cardview.widget.CardView
         android:id="@+id/addClientContainer"
         android:layout_width="0dp"
@@ -70,10 +68,6 @@
                 android:textColor="@color/white" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-
-    <!-- RecyclerView for listing clients -->
-
-    <!-- Bottom Navigation View -->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/clientRecyclerView"

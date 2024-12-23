@@ -1,0 +1,745 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.tradeagently.act_app"
+4    android:versionCode="2"
+5    android:versionName="2.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="34" />
+10
+11    <!-- Add Internet permission -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:5:5-67
+12-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:5:22-64
+13
+14    <!-- See https://developer.android.com/training/package-visibility/declaring for more details. -->
+15    <queries>
+15-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:8:5-12:15
+16
+17        <!-- Added to check if Chrome is installed for browser-based payment authentication (e.g. 3DS1). -->
+18        <package android:name="com.android.chrome" />
+18-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:11:9-54
+18-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:11:18-51
+19        <!-- Needs to be explicitly declared on Android R+ -->
+20        <package android:name="com.google.android.apps.maps" />
+20-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:33:9-64
+20-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:33:18-61
+21    </queries>
+22
+23    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+23-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:26:5-79
+23-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:26:22-76
+24
+25    <uses-feature
+25-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:26:5-28:35
+26        android:glEsVersion="0x00020000"
+26-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:27:9-41
+27        android:required="true" />
+27-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:28:9-32
+28
+29    <permission
+29-->[androidx.core:core:1.13.1] /Users/luisgiliberti/.gradle/caches/transforms-4/c60b370ed1e3923fd0c4ac340115cad6/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+30        android:name="com.tradeagently.act_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+30-->[androidx.core:core:1.13.1] /Users/luisgiliberti/.gradle/caches/transforms-4/c60b370ed1e3923fd0c4ac340115cad6/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+31        android:protectionLevel="signature" />
+31-->[androidx.core:core:1.13.1] /Users/luisgiliberti/.gradle/caches/transforms-4/c60b370ed1e3923fd0c4ac340115cad6/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+32
+33    <uses-permission android:name="com.tradeagently.act_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+33-->[androidx.core:core:1.13.1] /Users/luisgiliberti/.gradle/caches/transforms-4/c60b370ed1e3923fd0c4ac340115cad6/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+33-->[androidx.core:core:1.13.1] /Users/luisgiliberti/.gradle/caches/transforms-4/c60b370ed1e3923fd0c4ac340115cad6/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+34
+35    <application
+35-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:7:5-115:19
+36        android:allowBackup="true"
+36-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:8:9-35
+37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+37-->[androidx.core:core:1.13.1] /Users/luisgiliberti/.gradle/caches/transforms-4/c60b370ed1e3923fd0c4ac340115cad6/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+38        android:debuggable="true"
+39        android:extractNativeLibs="false"
+40        android:icon="@mipmap/ic_launcher"
+40-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:9:9-43
+41        android:label="@string/app_name"
+41-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:10:9-41
+42        android:roundIcon="@mipmap/ic_launcher_round"
+42-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:11:9-54
+43        android:supportsRtl="true"
+43-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:12:9-35
+44        android:testOnly="true"
+45        android:theme="@style/Theme.AppCompat.Light.NoActionBar" > <!-- App theme -->
+45-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:13:9-65
+46
+47
+48        <!-- Main Activity (launcher activity) -->
+49        <activity
+49-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:16:9-23:20
+50            android:name="com.tradeagently.act_app.MainActivity"
+50-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:17:13-41
+51            android:exported="true" > <!-- Exported because it has MAIN/LAUNCHER intent-filter -->
+51-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:18:13-36
+52            <intent-filter>
+52-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:19:13-22:29
+53                <action android:name="android.intent.action.MAIN" />
+53-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:20:17-69
+53-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:20:25-66
+54
+55                <category android:name="android.intent.category.LAUNCHER" />
+55-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:21:17-77
+55-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:21:27-74
+56            </intent-filter>
+57        </activity>
+58
+59        <!-- Login Activity -->
+60        <activity
+60-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:26:9-28:40
+61            android:name="com.tradeagently.act_app.LoginActivity"
+61-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:27:13-42
+62            android:exported="false" /> <!-- Internal activity -->
+62-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:28:13-37
+63
+64
+65        <!-- Register Activity -->
+66        <activity
+66-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:31:9-33:40
+67            android:name="com.tradeagently.act_app.RegisterActivity"
+67-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:32:13-45
+68            android:exported="false" /> <!-- Internal activity -->
+68-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:33:13-37
+69
+70
+71        <!-- My Assets Activity -->
+72        <activity
+72-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:36:9-38:40
+73            android:name="com.tradeagently.act_app.MyAssetsActivity"
+73-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:37:13-45
+74            android:exported="false" /> <!-- Internal activity -->
+74-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:38:13-37
+75
+76
+77        <!-- Market Activity -->
+78        <activity
+78-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:41:9-43:40
+79            android:name="com.tradeagently.act_app.MarketActivity"
+79-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:42:13-43
+80            android:exported="false" /> <!-- Internal activity -->
+80-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:43:13-37
+81
+82
+83        <!-- Menu Activity -->
+84        <activity
+84-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:46:9-48:40
+85            android:name="com.tradeagently.act_app.MenuActivity"
+85-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:47:13-41
+86            android:exported="false" /> <!-- Internal activity -->
+86-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:48:13-37
+87
+88
+89        <!-- Profile Activity -->
+90        <activity
+90-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:51:9-53:40
+91            android:name="com.tradeagently.act_app.ProfileActivity"
+91-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:52:13-44
+92            android:exported="false" /> <!-- Internal activity -->
+92-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:53:13-37
+93
+94
+95        <!-- Review Page Activity -->
+96        <activity
+96-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:56:9-58:40
+97            android:name="com.tradeagently.act_app.ReviewPageActivity"
+97-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:57:13-47
+98            android:exported="false" /> <!-- Internal activity -->
+98-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:58:13-37
+99
+100
+101        <!-- Support Page Activity -->
+102        <activity
+102-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:61:9-63:40
+103            android:name="com.tradeagently.act_app.SupportPageActivity"
+103-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:62:13-48
+104            android:exported="false" /> <!-- Internal activity -->
+104-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:63:13-37
+105
+106
+107        <!-- Client Management Page Activity -->
+108        <activity
+108-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:66:9-68:40
+109            android:name="com.tradeagently.act_app.ClientManagementActivity"
+109-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:67:13-53
+110            android:exported="false" /> <!-- Internal activity -->
+110-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:68:13-37
+111
+112
+113        <!-- Admin Tools Activity -->
+114        <activity
+114-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:71:9-73:40
+115            android:name="com.tradeagently.act_app.AdminToolsActivity"
+115-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:72:13-47
+116            android:exported="false" /> <!-- Internal activity -->
+116-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:73:13-37
+117
+118
+119        <!-- Stock Profile Activity -->
+120        <activity
+120-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:76:9-78:40
+121            android:name="com.tradeagently.act_app.StockProfileActivity"
+121-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:77:13-49
+122            android:exported="false" /> <!-- Internal activity -->
+122-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:78:13-37
+123
+124
+125        <!-- Crypto Profile Activity -->
+126        <activity
+126-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:81:9-83:40
+127            android:name="com.tradeagently.act_app.CryptoProfileActivity"
+127-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:82:13-50
+128            android:exported="false" /> <!-- Internal activity -->
+128-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:83:13-37
+129
+130
+131        <!-- Stock Profile Activity -->
+132        <activity
+132-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:86:9-88:40
+133            android:name="com.tradeagently.act_app.TicketDetailsActivity"
+133-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:87:13-50
+134            android:exported="false" /> <!-- Internal activity -->
+134-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:88:13-37
+135
+136
+137        <!-- Stock Profile Activity -->
+138        <activity
+138-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:91:9-93:40
+139            android:name="com.tradeagently.act_app.ReviewDetailsActivity"
+139-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:92:13-50
+140            android:exported="false" /> <!-- Internal activity -->
+140-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:93:13-37
+141
+142
+143        <!-- Add Balance Activity -->
+144        <activity
+144-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:96:9-98:40
+145            android:name="com.tradeagently.act_app.AddBalanceActivity"
+145-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:97:13-47
+146            android:exported="false" /> <!-- Internal activity -->
+146-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:98:13-37
+147
+148
+149        <!-- Client Profile Activity -->
+150        <activity
+150-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:101:9-103:40
+151            android:name="com.tradeagently.act_app.ClientProfileActivity"
+151-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:102:13-50
+152            android:exported="false" /> <!-- Internal activity -->
+152-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:103:13-37
+153
+154
+155        <!-- Price Alerts Activity -->
+156        <activity
+156-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:106:9-108:40
+157            android:name="com.tradeagently.act_app.PriceAlertsActivity"
+157-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:107:13-48
+158            android:exported="false" /> <!-- Internal activity -->
+158-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:108:13-37
+159
+160
+161        <!-- Subscription Activity -->
+162        <activity
+162-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:111:9-113:40
+163            android:name="com.tradeagently.act_app.SubscriptionActivity"
+163-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:112:13-49
+164            android:exported="false" /> <!-- Internal activity -->
+164-->/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/AndroidManifest.xml:113:13-37
+165
+166        <service
+166-->[com.google.firebase:firebase-auth-ktx:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/3fa73792169302bf397509ba07c85608/transformed/firebase-auth-ktx-22.1.1/AndroidManifest.xml:8:9-14:19
+167            android:name="com.google.firebase.components.ComponentDiscoveryService"
+167-->[com.google.firebase:firebase-auth-ktx:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/3fa73792169302bf397509ba07c85608/transformed/firebase-auth-ktx-22.1.1/AndroidManifest.xml:9:13-84
+168            android:directBootAware="true"
+168-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:32:13-43
+169            android:exported="false" >
+169-->[com.google.firebase:firebase-auth-ktx:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/3fa73792169302bf397509ba07c85608/transformed/firebase-auth-ktx-22.1.1/AndroidManifest.xml:10:13-37
+170            <meta-data
+170-->[com.google.firebase:firebase-auth-ktx:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/3fa73792169302bf397509ba07c85608/transformed/firebase-auth-ktx-22.1.1/AndroidManifest.xml:11:13-13:85
+171                android:name="com.google.firebase.components:com.google.firebase.auth.ktx.FirebaseAuthKtxRegistrar"
+171-->[com.google.firebase:firebase-auth-ktx:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/3fa73792169302bf397509ba07c85608/transformed/firebase-auth-ktx-22.1.1/AndroidManifest.xml:12:17-116
+172                android:value="com.google.firebase.components.ComponentRegistrar" />
+172-->[com.google.firebase:firebase-auth-ktx:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/3fa73792169302bf397509ba07c85608/transformed/firebase-auth-ktx-22.1.1/AndroidManifest.xml:13:17-82
+173            <meta-data
+173-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/fe4ddd6efb324ff8c0cef8eb9dd30636/transformed/firebase-common-ktx-21.0.0/AndroidManifest.xml:12:13-14:85
+174                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+174-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/fe4ddd6efb324ff8c0cef8eb9dd30636/transformed/firebase-common-ktx-21.0.0/AndroidManifest.xml:13:17-116
+175                android:value="com.google.firebase.components.ComponentRegistrar" />
+175-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/fe4ddd6efb324ff8c0cef8eb9dd30636/transformed/firebase-common-ktx-21.0.0/AndroidManifest.xml:14:17-82
+176            <meta-data
+176-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:69:13-71:85
+177                android:name="com.google.firebase.components:com.google.firebase.auth.FirebaseAuthRegistrar"
+177-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:70:17-109
+178                android:value="com.google.firebase.components.ComponentRegistrar" />
+178-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:71:17-82
+179            <meta-data
+179-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:35:13-37:85
+180                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+180-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:36:17-109
+181                android:value="com.google.firebase.components.ComponentRegistrar" />
+181-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:37:17-82
+182        </service>
+183
+184        <activity
+184-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:8:9-11:69
+185            android:name="com.stripe.android.paymentsheet.PaymentSheetActivity"
+185-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:9:13-80
+186            android:exported="false"
+186-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:10:13-37
+187            android:theme="@style/StripePaymentSheetDefaultTheme" />
+187-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:11:13-66
+188        <activity
+188-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:12:9-15:69
+189            android:name="com.stripe.android.paymentsheet.PaymentOptionsActivity"
+189-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:13:13-82
+190            android:exported="false"
+190-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:14:13-37
+191            android:theme="@style/StripePaymentSheetDefaultTheme" />
+191-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:15:13-66
+192        <activity
+192-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:16:9-19:69
+193            android:name="com.stripe.android.customersheet.CustomerSheetActivity"
+193-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:17:13-82
+194            android:exported="false"
+194-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:18:13-37
+195            android:theme="@style/StripePaymentSheetDefaultTheme" />
+195-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:19:13-66
+196        <activity
+196-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:20:9-23:69
+197            android:name="com.stripe.android.paymentsheet.addresselement.AddressElementActivity"
+197-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:21:13-97
+198            android:exported="false"
+198-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:22:13-37
+199            android:theme="@style/StripePaymentSheetDefaultTheme" />
+199-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:23:13-66
+200        <activity
+200-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:24:9-27:69
+201            android:name="com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationActivity"
+201-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:25:13-118
+202            android:exported="false"
+202-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:26:13-37
+203            android:theme="@style/StripePaymentSheetDefaultTheme" />
+203-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:27:13-66
+204        <activity
+204-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:28:9-31:69
+205            android:name="com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
+205-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:29:13-105
+206            android:exported="false"
+206-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:30:13-37
+207            android:theme="@style/StripePaymentSheetDefaultTheme" />
+207-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:31:13-66
+208        <activity
+208-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:32:9-35:69
+209            android:name="com.stripe.android.paymentsheet.ui.SepaMandateActivity"
+209-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:33:13-82
+210            android:exported="false"
+210-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:34:13-37
+211            android:theme="@style/StripePaymentSheetDefaultTheme" />
+211-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:35:13-66
+212        <activity
+212-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:36:9-39:68
+213            android:name="com.stripe.android.paymentsheet.ExternalPaymentMethodProxyActivity"
+213-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:37:13-94
+214            android:exported="false"
+214-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:38:13-37
+215            android:theme="@style/StripePayLauncherDefaultTheme" />
+215-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:39:13-65
+216        <activity
+216-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:40:9-42:69
+217            android:name="com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
+217-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:41:13-121
+218            android:theme="@style/StripePaymentSheetDefaultTheme" />
+218-->[com.stripe:paymentsheet:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/2888b46e632f3df58c5922c3c9456400/transformed/paymentsheet-21.2.0/AndroidManifest.xml:42:13-66
+219        <activity
+219-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:8:9-15:58
+220            android:name="com.stripe.android.link.LinkActivity"
+220-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:9:13-64
+221            android:autoRemoveFromRecents="true"
+221-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:10:13-49
+222            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
+222-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:11:13-115
+223            android:exported="false"
+223-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:12:13-37
+224            android:label="@string/stripe_link"
+224-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:13:13-48
+225            android:theme="@style/StripeLinkBaseTheme"
+225-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:14:13-55
+226            android:windowSoftInputMode="adjustResize" />
+226-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:15:13-55
+227        <activity
+227-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:16:9-21:61
+228            android:name="com.stripe.android.link.LinkForegroundActivity"
+228-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:17:13-74
+229            android:autoRemoveFromRecents="true"
+229-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:18:13-49
+230            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
+230-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:19:13-115
+231            android:launchMode="singleTop"
+231-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:20:13-43
+232            android:theme="@style/StripeTransparentTheme" />
+232-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:21:13-58
+233        <activity
+233-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:22:9-39:20
+234            android:name="com.stripe.android.link.LinkRedirectHandlerActivity"
+234-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:23:13-79
+235            android:autoRemoveFromRecents="true"
+235-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:24:13-49
+236            android:exported="true"
+236-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:25:13-36
+237            android:launchMode="singleInstance"
+237-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:26:13-48
+238            android:theme="@style/StripeTransparentTheme" >
+238-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:27:13-58
+239            <intent-filter>
+239-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:28:13-38:29
+240                <action android:name="android.intent.action.VIEW" />
+240-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:17-69
+240-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:25-66
+241
+242                <category android:name="android.intent.category.DEFAULT" />
+242-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:17-76
+242-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:27-73
+243                <category android:name="android.intent.category.BROWSABLE" />
+243-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:17-78
+243-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:27-75
+244
+245                <data
+245-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:34:17-37:51
+246                    android:host="complete"
+246-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:35:21-44
+247                    android:path="/com.tradeagently.act_app"
+247-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:36:21-53
+248                    android:scheme="link-popup" />
+248-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:37:21-48
+249            </intent-filter>
+250        </activity>
+251        <activity
+251-->[com.stripe:payments-ui-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/4a4deb9a5800533aef65ce64c309646a/transformed/payments-ui-core-21.2.0/AndroidManifest.xml:8:9-11:69
+252            android:name="com.stripe.android.ui.core.cardscan.CardScanActivity"
+252-->[com.stripe:payments-ui-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/4a4deb9a5800533aef65ce64c309646a/transformed/payments-ui-core-21.2.0/AndroidManifest.xml:9:13-80
+253            android:exported="false"
+253-->[com.stripe:payments-ui-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/4a4deb9a5800533aef65ce64c309646a/transformed/payments-ui-core-21.2.0/AndroidManifest.xml:10:13-37
+254            android:theme="@style/StripePaymentSheetDefaultTheme" />
+254-->[com.stripe:payments-ui-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/4a4deb9a5800533aef65ce64c309646a/transformed/payments-ui-core-21.2.0/AndroidManifest.xml:11:13-66
+255        <activity
+255-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:15:9-18:57
+256            android:name="com.stripe.android.view.PaymentAuthWebViewActivity"
+256-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:16:13-78
+257            android:exported="false"
+257-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:17:13-37
+258            android:theme="@style/StripeDefaultTheme" />
+258-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:18:13-54
+259        <activity
+259-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:19:9-22:61
+260            android:name="com.stripe.android.view.PaymentRelayActivity"
+260-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:20:13-72
+261            android:exported="false"
+261-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:21:13-37
+262            android:theme="@style/StripeTransparentTheme" />
+262-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:22:13-58
+263        <!--
+264        Set android:launchMode="singleTop" so that the StripeBrowserLauncherActivity instance that
+265        launched the browser Activity will also handle the return URL deep link.
+266        -->
+267        <activity
+267-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:28:9-32:61
+268            android:name="com.stripe.android.payments.StripeBrowserLauncherActivity"
+268-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:29:13-85
+269            android:exported="false"
+269-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:30:13-37
+270            android:launchMode="singleTask"
+270-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:31:13-44
+271            android:theme="@style/StripeTransparentTheme" />
+271-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:32:13-58
+272        <activity
+272-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:33:9-50:20
+273            android:name="com.stripe.android.payments.StripeBrowserProxyReturnActivity"
+273-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:34:13-88
+274            android:exported="true"
+274-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:35:13-36
+275            android:launchMode="singleTask"
+275-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:36:13-44
+276            android:theme="@style/StripeTransparentTheme" >
+276-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:37:13-58
+277            <intent-filter>
+277-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:38:13-49:29
+278                <action android:name="android.intent.action.VIEW" />
+278-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:17-69
+278-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:25-66
+279
+280                <category android:name="android.intent.category.DEFAULT" />
+280-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:17-76
+280-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:27-73
+281                <category android:name="android.intent.category.BROWSABLE" />
+281-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:17-78
+281-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:27-75
+282
+283                <!-- Must match `DefaultReturnUrl#value`. -->
+284                <data
+284-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:34:17-37:51
+285                    android:host="payment_return_url"
+285-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:35:21-44
+286                    android:path="/com.tradeagently.act_app"
+286-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:36:21-53
+287                    android:scheme="stripesdk" />
+287-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:37:21-48
+288            </intent-filter>
+289        </activity>
+290        <activity
+290-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:51:9-54:57
+291            android:name="com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionActivity"
+291-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:52:13-114
+292            android:exported="false"
+292-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:53:13-37
+293            android:theme="@style/StripeDefaultTheme" />
+293-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:54:13-54
+294        <activity
+294-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:55:9-58:66
+295            android:name="com.stripe.android.googlepaylauncher.GooglePayLauncherActivity"
+295-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:56:13-90
+296            android:exported="false"
+296-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:57:13-37
+297            android:theme="@style/StripeGooglePayDefaultTheme" />
+297-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:58:13-63
+298        <activity
+298-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:59:9-62:66
+299            android:name="com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
+299-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:60:13-103
+300            android:exported="false"
+300-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:61:13-37
+301            android:theme="@style/StripeGooglePayDefaultTheme" />
+301-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:62:13-63
+302        <activity
+302-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:63:9-66:68
+303            android:name="com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
+303-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:64:13-107
+304            android:exported="false"
+304-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:65:13-37
+305            android:theme="@style/StripePayLauncherDefaultTheme" />
+305-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:66:13-65
+306        <activity
+306-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:67:9-70:61
+307            android:name="com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity"
+307-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:68:13-97
+308            android:exported="false"
+308-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:69:13-37
+309            android:theme="@style/StripeTransparentTheme" />
+309-->[com.stripe:payments-core:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/298334249834599d15b10015912e34e8/transformed/payments-core-21.2.0/AndroidManifest.xml:70:13-58
+310        <activity
+310-->[com.stripe:stripe-3ds2-android:6.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/753f59506719181021c0c352e7a7b810/transformed/stripe-3ds2-android-6.2.0/AndroidManifest.xml:8:9-11:54
+311            android:name="com.stripe.android.stripe3ds2.views.ChallengeActivity"
+311-->[com.stripe:stripe-3ds2-android:6.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/753f59506719181021c0c352e7a7b810/transformed/stripe-3ds2-android-6.2.0/AndroidManifest.xml:9:13-81
+312            android:exported="false"
+312-->[com.stripe:stripe-3ds2-android:6.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/753f59506719181021c0c352e7a7b810/transformed/stripe-3ds2-android-6.2.0/AndroidManifest.xml:10:13-37
+313            android:theme="@style/Stripe3DS2Theme" />
+313-->[com.stripe:stripe-3ds2-android:6.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/753f59506719181021c0c352e7a7b810/transformed/stripe-3ds2-android-6.2.0/AndroidManifest.xml:11:13-51
+314        <activity
+314-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:23:9-27:75
+315            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+315-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:24:13-93
+316            android:excludeFromRecents="true"
+316-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:25:13-46
+317            android:exported="false"
+317-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:26:13-37
+318            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+318-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:27:13-72
+319        <!--
+320            Service handling Google Sign-In user revocation. For apps that do not integrate with
+321            Google Sign-In, this service will never be started.
+322        -->
+323        <service
+323-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:33:9-37:51
+324            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+324-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:34:13-89
+325            android:exported="true"
+325-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:35:13-36
+326            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"
+326-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:36:13-107
+327            android:visibleToInstantApps="true" />
+327-->[com.google.android.gms:play-services-auth:20.6.0] /Users/luisgiliberti/.gradle/caches/transforms-4/12dcc806e1e74989231b20d9d9f696b9/transformed/play-services-auth-20.6.0/AndroidManifest.xml:37:13-48
+328
+329        <activity
+329-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:29:9-46:20
+330            android:name="com.google.firebase.auth.internal.GenericIdpActivity"
+330-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:30:13-80
+331            android:excludeFromRecents="true"
+331-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:31:13-46
+332            android:exported="true"
+332-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:32:13-36
+333            android:launchMode="singleTask"
+333-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:33:13-44
+334            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+334-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:34:13-72
+335            <intent-filter>
+335-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:35:13-45:29
+336                <action android:name="android.intent.action.VIEW" />
+336-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:17-69
+336-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:25-66
+337
+338                <category android:name="android.intent.category.DEFAULT" />
+338-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:17-76
+338-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:27-73
+339                <category android:name="android.intent.category.BROWSABLE" />
+339-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:17-78
+339-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:27-75
+340
+341                <data
+341-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:34:17-37:51
+342                    android:host="firebase.auth"
+342-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:35:21-44
+343                    android:path="/"
+343-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:36:21-53
+344                    android:scheme="genericidp" />
+344-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:37:21-48
+345            </intent-filter>
+346        </activity>
+347        <activity
+347-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:47:9-64:20
+348            android:name="com.google.firebase.auth.internal.RecaptchaActivity"
+348-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:48:13-79
+349            android:excludeFromRecents="true"
+349-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:49:13-46
+350            android:exported="true"
+350-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:50:13-36
+351            android:launchMode="singleTask"
+351-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:51:13-44
+352            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+352-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:52:13-72
+353            <intent-filter>
+353-->[com.google.firebase:firebase-auth:22.1.1] /Users/luisgiliberti/.gradle/caches/transforms-4/2ae7fdb3cdb0ee305588836cf9ee1401/transformed/firebase-auth-22.1.1/AndroidManifest.xml:53:13-63:29
+354                <action android:name="android.intent.action.VIEW" />
+354-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:17-69
+354-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:29:25-66
+355
+356                <category android:name="android.intent.category.DEFAULT" />
+356-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:17-76
+356-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:31:27-73
+357                <category android:name="android.intent.category.BROWSABLE" />
+357-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:17-78
+357-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:32:27-75
+358
+359                <data
+359-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:34:17-37:51
+360                    android:host="firebase.auth"
+360-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:35:21-44
+361                    android:path="/"
+361-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:36:21-53
+362                    android:scheme="recaptcha" />
+362-->[com.stripe:link:21.2.0] /Users/luisgiliberti/.gradle/caches/transforms-4/6a4759b0d6692b4c8ac7cb97450d2dd0/transformed/link-21.2.0/AndroidManifest.xml:37:21-48
+363            </intent-filter>
+364        </activity>
+365
+366        <provider
+366-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:23:9-28:39
+367            android:name="com.google.firebase.provider.FirebaseInitProvider"
+367-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:24:13-77
+368            android:authorities="com.tradeagently.act_app.firebaseinitprovider"
+368-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:25:13-72
+369            android:directBootAware="true"
+369-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:26:13-43
+370            android:exported="false"
+370-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:27:13-37
+371            android:initOrder="100" /> <!-- Needs to be explicitly declared on P+ -->
+371-->[com.google.firebase:firebase-common:21.0.0] /Users/luisgiliberti/.gradle/caches/transforms-4/661c443f055db74ea876e20255a5155a/transformed/firebase-common-21.0.0/AndroidManifest.xml:28:13-36
+372        <uses-library
+372-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:39:9-41:40
+373            android:name="org.apache.http.legacy"
+373-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:40:13-50
+374            android:required="false" />
+374-->[com.google.android.gms:play-services-maps:18.0.2] /Users/luisgiliberti/.gradle/caches/transforms-4/30acc32fa4b79cf182142a22a9668aae/transformed/play-services-maps-18.0.2/AndroidManifest.xml:41:13-37
+375
+376        <activity
+376-->[com.google.android.gms:play-services-base:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/5a8a0042378e3174a2f569c8236863d7/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:9-173
+377            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+377-->[com.google.android.gms:play-services-base:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/5a8a0042378e3174a2f569c8236863d7/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:19-85
+378            android:exported="false"
+378-->[com.google.android.gms:play-services-base:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/5a8a0042378e3174a2f569c8236863d7/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:146-170
+379            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+379-->[com.google.android.gms:play-services-base:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/5a8a0042378e3174a2f569c8236863d7/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:86-145
+380
+381        <provider
+381-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+382            android:name="androidx.startup.InitializationProvider"
+382-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+383            android:authorities="com.tradeagently.act_app.androidx-startup"
+383-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+384            android:exported="false" >
+384-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+385            <meta-data
+385-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+386                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+386-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+387                android:value="androidx.startup" />
+387-->[androidx.emoji2:emoji2:1.3.0] /Users/luisgiliberti/.gradle/caches/transforms-4/cf31503c357935e549a656ab1a388ed8/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+388            <meta-data
+388-->[androidx.lifecycle:lifecycle-process:2.8.6] /Users/luisgiliberti/.gradle/caches/transforms-4/b04aa412a78e41486e10f6418b8d904b/transformed/lifecycle-process-2.8.6/AndroidManifest.xml:29:13-31:52
+389                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+389-->[androidx.lifecycle:lifecycle-process:2.8.6] /Users/luisgiliberti/.gradle/caches/transforms-4/b04aa412a78e41486e10f6418b8d904b/transformed/lifecycle-process-2.8.6/AndroidManifest.xml:30:17-78
+390                android:value="androidx.startup" />
+390-->[androidx.lifecycle:lifecycle-process:2.8.6] /Users/luisgiliberti/.gradle/caches/transforms-4/b04aa412a78e41486e10f6418b8d904b/transformed/lifecycle-process-2.8.6/AndroidManifest.xml:31:17-49
+391            <meta-data
+391-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+392                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+392-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+393                android:value="androidx.startup" />
+393-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+394        </provider>
+395
+396        <meta-data
+396-->[com.google.android.gms:play-services-basement:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/a6b4cf63fdc8523aac11829d4f8344b4/transformed/play-services-basement-18.5.0/AndroidManifest.xml:21:9-23:69
+397            android:name="com.google.android.gms.version"
+397-->[com.google.android.gms:play-services-basement:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/a6b4cf63fdc8523aac11829d4f8344b4/transformed/play-services-basement-18.5.0/AndroidManifest.xml:22:13-58
+398            android:value="@integer/google_play_services_version" />
+398-->[com.google.android.gms:play-services-basement:18.5.0] /Users/luisgiliberti/.gradle/caches/transforms-4/a6b4cf63fdc8523aac11829d4f8344b4/transformed/play-services-basement-18.5.0/AndroidManifest.xml:23:13-66
+399
+400        <receiver
+400-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+401            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+401-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+402            android:directBootAware="false"
+402-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+403            android:enabled="true"
+403-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+404            android:exported="true"
+404-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+405            android:permission="android.permission.DUMP" >
+405-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+406            <intent-filter>
+406-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+407                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+407-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+407-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+408            </intent-filter>
+409            <intent-filter>
+409-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+410                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+410-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+410-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+411            </intent-filter>
+412            <intent-filter>
+412-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+413                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+413-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+413-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+414            </intent-filter>
+415            <intent-filter>
+415-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+416                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+416-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+416-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/luisgiliberti/.gradle/caches/transforms-4/9b8523008f873961b0e9669f571d01c5/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+417            </intent-filter>
+418        </receiver>
+419
+420        <meta-data
+420-->[com.google.android.instantapps:instantapps:1.1.0] /Users/luisgiliberti/.gradle/caches/transforms-4/a267a5db26157966a6d6de30a4032eec/transformed/instantapps-1.1.0/AndroidManifest.xml:10:9-12:33
+421            android:name="aia-compat-api-min-version"
+421-->[com.google.android.instantapps:instantapps:1.1.0] /Users/luisgiliberti/.gradle/caches/transforms-4/a267a5db26157966a6d6de30a4032eec/transformed/instantapps-1.1.0/AndroidManifest.xml:11:13-54
+422            android:value="1" />
+422-->[com.google.android.instantapps:instantapps:1.1.0] /Users/luisgiliberti/.gradle/caches/transforms-4/a267a5db26157966a6d6de30a4032eec/transformed/instantapps-1.1.0/AndroidManifest.xml:12:13-30
+423    </application>
+424
+425</manifest>

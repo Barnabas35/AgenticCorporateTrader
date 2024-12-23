@@ -20,7 +20,7 @@ class CryptoAdapter(
 
     fun updateData(newCryptoList: List<CryptoItem>) {
         cryptoList = newCryptoList
-        notifyDataSetChanged() // Refresh the adapter with the new data
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CryptoViewHolder {

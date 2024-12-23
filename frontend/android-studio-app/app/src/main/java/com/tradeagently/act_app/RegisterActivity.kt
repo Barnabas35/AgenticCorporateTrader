@@ -20,7 +20,7 @@ import retrofit2.Response
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 1001 // Request code for Google Sign-In
+    private val RC_SIGN_IN = 1001
     private var userTypeValue: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,14 +36,12 @@ class RegisterActivity : AppCompatActivity() {
         val loginTextView: TextView = findViewById(R.id.textViewLogin)
         val googleSignInButton: com.google.android.gms.common.SignInButton = findViewById(R.id.buttonGoogleSignIn)
 
-        // Configure user type spinner
         val userTypeOptions = arrayOf("User Type", "Fund Administrator", "Fund Manager")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, userTypeOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         userTypeSpinner.adapter = adapter
         userTypeSpinner.setSelection(0)
 
-        // Handle normal registration via email/password
         registerButton.setOnClickListener {
             val username = usernameEditText.text.toString().trim()
             val email = emailEditText.text.toString().trim()
@@ -51,7 +49,6 @@ class RegisterActivity : AppCompatActivity() {
             val confirmPassword = confirmPasswordEditText.text.toString().trim()
             val selectedUserType = userTypeSpinner.selectedItem.toString()
 
-            // Validate fields
             if (username.isEmpty()) {
                 usernameEditText.error = "Please enter your username"
                 return@setOnClickListener
@@ -77,14 +74,12 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Map user-friendly names to API-expected values
             userTypeValue = when (selectedUserType) {
                 "Fund Administrator" -> "fa"
                 "Fund Manager" -> "fm"
                 else -> ""
             }
 
-            // Create registration request
             val registerRequest = RegisterRequest(username, email, password, userTypeValue)
             registerViaEmailPassword(registerRequest)
         }
@@ -94,7 +89,6 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("68009005920-gkrtmda8m8hrq0273t5ptgsr1voivf0n.apps.googleusercontent.com")
             .requestEmail()
@@ -102,16 +96,13 @@ class RegisterActivity : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // Handle Google Sign-In button click
         googleSignInButton.setOnClickListener {
-            // Clear cached token before initiating sign-in
             googleSignInClient.signOut().addOnCompleteListener {
                 val signInIntent = googleSignInClient.signInIntent
                 startActivityForResult(signInIntent, RC_SIGN_IN)
             }
         }
 
-        // Initialize Firebase
         initializeFirebase()
     }
 
@@ -137,15 +128,12 @@ class RegisterActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Firebase sign-in successful
                         val user = FirebaseAuth.getInstance().currentUser
                         if (user != null) {
-                            // Get the Firebase Auth token
                             user.getIdToken(true).addOnCompleteListener { tokenTask ->
                                 if (tokenTask.isSuccessful) {
                                     val firebaseToken = tokenTask.result?.token
                                     if (!firebaseToken.isNullOrEmpty()) {
-                                        // Now you have a Firebase token suitable for your backend
                                         exchangeTokens(firebaseToken)
                                     } else {
                                         Toast.makeText(this, "Could not retrieve Firebase token", Toast.LENGTH_SHORT).show()
@@ -169,7 +157,6 @@ class RegisterActivity : AppCompatActivity() {
     private fun exchangeTokens(authToken: String) {
         val request = ExchangeTokensRequest(auth_token = authToken)
 
-        // Make API call
         RetrofitClient.apiService.exchangeTokens(request).enqueue(object : Callback<ExchangeTokensResponse> {
             override fun onResponse(
                 call: Call<ExchangeTokensResponse>,
@@ -179,18 +166,15 @@ class RegisterActivity : AppCompatActivity() {
                     val exchangeResponse = response.body()
                     when (exchangeResponse?.status) {
                         "Success" -> {
-                            // Save the session token and proceed
                             exchangeResponse.session_token?.let {
                                 saveSessionToken(it)
                             }
                             navigateToAssetsActivity()
                         }
                         "Success: Register User" -> {
-                            // User does not exist, ask them to pick a user type
                             showUserTypeSelectionDialog(authToken)
                         }
                         "Invalid auth token." -> {
-                            // Show a message and sign out to retry
                             Toast.makeText(this@RegisterActivity, "Invalid token. Please try signing in again.", Toast.LENGTH_LONG).show()
                             googleSignInClient.signOut().addOnCompleteListener {
                                 val signInIntent = googleSignInClient.signInIntent
@@ -230,7 +214,6 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             dialog.dismiss()
-            // Now call registerWithToken again, this time with the chosen userType
             registerWithToken(firebaseToken, selectedUserType)
         }
 
@@ -290,14 +273,13 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun initializeFirebase() {
         val options = FirebaseOptions.Builder()
-            .setApiKey("AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko") // Corrected API key
-            .setApplicationId("1:68009005920:android:2c5b77919be0a2d0e60405") // Corrected app ID
-            .setProjectId("agenticcorporatetrader") // Verified project ID
-            .setDatabaseUrl("https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app") // Corrected database URL
+            .setApiKey("AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko")
+            .setApplicationId("1:68009005920:android:2c5b77919be0a2d0e60405")
+            .setProjectId("agenticcorporatetrader")
+            .setDatabaseUrl("https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app")
             .build()
 
         try {
-            // Initialize Firebase only if not already initialized
             if (FirebaseApp.getApps(this).isEmpty()) {
                 FirebaseApp.initializeApp(this, options)
             }

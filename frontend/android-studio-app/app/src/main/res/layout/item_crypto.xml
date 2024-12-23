@@ -29,7 +29,6 @@
         android:textColor="@android:color/holo_green_dark"
         android:layout_marginTop="4dp" />
 
-    <!-- Divider line to separate items visually -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

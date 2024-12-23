@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -19,26 +20,23 @@ class SupportPageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_supportpage)
 
-        // Set up the bottom navigation
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Get references to the EditTexts, Button, and phone number TextView
         val issueSubjectEditText: EditText = findViewById(R.id.editTextIssueSubject)
         val issueDescriptionEditText: EditText =
             findViewById(R.id.editTextReview)  // Updated reference
         val submitButton: Button = findViewById(R.id.buttonSubmitSupportTicket)
         val phoneNumberTextView: TextView = findViewById(R.id.textViewPhoneNumber)
 
-        // Retrieve session token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val token = sharedPreferences.getString("session_token", null)
 
-        // Set up the submit button click listener
         submitButton.setOnClickListener {
             val subject = issueSubjectEditText.text.toString().trim()
             val description = issueDescriptionEditText.text.toString().trim()
 
-            // Validate input
             if (subject.isEmpty()) {
                 issueSubjectEditText.error = "Please enter a subject"
                 return@setOnClickListener
@@ -50,14 +48,12 @@ class SupportPageActivity : AppCompatActivity() {
             }
 
             if (token != null) {
-                // Create the support ticket request
                 val supportTicketRequest = SupportTicketRequest(
                     session_token = token,
                     issue_subject = subject,
                     issue_description = description
                 )
 
-                // Make the API call to submit the support ticket
                 RetrofitClient.apiService.submitSupportTicket(supportTicketRequest)
                     .enqueue(object : Callback<ApiResponse> {
                         override fun onResponse(
@@ -70,7 +66,6 @@ class SupportPageActivity : AppCompatActivity() {
                                     "Support ticket submitted!",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                // Clear input fields after successful submission
                                 issueSubjectEditText.text.clear()
                                 issueDescriptionEditText.text.clear()
                             } else {
@@ -96,7 +91,6 @@ class SupportPageActivity : AppCompatActivity() {
             }
         }
 
-        // Set up the phone number click listener
         phoneNumberTextView.setOnClickListener {
             val phoneNumber = "08001818181"
             val intent = Intent(Intent.ACTION_DIAL).apply {

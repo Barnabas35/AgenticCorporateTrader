@@ -25,10 +25,8 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
 
-        // Set up the bottom navigation to handle navigation between activities
         NavigationHelper.setupBottomNavigation(this, R.id.nav_menu)
 
-        // Initialize buttons
         profileButton = findViewById(R.id.profileButton)
         aiSubscriptionButton = findViewById(R.id.aiSubscriptionButton)
         reviewpageButton = findViewById(R.id.reviewpageButton)
@@ -37,19 +35,15 @@ class MenuActivity : AppCompatActivity() {
         adminToolsButton = findViewById(R.id.adminToolsButton)
         priceAlertsButton = findViewById(R.id.priceAlertsButton)
 
-        // Attempt to fetch user type from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val storedUserType = sharedPreferences.getString("user_type", null)
 
         if (storedUserType.isNullOrEmpty()) {
-            // If user type not stored locally, fetch it from server
             fetchUserTypeFromServer()
         } else {
-            // If we already have the user type, set the UI
             setUIBasedOnUserType(storedUserType)
         }
 
-        // Set click listeners for each button
         profileButton.setOnClickListener {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
@@ -108,12 +102,10 @@ class MenuActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     val userType = response.body()?.user_type
                     if (!userType.isNullOrEmpty()) {
-                        // Store user type in SharedPreferences
                         val editor = sharedPreferences.edit()
                         editor.putString("user_type", userType)
                         editor.apply()
 
-                        // Update UI
                         setUIBasedOnUserType(userType)
                     } else {
                         Toast.makeText(this@MenuActivity, "Failed to retrieve user type.", Toast.LENGTH_SHORT).show()

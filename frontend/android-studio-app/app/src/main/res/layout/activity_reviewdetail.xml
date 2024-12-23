@@ -9,7 +9,6 @@
     android:background="@color/backgroundLight"
     tools:context=".AdminToolsActivity">
 
-    <!-- Toolbar for Admin Tools Activity -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/admintoolsToolbar"
         android:layout_width="0dp"
@@ -31,7 +30,6 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- CardView container for score and comment text -->
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -50,9 +48,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Score TextView inside CardView -->
-
-            <!-- Comment TextView inside CardView -->
             <TextView
                 android:id="@+id/scoreTextView"
                 android:layout_width="match_parent"
@@ -68,12 +63,11 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textColor="@android:color/black"
-                android:maxLines="10" /> <!-- Adjust or remove maxLines as needed -->
+                android:maxLines="10" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

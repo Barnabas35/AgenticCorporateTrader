@@ -17,7 +17,7 @@ data class RegisterRequest(
     val user_type: String
 )
 
-// Data class for the token request (used for get-username, get-email, etc.)
+// Data class for the token request
 data class TokenRequest(val session_token: String)
 
 // Data class for submitting a review
@@ -81,7 +81,6 @@ data class Client(
     val client_id: String
 )
 
-// Unified StockItem class for both top stocks and search results
 data class TopStocksResponse(
     val ticker_details: List<StockItem>,
     val status: String
@@ -142,13 +141,11 @@ data class Review(
     val user_id: String
 )
 
-// Data class for ticker info request
 data class TickerRequest(
     val ticker: String,
     val session_token: String
 )
 
-// Data class for ticker aggregates request
 data class TickerAggregatesRequest(
     val ticker: String,
     val session_token: String,
@@ -158,14 +155,11 @@ data class TickerAggregatesRequest(
     val limit: Int
 )
 
-// Data class for ticker info response
 data class TickerInfoResponse(
     val status: String,
     val ticker_info: TickerInfo?
 )
 
-
-// Ticker info details
 data class TickerInfo(
     val change_percentage: Double,
     val close_price: Double,
@@ -182,22 +176,21 @@ data class TickerInfo(
 )
 
 data class TickerAggregatesResponse(
-    val ticker_info: List<TickerAggregate>?,  // Renamed from 'aggregates' to 'ticker_info'
+    val ticker_info: List<TickerAggregate>?,
     val status: String?
 )
 
 data class TickerAggregate(
-    val close: Double,      // Close price
-    val high: Double,       // High price
-    val low: Double,        // Low price
-    val open: Double,       // Open price
-    val volume: Double,     // Volume
-    val vwap: Double,       // Volume weighted average price
-    val timestamp: Long,    // Unix timestamp
-    val transactions: Int   // Number of trades
+    val close: Double,
+    val high: Double,
+    val low: Double,
+    val open: Double,
+    val volume: Double,
+    val vwap: Double,
+    val timestamp: Long,
+    val transactions: Int
 )
 
-// Request data class for /text-search-crypto
 data class TextSearchCryptoRequest(
     val search_query: String,
     val limit: Int = 5,
@@ -205,25 +198,21 @@ data class TextSearchCryptoRequest(
     val show_price: Boolean
 )
 
-// Response data class for /text-search-crypto
 data class TextSearchCryptoResponse(
     val crypto_details: List<CryptoItem>,
     val status: String
 )
 
-// Request for get crypto info
 data class CryptoInfoRequest(
     val crypto: String,
     val session_token: String
 )
 
-// Response for get crypto info
 data class CryptoInfoResponse(
     val crypto_info: CryptoInfo?,
     val status: String
 )
 
-// Response data class for individual crypto info
 data class CryptoInfo(
     val description: String,
     val high: Double,
@@ -236,20 +225,17 @@ data class CryptoInfo(
     val volume: Long
 )
 
-// Response for get top cryptos and get crypto aggregates
 data class TopCryptosResponse(
     val crypto_details: List<CryptoItem>?,
     val status: String
 )
 
-// Crypto item data class to hold individual ticker details
 data class CryptoItem(
     val symbol: String,
     val name: String,
     val price: Double?
 )
 
-// Request for crypto aggregates
 data class CryptoAggregatesRequest(
     val crypto: String,
     val session_token: String,
@@ -258,7 +244,6 @@ data class CryptoAggregatesRequest(
     val interval: String
 )
 
-// Response for crypto aggregates
 data class CryptoAggregatesResponse(
     val crypto_aggregates: List<CryptoAggregate>,
     val status: String
@@ -273,7 +258,6 @@ data class CryptoAggregate(
     val volume: Double
 )
 
-// Data class for user response in the user list
 data class User(
     val client_id: String,
     val username: String,
@@ -281,37 +265,31 @@ data class User(
     val user_type: String
 )
 
-// Response class for user list
 data class UserListResponse(
     val status: String,
     val user_list: List<User>
 )
 
-// Request class for admin delete user
 data class AdminDeleteUserRequest(
     val session_token: String,
     val id: String
 )
 
-// Response for adding balance
 data class AddBalanceResponse(
     val status: String,
-    val client_secret: String? = null // Nullable as it may not be returned in all cases
+    val client_secret: String? = null
 )
 
-// Request for adding balance
 data class AddBalanceRequest(
     val session_token: String,
-    val usd_quantity: Int // Updated to Double to support fractional USD amounts
+    val usd_quantity: Int
 )
 
-// Response for balance retrieval
 data class BalanceResponse(
     val balance: Double,
     val status: String
 )
 
-// Request for purchasing an asset
 data class PurchaseAssetRequest(
     val session_token: String,
     val usd_quantity: Double,
@@ -320,20 +298,17 @@ data class PurchaseAssetRequest(
     val client_id: String
 )
 
-// Request for getting user assets
 data class GetUserAssetsRequest(
     val session_token: String,
     val client_id: String,
     val market: String
 )
 
-// Response for user assets
 data class UserAssetsResponse(
     val status: String,
     val ticker_symbols: List<String>
 )
 
-// Request for getting a specific asset
 data class GetAssetRequest(
     val session_token: String,
     val market: String,
@@ -341,13 +316,11 @@ data class GetAssetRequest(
     val client_id: String
 )
 
-// Response for getting an asset
 data class AssetResponse(
     val status: String,
     val total_asset_quantity: Double
 )
 
-// Request for selling an asset
 data class SellAssetRequest(
     val session_token: String,
     val asset_quantity: Double,
@@ -356,7 +329,6 @@ data class SellAssetRequest(
     val client_id: String
 )
 
-// Data class for creating a price alert
 data class SetPriceAlertRequest(
     val session_token: String,
     val ticker: String,
@@ -364,12 +336,10 @@ data class SetPriceAlertRequest(
     val market: String
 )
 
-// Data class for retrieving price alerts
 data class GetPriceAlertsRequest(
     val session_token: String
 )
 
-// Data class for an individual price alert
 data class PriceAlert(
     val alert_id: String,
     val market: String,
@@ -377,13 +347,11 @@ data class PriceAlert(
     val ticker: String
 )
 
-// Data class for the response when retrieving price alerts
 data class GetPriceAlertsResponse(
     val status: String,
     val alerts: List<PriceAlert>
 )
 
-// Request for asset report
 data class AssetReportRequest(
     val session_token: String,
     val market: String,
@@ -391,70 +359,72 @@ data class AssetReportRequest(
     val ticker: String
 )
 
-// Response for asset report
 data class AssetReportResponse(
     val profit: Double,
     val status: String,
     val total_usd_invested: Double
 )
 
-// Request for exchanging tokens
 data class ExchangeTokensRequest(
     val auth_token: String
 )
 
-// Response for exchanging tokens
 data class ExchangeTokensResponse(
     val session_token: String?,
     val status: String
 )
 
-// Request for registering with a token
 data class RegisterWithTokenRequest(
     val auth_token: String,
     val user_type: String
 )
 
-// Response for registering with a token
 data class RegisterWithTokenResponse(
     val status: String
 )
 
-// Data class for AI Asset Report Request
 data class AiAssetReportRequest(
     val session_token: String,
-    val market: String, // "stocks" or "crypto"
-    val ticker: String  // Ticker symbol without -USD suffix
+    val market: String,
+    val ticker: String
 )
 
-// Data class for AI Asset Report Response
 data class AiAssetReportResponse(
-    val response: String,  // AI-generated report (~200 words)
-    val status: String,    // Status message (e.g., "success")
-    val future: String?,   // Prediction for future value (e.g., "Increase")
-    val recommend: String? // Recommended action (e.g., "BUY")
+    val response: String,
+    val status: String,
+    val future: String?,
+    val recommend: String?
 )
 
-// Request for subscription details
 data class SubscriptionRequest(
     val session_token: String
 )
 
-// Response for subscription details
 data class SubscriptionResponse(
     val status: String,
-    val subscription_start: Long, // UNIX timestamp for start
-    val subscription_end: Long,   // UNIX timestamp for end
+    val subscription_start: Long,
+    val subscription_end: Long,
     val subscription_active: Boolean,
     val renew_subscription: Boolean
 )
 
-// Response for subscription activation/cancellation
 data class SubscriptionActionResponse(
     val status: String
 )
 
-// Retrofit interface for API calls
+data class AiAccountingRequest(
+    val session_token: String,
+    val market: String,
+    val ticker: String,
+    val client_id: String
+)
+
+data class AiAccountingResponse(
+    val asset_growth: String,
+    val asset_liquidity: String,
+    val asset_profitability: String,
+)
+
 interface ApiService {
 
     // Endpoint for login
@@ -620,4 +590,8 @@ interface ApiService {
     // Endpoint for activating a subscription
     @POST("/activate-subscription")
     fun activateSubscription(@Body request: SubscriptionRequest): Call<SubscriptionActionResponse>
+
+    // Endpoint for getting AI accounting data
+    @POST("/get-ai-accounting")
+    fun getAiAccounting(@Body request: AiAccountingRequest): Call<AiAccountingResponse>
 }

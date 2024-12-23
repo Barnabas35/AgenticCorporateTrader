@@ -8,7 +8,6 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <!-- Row to hold symbol and crypto name -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,7 +15,6 @@
         android:gravity="center_vertical"
         android:weightSum="10">
 
-        <!-- Crypto Symbol with Bold Style -->
         <TextView
             android:id="@+id/symbolText"
             android:layout_width="0dp"
@@ -31,7 +29,6 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp" />
 
-        <!-- Separator between symbol and crypto name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,7 +39,6 @@
             android:paddingStart="4dp"
             android:paddingEnd="4dp" />
 
-        <!-- Crypto Name with ellipsis if too long -->
         <TextView
             android:id="@+id/cryptoName"
             android:layout_width="0dp"
@@ -57,7 +53,6 @@
             android:paddingBottom="4dp" />
     </LinearLayout>
 
-    <!-- Price row (optional: only shown when price is available) -->
     <TextView
         android:id="@+id/cryptoPrice"
         android:layout_width="wrap_content"
@@ -68,7 +63,6 @@
         android:paddingBottom="4dp"
         android:visibility="gone" />
 
-    <!-- Bottom Divider -->
     <View
         android:id="@+id/bottomDivider"
         android:layout_width="match_parent"

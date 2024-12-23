@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -27,10 +28,8 @@ class PriceAlertsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_price_alerts)
 
-        // Set up bottom navigation
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Get session token from SharedPreferences
         val sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
         sessionToken = sharedPreferences.getString("session_token", "") ?: ""
 
@@ -40,15 +39,13 @@ class PriceAlertsActivity : AppCompatActivity() {
             return
         }
 
-        // Initialize views
         recyclerView = findViewById(R.id.recyclerViewPriceAlerts)
         noAlertsTextView = findViewById(R.id.noAlertsTextView)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         priceAlertAdapter = PriceAlertAdapter(priceAlertList)
-        recyclerView.adapter = priceAlertAdapter // Attach adapter immediately
+        recyclerView.adapter = priceAlertAdapter
 
-        // Fetch price alerts
         fetchPriceAlerts()
     }
 
@@ -60,16 +57,16 @@ class PriceAlertsActivity : AppCompatActivity() {
                     val alerts = response.body()?.alerts ?: emptyList()
                     priceAlertList.clear()
                     priceAlertList.addAll(alerts)
-                    updateRecyclerView() // Ensure UI is updated
+                    updateRecyclerView()
                 } else {
-                    priceAlertList.clear() // Clear the list
-                    updateRecyclerView() // Show no alerts message
+                    priceAlertList.clear()
+                    updateRecyclerView()
                 }
             }
 
             override fun onFailure(call: Call<GetPriceAlertsResponse>, t: Throwable) {
-                priceAlertList.clear() // Clear the list
-                updateRecyclerView() // Show no alerts message
+                priceAlertList.clear()
+                updateRecyclerView()
                 Log.e("PriceAlertsActivity", "Error fetching price alerts: ${t.message}")
                 Toast.makeText(this@PriceAlertsActivity, "Error fetching price alerts.", Toast.LENGTH_SHORT).show()
             }
@@ -77,7 +74,7 @@ class PriceAlertsActivity : AppCompatActivity() {
     }
 
     private fun updateRecyclerView() {
-        Log.d("PriceAlertsActivity", "Updating RecyclerView with ${priceAlertList.size} items.") // Log list size
+        Log.d("PriceAlertsActivity", "Updating RecyclerView with ${priceAlertList.size} items.")
 
         if (priceAlertList.isEmpty()) {
             noAlertsTextView.visibility = View.VISIBLE
@@ -85,7 +82,7 @@ class PriceAlertsActivity : AppCompatActivity() {
         } else {
             noAlertsTextView.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-            priceAlertAdapter.notifyDataSetChanged() // Notify adapter of changes
+            priceAlertAdapter.notifyDataSetChanged()
         }
     }
 
@@ -99,7 +96,7 @@ class PriceAlertsActivity : AppCompatActivity() {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     Toast.makeText(this@PriceAlertsActivity, "Price alert deleted successfully!", Toast.LENGTH_SHORT).show()
-                    fetchPriceAlerts() // Refresh the list
+                    fetchPriceAlerts()
                 } else {
                     Log.e("PriceAlertsActivity", "Failed to delete price alert: ${response.message()}")
                     Toast.makeText(this@PriceAlertsActivity, "Failed to delete price alert.", Toast.LENGTH_SHORT).show()

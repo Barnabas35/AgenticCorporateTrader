@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,7 +36,8 @@ class MarketActivity : AppCompatActivity() {
         setContentView(R.layout.activity_market)
         NavigationHelper.setupBottomNavigation(this, R.id.nav_market)
 
-        // Initialize RecyclerViews and buttons
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+
         stockRecyclerView = findViewById(R.id.stockRecyclerView)
         stockRecyclerView.layoutManager = LinearLayoutManager(this)
         cryptoRecyclerView = findViewById(R.id.cryptoRecyclerView)
@@ -55,23 +57,19 @@ class MarketActivity : AppCompatActivity() {
         buttonStock = findViewById(R.id.buttonStock)
         buttonCrypto = findViewById(R.id.buttonCrypto)
 
-        // Fetch session token
         sessionToken = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
             .getString("session_token", "") ?: ""
 
-        // Initialize adapters
         stockAdapter = StockAdapter(emptyList(), RetrofitClient.apiService, sessionToken)
         cryptoAdapter = CryptoAdapter(emptyList())
 
         stockRecyclerView.adapter = stockAdapter
         cryptoRecyclerView.adapter = cryptoAdapter
 
-        // Set STOCK as the default selected option
         setButtonSelected(buttonStock, true)
         setButtonSelected(buttonCrypto, false)
-        loadTopStocks()  // Load stocks by default
+        loadTopStocks()
 
-        // Set up button listeners
         buttonStock.setOnClickListener {
             setButtonSelected(buttonStock, true)
             setButtonSelected(buttonCrypto, false)
@@ -91,14 +89,14 @@ class MarketActivity : AppCompatActivity() {
     private fun setButtonSelected(button: Button, isSelected: Boolean) {
         button.isSelected = isSelected
         if (isSelected) {
-            button.setBackgroundResource(R.drawable.btn_bg) // Active background (green or selected color)
+            button.setBackgroundResource(R.drawable.btn_bg)
             button.setTextColor(Color.WHITE)
             if (button == buttonStock) {
                 stockRecyclerView.visibility = View.VISIBLE
                 cryptoRecyclerView.visibility = View.GONE
                 stockSearchView.visibility = View.VISIBLE
                 cryptoSearchView.visibility = View.GONE
-                stockSuggestionRecyclerView.visibility = View.GONE // Hide crypto suggestions
+                stockSuggestionRecyclerView.visibility = View.GONE
                 cryptoSuggestionRecyclerView.visibility = View.GONE
             } else {
                 stockRecyclerView.visibility = View.GONE
@@ -106,10 +104,10 @@ class MarketActivity : AppCompatActivity() {
                 stockSearchView.visibility = View.GONE
                 cryptoSearchView.visibility = View.VISIBLE
                 stockSuggestionRecyclerView.visibility = View.GONE
-                cryptoSuggestionRecyclerView.visibility = View.GONE // Hide stock suggestions
+                cryptoSuggestionRecyclerView.visibility = View.GONE
             }
         } else {
-            button.setBackgroundResource(R.drawable.btn_bg) // Inactive background (gray or deselected color)
+            button.setBackgroundResource(R.drawable.btn_bg)
             button.setTextColor(Color.WHITE)
         }
     }
@@ -151,7 +149,7 @@ class MarketActivity : AppCompatActivity() {
 
     private fun setupStockSearchView() {
         stockSearchView.setOnClickListener {
-            stockSearchView.isIconified = false // Expands the search bar
+            stockSearchView.isIconified = false
         }
         stockSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -175,7 +173,7 @@ class MarketActivity : AppCompatActivity() {
 
     private fun setupCryptoSearchView() {
         cryptoSearchView.setOnClickListener {
-            cryptoSearchView.isIconified = false // Expands the search bar
+            cryptoSearchView.isIconified = false
         }
         cryptoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {

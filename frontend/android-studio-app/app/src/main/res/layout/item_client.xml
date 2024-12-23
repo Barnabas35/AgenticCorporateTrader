@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <!-- Client Name -->
         <TextView
             android:id="@+id/clientNameTextView"
             android:layout_width="0dp"
@@ -26,7 +25,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/removeClientButton" />
 
-        <!-- Red X Button to Remove Client -->
         <ImageView
             android:id="@+id/removeClientButton"
             android:layout_width="wrap_content"

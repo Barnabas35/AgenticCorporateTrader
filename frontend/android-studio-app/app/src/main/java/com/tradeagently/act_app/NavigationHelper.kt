@@ -6,15 +6,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 object NavigationHelper {
 
-    // Method to set up the bottom navigation
     fun setupBottomNavigation(activity: AppCompatActivity, selectedItemId: Int) {
         val bottomNavigationView = activity.findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
-        // If selectedItemId is valid and exists in the menu, select it, otherwise set a hidden dummy item as selected
         if (selectedItemId != -1) {
             bottomNavigationView.selectedItemId = selectedItemId
         } else {
-            // Select a hidden item (e.g., nav_dummy) to ensure no visible items are selected
             bottomNavigationView.selectedItemId = R.id.nav_dummy
         }
 

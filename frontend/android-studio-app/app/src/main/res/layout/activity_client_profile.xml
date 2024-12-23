@@ -7,7 +7,6 @@
     android:background="@color/backgroundLight"
     tools:context=".ClientProfileActivity">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/assetsToolbar"
         android:layout_width="match_parent"
@@ -28,21 +27,49 @@
             android:textStyle="bold" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Informative Text -->
+    <TextView
+        android:id="@+id/myuserBalance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="15dp"
+        android:text="Balance: $0.00"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/assetsToolbar" />
+
+    <Button
+        android:id="@+id/addBalanceButton"
+        android:layout_width="147dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="9.5dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/btn_bg"
+        android:backgroundTint="#4CAF50"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Add Balance"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/myuserBalance"
+        app:layout_constraintTop_toBottomOf="@id/assetsToolbar" />
+
     <TextView
         android:id="@+id/assetsInfoTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="20dp"
         android:gravity="center"
         android:text="Assets owned by {Client Name}"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/assetsToolbar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/myuserBalance" />
 
-    <!-- Button Container -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="180dp"
@@ -56,7 +83,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Stock Button -->
         <Button
             android:id="@+id/buttonStock"
             android:layout_width="80dp"
@@ -67,7 +93,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 
-        <!-- Crypto Button -->
         <Button
             android:id="@+id/buttonCrypto"
             android:layout_width="80dp"
@@ -102,7 +127,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
