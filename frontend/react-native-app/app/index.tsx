@@ -88,8 +88,8 @@ const Home: React.FC = () => {
       if (data.status === 'Success') {
         // Redirect to CheckoutForm with clientSecret and amount
         navigate('/checkout', {
-          state: { 
-            clientSecret: data.client_secret, 
+          state: {
+            clientSecret: data.client_secret,
             dpmCheckerLink: data.dpmCheckerLink,
             amount: numericAmount, // Pass the amount here
           },
@@ -110,15 +110,20 @@ const Home: React.FC = () => {
           <Text style={styles.title}>Welcome to TradeAgently, {username}!</Text>
         </View>
         <Text style={styles.description}>
-          TradeAgently is your trusted partner in managing and tracking your investments with real-time data and insightful analytics.
+          TradeAgently is your trusted partner in managing and tracking your investments with
+          real-time data and insightful analytics.
         </Text>
         <View style={styles.featureContainer}>
           <MaterialIcons name="show-chart" size={28} color="#2e86de" />
-          <Text style={styles.featureText}>Real-time tracking of investment performance to keep you ahead.</Text>
+          <Text style={styles.featureText}>
+            Real-time tracking of investment performance to keep you ahead.
+          </Text>
         </View>
         <View style={styles.featureContainer}>
           <MaterialIcons name="security" size={28} color="#2e86de" />
-          <Text style={styles.featureText}>Secure and reliable platform ensuring your data safety.</Text>
+          <Text style={styles.featureText}>
+            Secure and reliable platform ensuring your data safety.
+          </Text>
         </View>
         {/* Conditionally render the "Get Started" message if not logged in */}
         {!sessionToken && (
@@ -128,9 +133,11 @@ const Home: React.FC = () => {
         )}
         {/* Additional information about the website */}
         <Text style={styles.additionalInfo}>
-          Whether you're a seasoned investor or just starting out, TradeAgently provides the tools you need to make informed decisions and grow your portfolio.
+          Whether you're a seasoned investor or just starting out, TradeAgently provides the tools
+          you need to make informed decisions and grow your portfolio.
         </Text>
       </View>
+
       <View style={styles.rightContainer}>
         {sessionToken && (
           <View style={styles.balanceContainer}>
@@ -153,9 +160,12 @@ const Home: React.FC = () => {
                     <Text style={styles.addBalanceButtonText}>Add Balance</Text>
                   </TouchableOpacity>
                 </View>
-                {/* Display Error Message */}
+
+                {/* Display Error Message in a Light Red Box */}
                 {errorMessage !== '' && (
-                  <Text style={styles.errorText}>{errorMessage}</Text>
+                  <View style={styles.errorBox}>
+                    <Text style={styles.errorBoxText}>{errorMessage}</Text>
+                  </View>
                 )}
               </>
             )}
@@ -273,10 +283,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  errorText: {
-    color: '#e74c3c',
-    fontSize: 14,
+
+  // The new styles for our error box
+  errorBox: {
     marginTop: 10,
+    backgroundColor: '#ffe5e5',   // Light red background
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    width: '80%',
+    alignItems: 'center',
+  },
+  errorBoxText: {
+    color: '#b71c1c',            // A darker red text
+    fontSize: 14,
     textAlign: 'center',
   },
 });

@@ -97,8 +97,6 @@ export default function CompletePage() {
             {intentId && (
               <div style={styles.detailsTable}>
                 <div style={styles.row}>
-                  <span style={styles.label}>Status:</span>
-                  <span style={styles.content}>{status}</span>
                 </div>
               </div>
             )}

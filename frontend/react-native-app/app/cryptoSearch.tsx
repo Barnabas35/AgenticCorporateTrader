@@ -63,27 +63,31 @@ const CryptoSearch: React.FC = () => {
   });
   const [historyWindow, setHistoryWindow] = useState<string>('month');
 
+  // Buy modal states
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [buyUsdQuantity, setBuyUsdQuantity] = useState<string>('');
   const [buyTicker, setBuyTicker] = useState<string>('');
+
+  // Price alert modal states
   const [priceAlertModalVisible, setPriceAlertModalVisible] = useState(false);
   const [alertPrice, setAlertPrice] = useState<string>('');
   const [alertTicker, setAlertTicker] = useState<string | null>(null);
 
+  // User/client states
   const [userType, setUserType] = useState<string | null>(null);
   const [isFundManager, setIsFundManager] = useState<boolean>(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
 
-  // States for AI Asset Report
+  // AI Asset Report states
   const [aiReportLoading, setAiReportLoading] = useState(false);
   const [aiReportData, setAiReportData] = useState<{
     response?: string;
     future?: string;
     recommend?: string;
   } | null>(null);
-  const [activeSubscription, setActiveSubscription] = useState<boolean>(true); 
+  const [activeSubscription, setActiveSubscription] = useState<boolean>(true);
 
   useEffect(() => {
     fetchTopCryptos();
@@ -91,16 +95,19 @@ const CryptoSearch: React.FC = () => {
     fetchBalance();
   }, []);
 
-  // Removed the automatic call to fetchAiAssetReport here
+  // Load aggregates each time the timeframe or the selected crypto changes
   useEffect(() => {
     if (selectedCrypto) {
       fetchCryptoAggregates(selectedCrypto.symbol);
-      // fetchAiAssetReport(); <-- removed so user must click the button to get AI report
     }
   }, [historyWindow, selectedCrypto]);
 
+  // ----------------------
+  // Utility: get interval/limit
+  // ----------------------
   const getIntervalAndLimit = (hw: string): { interval: string; limit: number } => {
     switch (hw) {
+      // Removed 'hour' in the Picker, but leaving it here won't hurt unless you want to remove completely
       case 'hour':
         return { interval: '1m', limit: 60 };
       case 'day':
@@ -116,6 +123,9 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
+  // ----------------------
+  // Fetch balances, user type, clients
+  // ----------------------
   const fetchBalance = async () => {
     if (!sessionToken) return;
     try {
@@ -183,6 +193,9 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
+  // ----------------------
+  // Fetch cryptos & search
+  // ----------------------
   const fetchTopCryptos = async (limit = 10) => {
     setLoading(true);
     setError(null);
@@ -259,6 +272,9 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
+  // ----------------------
+  // Fetch historical data
+  // ----------------------
   const fetchCryptoAggregates = async (symbol: string) => {
     setLoading(true);
     setError(null);
@@ -267,25 +283,30 @@ const CryptoSearch: React.FC = () => {
     let startDate = '';
 
     switch (historyWindow) {
+      // We removed the hour option from the UI, but the code can remain:
       case 'hour':
         startDate = endDate;
         break;
-      case 'day':
+      case 'day': {
         const oneDayAgo = new Date(end.getTime() - 86400 * 1000);
         startDate = oneDayAgo.toISOString().split('T')[0];
         break;
-      case 'week':
+      }
+      case 'week': {
         const oneWeekAgo = new Date(end.getTime() - 7 * 86400 * 1000);
         startDate = oneWeekAgo.toISOString().split('T')[0];
         break;
-      case 'month':
+      }
+      case 'month': {
         const oneMonthAgo = new Date(end.getTime() - 30 * 86400 * 1000);
         startDate = oneMonthAgo.toISOString().split('T')[0];
         break;
-      case 'year':
+      }
+      case 'year': {
         const oneYearAgo = new Date(end.getTime() - 365 * 86400 * 1000);
         startDate = oneYearAgo.toISOString().split('T')[0];
         break;
+      }
       default:
         startDate = '2024-01-01';
     }
@@ -353,6 +374,9 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
+  // ----------------------
+  // BUY logic
+  // ----------------------
   const handleBuy = (ticker: string) => {
     setBuyTicker(ticker);
     setBuyModalVisible(true);
@@ -400,15 +424,14 @@ const CryptoSearch: React.FC = () => {
         Alert.alert(
           'Success',
           `Successfully purchased ${buyUsdQuantity} USD of ${buyTicker}${
-            isFundManager || userType === 'fa' ? ` for client ${getClientName(selectedClient)}` : '.'
-          }`
+            (isFundManager || userType === 'fa') ? ` for client ${getClientName(selectedClient)}` : ''
+          }.`
         );
         setBuyModalVisible(false);
         setBuyUsdQuantity('');
 
-        if (isFundManager) {
-          setSelectedClient(null);
-        }
+        // *** Removed the line that sets the selectedClient to null. ***
+        // so user can continue buying for the same client
 
         fetchBalance();
       } else {
@@ -425,6 +448,9 @@ const CryptoSearch: React.FC = () => {
     return client ? client.client_name : 'Unknown Client';
   };
 
+  // ----------------------
+  // PRICE ALERT logic
+  // ----------------------
   const handleSetPriceAlert = (ticker: string) => {
     setAlertTicker(ticker);
     setPriceAlertModalVisible(true);
@@ -468,7 +494,9 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
-  // Removed the automatic call from the useEffect, create a manual button method
+  // ----------------------
+  // AI REPORT logic
+  // ----------------------
   const fetchAiAssetReport = async () => {
     if (!selectedCrypto) return;
     setAiReportLoading(true);
@@ -487,13 +515,14 @@ const CryptoSearch: React.FC = () => {
       });
       const data = await response.json();
       if (data.status === 'success') {
+        // Insert extra blank lines for nicer paragraph spacing:
+        const spacedResponse = data.response.replace(/\n/g, '\n\n');
         setAiReportData({
-          response: data.response,
+          response: spacedResponse,
           future: data.future,
           recommend: data.recommend,
         });
       } else if (data.status === 'No active subscription.') {
-        // If no active subscription, display message
         setActiveSubscription(false);
       } else {
         setError('Failed to fetch AI asset report.');
@@ -506,6 +535,9 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
+  // ----------------------
+  // Render an individual crypto row
+  // ----------------------
   const renderCryptoItem = ({ item }: { item: Crypto }) => (
     <View style={styles.cryptoItem}>
       <TouchableOpacity onPress={() => fetchCryptoDetails(item.symbol)}>
@@ -537,6 +569,7 @@ const CryptoSearch: React.FC = () => {
       {error && <Text style={styles.errorText}>{error}</Text>}
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
 
+      {/* Main Display */}
       {selectedCrypto ? (
         <View style={styles.cryptoDetails}>
           <Text style={styles.cryptoTitle}>
@@ -574,7 +607,7 @@ const CryptoSearch: React.FC = () => {
                   onValueChange={(value) => setHistoryWindow(value)}
                   style={styles.pickerStyle}
                 >
-                  <Picker.Item label="Last Hour" value="hour" />
+                  {/* REMOVED the Last Hour option */}
                   <Picker.Item label="Last Day" value="day" />
                   <Picker.Item label="Last Week" value="week" />
                   <Picker.Item label="Last Month" value="month" />
@@ -651,8 +684,11 @@ const CryptoSearch: React.FC = () => {
                   </View>
                 ) : (
                   // Show button to fetch AI report if subscription is active but no data fetched yet
-                  <TouchableOpacity style={styles.generateReportButton} onPress={fetchAiAssetReport}>
-                    <Text style={styles.generateReportButtonText}>Generate AI Report</Text>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.generateReportButton]}
+                    onPress={fetchAiAssetReport}
+                  >
+                    <Text style={styles.actionButtonText}>Generate AI Report</Text>
                   </TouchableOpacity>
                 )}
               </>
@@ -663,8 +699,9 @@ const CryptoSearch: React.FC = () => {
             )}
           </View>
 
+          {/* Back Button: matched size, different color */}
           <TouchableOpacity
-            style={styles.backButton}
+            style={[styles.actionButton, styles.backButton]}
             onPress={() => {
               setSelectedCrypto(null);
               setSearchResults([]);
@@ -674,7 +711,7 @@ const CryptoSearch: React.FC = () => {
               setActiveSubscription(true);
             }}
           >
-            <Text style={styles.backButtonText}>Back</Text>
+            <Text style={styles.actionButtonText}>Back</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -871,6 +908,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     padding: 16,
     marginTop: 20,
+    width: '100%',
   },
   aiReportTitle: {
     fontSize: 18,
@@ -894,33 +932,33 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#333',
   },
-  generateReportButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
+
+  // Shared style for action buttons
+  actionButton: {
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 10,
+    width: '50%',
+    alignSelf: 'center',
     alignItems: 'center',
-    marginTop: 10,
   },
-  generateReportButtonText: {
-    color: 'white',
+  actionButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
+  generateReportButton: {
+    backgroundColor: '#28a745', // green
+  },
+  backButton: {
+    backgroundColor: '#dc3545', // red
+  },
+
   subscriptionError: {
     color: 'red',
     fontSize: 16,
     textAlign: 'center',
     marginTop: 10,
   },
-
-  backButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-    alignSelf: 'center',
-    marginVertical: 10,
-    width: '40%',
-  },
-  backButtonText: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 
   buttonContainer: {
     flexDirection: 'row',

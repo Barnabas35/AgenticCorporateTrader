@@ -10,6 +10,7 @@ import {
   ScrollView,
   Modal,
   Alert,
+  Linking,
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 import { Line } from 'react-chartjs-2';
@@ -256,8 +257,7 @@ const StockSearch: React.FC = () => {
 
   function getIntervalAndLimit(historyWindow: string): { interval: string; limit: number } {
     switch (historyWindow) {
-      case 'hour':
-        return { interval: 'hour', limit: 60 };
+      // Removed the "hour" case
       case 'day':
         return { interval: 'hour', limit: 24 };
       case 'week':
@@ -280,9 +280,7 @@ const StockSearch: React.FC = () => {
     let startDate = '';
 
     switch (historyWindow) {
-      case 'hour':
-        startDate = endDate;
-        break;
+      // Removed the "hour" case
       case 'day': {
         const oneDayAgo = new Date(end.getTime() - 86400 * 1000);
         startDate = oneDayAgo.toISOString().split('T')[0];
@@ -335,13 +333,7 @@ const StockSearch: React.FC = () => {
 
         const labels = validData.map((item: any) => {
           const dateObj = new Date(item.timestamp);
-          if (historyWindow === 'hour') {
-            return dateObj.toLocaleString('en-US', {
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true,
-            });
-          } else if (historyWindow === 'day') {
+          if (historyWindow === 'day') {
             return dateObj.toLocaleString('en-US', {
               hour: 'numeric',
               hour12: true,
@@ -424,13 +416,8 @@ const StockSearch: React.FC = () => {
         setBuyModalVisible(false);
         setBuyAmount('');
 
-        // If user was FM or FA, optionally reset the selectedClient
-        if (requiresClientSelection) {
-          // For some flows, you might NOT want to reset, but here's an example:
-          setSelectedClient(null);
-        }
-
-        // Refresh balance
+        // -------- Removed the line that resets the client to null --------
+        // fetch new balance
         fetchBalance();
       } else {
         Alert.alert('Error', data.message || 'Failed to complete the purchase.');
@@ -513,8 +500,10 @@ const StockSearch: React.FC = () => {
       const data = await response.json();
 
       if (data.status === 'success') {
+        // We'll add a tiny transform to insert a blank line between existing line breaks:
+        const prettyResponse = data.response.replace(/\n/g, '\n\n');
         setAiReportData({
-          response: data.response,
+          response: prettyResponse,
           future: data.future,
           recommend: data.recommend,
         });
@@ -557,6 +546,7 @@ const StockSearch: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
+      {/* SEARCH INPUT */}
       {!selectedStock && (
         <TextInput
           style={styles.searchInput}
@@ -576,6 +566,7 @@ const StockSearch: React.FC = () => {
       {error && <Text style={styles.errorText}>{error}</Text>}
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
 
+      {/* STOCK DETAILS OR LIST */}
       {selectedStock ? (
         <View style={styles.cryptoDetails}>
           <Text style={styles.cryptoTitle}>
@@ -617,10 +608,14 @@ const StockSearch: React.FC = () => {
               <Text style={styles.infoValue}>{selectedStock.employee_count}</Text>
             </View>
             {selectedStock.homepage && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Homepage:</Text>
-                <Text style={styles.infoValue}>{selectedStock.homepage}</Text>
-              </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Homepage:</Text>
+              <TouchableOpacity onPress={() => Linking.openURL(selectedStock.homepage)}>
+                <Text style={[styles.infoValue, { color: 'blue', textDecorationLine: 'underline' }]}>
+                  {selectedStock.homepage}
+                </Text>
+              </TouchableOpacity>
+            </View>
             )}
           </View>
 
@@ -635,7 +630,7 @@ const StockSearch: React.FC = () => {
                   onValueChange={(value) => setHistoryWindow(value)}
                   style={styles.pickerStyle}
                 >
-                  <Picker.Item label="Last Hour" value="hour" />
+                  {/* Removed the Last Hour option */}
                   <Picker.Item label="Last Day" value="day" />
                   <Picker.Item label="Last Week" value="week" />
                   <Picker.Item label="Last Month" value="month" />
@@ -671,9 +666,7 @@ const StockSearch: React.FC = () => {
                   }}
                 />
               ) : (
-                <Text style={styles.errorText}>
-                  No data available for the selected timeframe.
-                </Text>
+                <Text style={styles.errorText}>No data available for the selected timeframe.</Text>
               )}
             </View>
           </View>
@@ -692,7 +685,10 @@ const StockSearch: React.FC = () => {
                 ) : aiReportData ? (
                   <View style={styles.aiReportCard}>
                     <Text style={styles.aiReportTitle}>AI Asset Report</Text>
-                    <Text style={styles.aiReportText}>{aiReportData.response}</Text>
+                    {/* Nicely spaced paragraphs */}
+                    <Text style={styles.aiReportText}>
+                      {aiReportData.response}
+                    </Text>
                     <Text style={styles.aiReportFuture}>
                       Future Outlook:{' '}
                       <Text style={{ fontWeight: 'bold' }}>{aiReportData.future}</Text>
@@ -703,7 +699,7 @@ const StockSearch: React.FC = () => {
                     </Text>
                   </View>
                 ) : (
-                  <TouchableOpacity style={styles.generateReportButton} onPress={fetchAiAssetReport}>
+                  <TouchableOpacity style={[styles.actionButton, styles.generateReportButton]} onPress={fetchAiAssetReport}>
                     <Text style={styles.generateReportButtonText}>Generate AI Report</Text>
                   </TouchableOpacity>
                 )}
@@ -713,8 +709,9 @@ const StockSearch: React.FC = () => {
             )}
           </View>
 
+          {/* Back Button (matched size, different color) */}
           <TouchableOpacity
-            style={styles.backButton}
+            style={[styles.actionButton, styles.backButton]}
             onPress={() => {
               setSelectedStock(null);
               setSearchResults([]);
@@ -933,6 +930,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     padding: 16,
     marginTop: 20,
+    width: '100%',
   },
   aiReportTitle: {
     fontSize: 18,
@@ -940,11 +938,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
+  // We added some spacing (lineHeight) for readability:
   aiReportText: {
     fontSize: 16,
     marginBottom: 10,
     color: '#333',
     lineHeight: 22,
+    textAlign: 'justify',
   },
   aiReportFuture: {
     fontSize: 16,
@@ -956,33 +956,27 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#333',
   },
-  generateReportButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
+
+  // Shared style for action buttons (Generate AI / Back)
+  actionButton: {
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 10,
+    width: '50%',
+    alignSelf: 'center',
     alignItems: 'center',
-    marginTop: 10,
+  },
+  generateReportButton: {
+    backgroundColor: '#17a2b8',
   },
   generateReportButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },
-  subscriptionError: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 10,
-  },
-
   backButton: {
-    backgroundColor: '#007bff',
-    padding: 8,
-    borderRadius: 5,
-    alignSelf: 'center',
-    marginVertical: 10,
-    width: '40%',
+    backgroundColor: '#dc3545',
   },
-  backButtonText: { color: 'white', fontWeight: 'bold', alignSelf: 'center' },
+  backButtonText: { color: 'white', fontWeight: 'bold' },
 
   buttonContainer: {
     flexDirection: 'row',
@@ -1077,6 +1071,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+  },
+  subscriptionError: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
 

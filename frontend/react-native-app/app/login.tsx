@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { useSessionToken, useUser } from '../components/userContext';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import firebaseApp from '../components/firebase';
 
+// Basic email regex
+function validateEmail(email: string): boolean {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email.toLowerCase());
+}
+
+// Path to your Google icon asset
+const googleIcon = require('../assets/images/google-icon.png');
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+
+  // Separate error states
+  const [emailError, setEmailError] = useState('');
+  const [loginError, setLoginError] = useState('');
+
   const navigate = useNavigate();
   const { setSessionToken, setUsername, setEmail: setUserEmail } = useUser();
 
@@ -19,32 +32,21 @@ const Login: React.FC = () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+      if (!user) throw new Error('No user information returned from Google Sign-In.');
 
-      if (!user) {
-        throw new Error('No user information returned from Google Sign-In.');
-      }
-
-      // Retrieve ID token from the current user
-      const idToken = await user.getIdToken(true); // Force refresh to ensure a valid token
-      console.log('Google User ID Token:', idToken);
-
-      // Call the backend to exchange tokens
+      const idToken = await user.getIdToken(true);
       const response = await fetch('https://tradeagently.dev/exchange-tokens', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auth_token: idToken }),
       });
 
       const data = await response.json();
-      console.log('Exchange Tokens Response:', data);
-
       if (data.status === 'Success' && data.session_token) {
         setSessionToken(data.session_token);
         setUsername(user.displayName || 'User');
         setUserEmail(user.email || '');
-        navigate('/'); // Redirect to the home page
+        navigate('/');
       } else if (data.status === 'Success: Register User') {
         Alert.alert('New User', 'Please complete registration.');
         navigate('/register');
@@ -58,28 +60,38 @@ const Login: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    setErrorMessage('');
+    // Clear previous errors
+    setEmailError('');
+    setLoginError('');
 
+    // Validate presence
     if (!email || !password) {
       Alert.alert('Missing Fields', 'Please fill out both email and password.');
+      return;
+    }
+
+    // Validate email format
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address.');
       return;
     }
 
     try {
       const response = await fetch('https://tradeagently.dev/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
+
+      // Check for session token
       if (data.status === 'Success' && data.session_token) {
         setSessionToken(data.session_token);
         navigate('/');
       } else {
-        Alert.alert('Login Failed', data.message || 'Invalid credentials.');
+        // Show a styled error box
+        setLoginError('Invalid login credentials. Please try again.');
       }
     } catch (error) {
       console.error('Login Error:', error);
@@ -90,14 +102,26 @@ const Login: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
+
+      {/* Email Error Info (above the email input) */}
+      {emailError ? (
+        <View style={styles.infoBox}>
+          <Text style={styles.infoBoxText}>{emailError}</Text>
+        </View>
+      ) : null}
+
       <TextInput
         style={styles.input}
         placeholder="Email"
         placeholderTextColor="#aaa"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(val) => {
+          setEmail(val);
+          if (emailError) setEmailError(''); // clear as user types
+        }}
         keyboardType="email-address"
       />
+
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -106,13 +130,26 @@ const Login: React.FC = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
+
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+
+      {/* Google Login Button with Icon */}
       <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-        <Text style={styles.buttonText}>Login with Google</Text>
+        <View style={styles.googleButtonContent}>
+          <Image source={googleIcon} style={styles.googleIcon} />
+          <Text style={styles.buttonText}>Login with Google</Text>
+        </View>
       </TouchableOpacity>
-      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
+      {/* Nicer "Error Box" for invalid credentials */}
+      {loginError ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorBoxText}>{loginError}</Text>
+        </View>
+      ) : null}
+
       <TouchableOpacity onPress={() => navigate('/register')} style={styles.registerLink}>
         <Text style={styles.registerText}>Don't have an account? Register here</Text>
       </TouchableOpacity>
@@ -120,6 +157,9 @@ const Login: React.FC = () => {
   );
 };
 
+// ----------------
+// Styles
+// ----------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -134,6 +174,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
+
+  // Info box for email errors
+  infoBox: {
+    width: '30%',
+    backgroundColor: '#fff4e5',
+    borderColor: '#ffca99',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
+  },
+  infoBoxText: {
+    color: '#b45b00',
+    fontSize: 14,
+  },
+
   input: {
     width: '30%',
     height: 50,
@@ -142,7 +198,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
+    backgroundColor: '#fff',
   },
+
   button: {
     width: '30%',
     height: 50,
@@ -156,19 +214,40 @@ const styles = StyleSheet.create({
     width: '30%',
     height: 50,
     backgroundColor: '#DB4437',
-    justifyContent: 'center',
-    alignItems: 'center',
     borderRadius: 8,
     marginBottom: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  googleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
   },
-  errorText: {
-    color: 'red',
+
+  // Nicer error box for login credentials
+  errorBox: {
+    width: '30%',
+    backgroundColor: '#f8d7da',
+    borderColor: '#f5c6cb',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
     marginTop: 10,
   },
+  errorBoxText: {
+    color: '#721c24',
+    fontSize: 14,
+  },
+
   registerLink: {
     marginTop: 20,
   },

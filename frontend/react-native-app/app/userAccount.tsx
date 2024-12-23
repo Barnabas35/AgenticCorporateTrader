@@ -159,8 +159,8 @@ const UserAccount: React.FC = () => {
         body: JSON.stringify({ session_token: sessionToken }),
       });
       const result = await response.json();
-
-      if (result.status === 'Success') {
+      console.log(result)
+      if (result.status == 'Success') {
         handleLogout();
       } else {
         setDebugMessage('Failed to delete account');
