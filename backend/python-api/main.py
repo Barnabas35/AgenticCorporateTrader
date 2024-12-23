@@ -352,6 +352,12 @@ def get_ai_accounting():
     return jsonify(q_get_ai_accounting(request.json)), 200
 
 
+@app.route("/get-agents", methods=["POST"])
+def get_agents():
+    from agentic_ai.get_agents import run_all_agents
+    return jsonify(run_all_agents(request.json)), 200
+
+
 if __name__ == "__main__":
 
     # Start background task to check price alerts
