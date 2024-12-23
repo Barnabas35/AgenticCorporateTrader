@@ -95,7 +95,7 @@ Map ports 11434:11434.
 
 To compile the mobile application, use Android Studio.
 
-![StackNDeployment](https://github.com/Barnabas35/AgenticCorporateTrader/tree/main/github/FrameWorkNDeployment.png)
+![StackNDeployment](https://github.com/Barnabas35/AgenticCorporateTrader/blob/main/github/FrameWorkNDeployment.png)
 
 
 ## API Reference
