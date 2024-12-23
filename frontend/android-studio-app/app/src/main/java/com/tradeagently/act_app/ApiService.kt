@@ -613,11 +613,11 @@ interface ApiService {
     @POST("/get-subscription")
     fun getSubscription(@Body request: SubscriptionRequest): Call<SubscriptionResponse>
 
-    // Endpoint for canceling a subscription
+    // Endpoint for canceling subscription
     @POST("/cancel-subscription")
     fun cancelSubscription(@Body request: SubscriptionRequest): Call<SubscriptionActionResponse>
 
-    // Endpoint for activating a subscription
+    // Endpoint for activating subscription
     @POST("/activate-subscription")
     fun activateSubscription(@Body request: SubscriptionRequest): Call<SubscriptionActionResponse>
 }

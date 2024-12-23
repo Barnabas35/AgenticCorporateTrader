@@ -40,6 +40,14 @@ def api_get_ticker_info(request_json):
     # Get ticker snapshot
     ticker_snapshot = client.get_snapshot_ticker("stocks", ticker)
 
+    # Choosing day or previous day snapshot
+    if ticker_snapshot.day.open == 0:
+        change_percentage = 0
+        ticker_snapshot = ticker_snapshot.prev_day
+    else:
+        change_percentage = ticker_snapshot.todays_change_percent
+        ticker_snapshot = ticker_snapshot.day
+
     # Compiling response
     ticker_info = {
         "symbol": ticker,
@@ -48,12 +56,12 @@ def api_get_ticker_info(request_json):
         "homepage": ticker_details.homepage_url,
         "employee_count": ticker_details.total_employees,
         "currency": ticker_details.currency_name,
-        "open_price": ticker_snapshot.day.open,
-        "close_price": ticker_snapshot.day.close,
-        "high_price": ticker_snapshot.day.high,
-        "low_price": ticker_snapshot.day.low,
-        "volume": ticker_snapshot.day.volume,
-        "change_percentage": ticker_snapshot.todays_change_percent,
+        "open_price": ticker_snapshot.open,
+        "close_price": ticker_snapshot.close,
+        "high_price": ticker_snapshot.high,
+        "low_price": ticker_snapshot.low,
+        "volume": ticker_snapshot.volume,
+        "change_percentage": change_percentage,
         "market": "stocks"
     }
 

@@ -27,20 +27,27 @@ def q_delete_user(request_json):
     # Get user id
     user_id = result[0].id
 
-    # Delete user
-    db.collection("users").document(user_id).delete()
-
     # Delete user's client list
     client_list = (db.collection("clients").where(field_path="user_id", op_string="==", value=user_id).get())
-    for client in client_list:
-        client_id = client.id
-        db.collection("clients").document(client_id).delete()
 
-    # Delete user's transaction collection
-    transactions = db.collection(user_id).collection("transactions").get()
-    for transaction in transactions:
-        transaction_id = transaction.id
-        db.collection(user_id).collection("transactions").document(transaction_id).delete()
+    if len(client_list) != 0:
+        for client in client_list:
+            client_id = client.id
+            db.collection("clients").document(client_id).delete()
+
+    # Delete user's transaction collection if there is one
+    try:
+        transactions = db.collection("users").document(user_id).collection("transaction_log").get()
+
+        if len(transactions) != 0:
+            for transaction in transactions:
+                transaction_id = transaction.id
+                db.collection(user_id).collection("transactions").document(transaction_id).delete()
+    except AttributeError:
+        pass
+
+    # Delete user
+    db.collection("users").document(user_id).delete()
 
     # Return email
     return {"status": "Success"}
