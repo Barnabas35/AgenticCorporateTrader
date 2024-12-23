@@ -12,6 +12,7 @@ import {
   Legend,
 } from 'chart.js';
 
+//This is just for the index page using the coingecko api to draw a graph so basically just filler
 // Register the necessary Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -41,8 +42,6 @@ const BitcoinChart: React.FC = () => {
         }
 
         const data = await response.json();
-
-        // data.prices is an array of [timestamp, price] arrays
         setBitcoinData(data.prices);
       } catch (err: any) {
         console.error('Error fetching Bitcoin data:', err);

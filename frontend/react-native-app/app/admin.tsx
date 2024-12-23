@@ -7,8 +7,8 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
-  Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useSessionToken } from '../components/userContext';
 
@@ -38,10 +38,14 @@ const AdminPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'tickets' | 'users'>('tickets');
   const [ticketView, setTicketView] = useState<'open' | 'resolved'>('open');
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedTicket, setExpandedTicket] = useState<SupportTicket | null>(null);
   const [responseSubject, setResponseSubject] = useState<string>('');
   const [responseBody, setResponseBody] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [confirmDeleteModalVisible, setConfirmDeleteModalVisible] = useState<boolean>(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [infoModalVisible, setInfoModalVisible] = useState<boolean>(false);
+  const [infoModalMessage, setInfoModalMessage] = useState<string>('');
 
   useEffect(() => {
     fetchSupportTickets();
@@ -61,11 +65,11 @@ const AdminPage: React.FC = () => {
       if (data.status === 'Success') {
         setTickets(data.support_tickets);
       } else {
-        setError('Failed to fetch tickets');
+        setError(data.message || 'Failed to fetch tickets.');
       }
     } catch (err) {
       console.error('Error fetching tickets:', err);
-      setError('Failed to fetch tickets');
+      setError('Failed to fetch tickets.');
     } finally {
       setLoading(false);
     }
@@ -73,11 +77,12 @@ const AdminPage: React.FC = () => {
 
   const resolveTicket = async (ticket: SupportTicket) => {
     if (!responseSubject.trim() || !responseBody.trim()) {
-      Alert.alert('Error', 'Please provide a subject and body for the response.');
+      setError('Please provide a subject and body for the response.');
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch('https://tradeagently.dev/resolve-support-ticket', {
         method: 'POST',
@@ -90,18 +95,22 @@ const AdminPage: React.FC = () => {
         }),
       });
       const data = await response.json();
+
       if (data.status === 'Success') {
-        Alert.alert('Success', 'Ticket resolved successfully');
+        setInfoModalMessage('Ticket resolved successfully.');
+        setInfoModalVisible(true);
+
         setResponseSubject('');
         setResponseBody('');
         setExpandedTicket(null);
+
         fetchSupportTickets();
       } else {
-        setError('Failed to resolve ticket');
+        setError(data.message || 'Failed to resolve ticket.');
       }
     } catch (err) {
       console.error('Error resolving ticket:', err);
-      setError('Failed to resolve ticket');
+      setError('Failed to resolve ticket.');
     } finally {
       setLoading(false);
     }
@@ -110,24 +119,22 @@ const AdminPage: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
-  
+
     try {
       const response = await fetch('https://tradeagently.dev/get-user-list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken }),
       });
-  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
       const data = await response.json();
-  
+
       if (data.status === 'Success') {
-        setUsers(data.user_list); // Update state with user list
+        setUsers(data.user_list);
       } else {
-        setError(data.message || 'Failed to fetch users');
+        setError(data.message || 'Failed to fetch users.');
       }
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -136,37 +143,43 @@ const AdminPage: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
-  const deleteUser = async (userId: string) => {
-    Alert.alert('Confirm', 'Are you sure you want to delete this user?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        onPress: async () => {
-          setLoading(true);
-          try {
-            const response = await fetch('https://tradeagently.dev/admin-delete-user', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ session_token: sessionToken, id: userId }),
-            });
-            const data = await response.json();
-            if (data.status === 'Success') {
-              Alert.alert('Success', 'User deleted successfully');
-              fetchUsers();
-            } else {
-              setError('Failed to delete user');
-            }
-          } catch (err) {
-            console.error('Error deleting user:', err);
-            setError('Failed to delete user');
-          } finally {
-            setLoading(false);
-          }
-        },
-      },
-    ]);
+  const triggerDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setConfirmDeleteModalVisible(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setConfirmDeleteModalVisible(false);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://tradeagently.dev/admin-delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          id: userToDelete.id,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.status === 'Success') {
+        setInfoModalMessage(`User "${userToDelete.username}" deleted successfully.`);
+        setInfoModalVisible(true);
+        fetchUsers();
+      } else {
+        setError(data.message || 'Failed to delete user.');
+      }
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError('Failed to delete user.');
+    } finally {
+      setUserToDelete(null);
+      setLoading(false);
+    }
   };
 
   const filteredUsers = users.filter(
@@ -177,7 +190,7 @@ const AdminPage: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      {loading && <ActivityIndicator size="large" color="#0000ff" style={{ marginBottom: 10 }} />}
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       {/* Navigation Buttons */}
@@ -198,7 +211,7 @@ const AdminPage: React.FC = () => {
         </View>
       </View>
 
-      {/* Tickets View */}
+      {/* ----------------- Tickets View ----------------- */}
       {view === 'tickets' && (
         <View>
           <View style={styles.ticketNavContainer}>
@@ -219,7 +232,7 @@ const AdminPage: React.FC = () => {
           {expandedTicket ? (
             <View style={styles.ticketItem}>
               <Text style={styles.ticketTitle}>{expandedTicket.issue_subject}</Text>
-              <Text>{expandedTicket.issue_description}</Text>
+              <Text style={styles.ticketDescription}>{expandedTicket.issue_description}</Text>
               <TextInput
                 style={styles.responseInput}
                 placeholder="Response Subject"
@@ -227,7 +240,7 @@ const AdminPage: React.FC = () => {
                 onChangeText={setResponseSubject}
               />
               <TextInput
-                style={styles.responseInput}
+                style={[styles.responseInput, { height: 80 }]}
                 placeholder="Response Body"
                 value={responseBody}
                 onChangeText={setResponseBody}
@@ -241,7 +254,11 @@ const AdminPage: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.smallButton, styles.cancelButton]}
-                onPress={() => setExpandedTicket(null)}
+                onPress={() => {
+                  setExpandedTicket(null);
+                  setResponseSubject('');
+                  setResponseBody('');
+                }}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
@@ -252,7 +269,8 @@ const AdminPage: React.FC = () => {
               renderItem={({ item }) => (
                 <View style={styles.ticketItem}>
                   <Text style={styles.ticketTitle}>{item.issue_subject}</Text>
-                  <Text>{item.issue_description}</Text>
+                  <Text style={styles.ticketDescription}>{item.issue_description}</Text>
+
                   {ticketView === 'open' && (
                     <TouchableOpacity
                       style={[styles.smallButton, styles.expandButton]}
@@ -269,7 +287,8 @@ const AdminPage: React.FC = () => {
         </View>
       )}
 
-      {/* Users View */}
+      {/* ----------------- Users View
+       ----------------- */}
       {view === 'users' && (
         <ScrollView>
           <TextInput
@@ -280,25 +299,86 @@ const AdminPage: React.FC = () => {
           />
           <FlatList
             data={filteredUsers}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.userItem}>
                 <Text style={styles.userText}>Username: {item.username}</Text>
                 <Text style={styles.userText}>Email: {item.email}</Text>
+                <Text style={[styles.userText, { color: '#999' }]}>ID: {item.id}</Text>
+
                 <TouchableOpacity
                   style={[styles.button, styles.narrowDeleteButton]}
-                  onPress={() => deleteUser(item.id)}
+                  onPress={() => triggerDeleteUser(item)}
                 >
                   <Text style={styles.buttonText}>Delete User</Text>
                 </TouchableOpacity>
               </View>
             )}
-            keyExtractor={(item) => item.id}
           />
         </ScrollView>
       )}
+
+      {/* ------------- CONFIRM DELETE USER MODAL ------------- */}
+      <Modal
+        visible={confirmDeleteModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setConfirmDeleteModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirm Deletion</Text>
+            {userToDelete && (
+              <Text style={styles.modalMessage}>
+                Are you sure you want to delete user: "{userToDelete.username}"?
+              </Text>
+            )}
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#FF5555', marginRight: 10 }]}
+                onPress={confirmDeleteUser}
+              >
+                <Text style={styles.buttonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#ccc' }]}
+                onPress={() => {
+                  setConfirmDeleteModalVisible(false);
+                  setUserToDelete(null);
+                }}
+              >
+                <Text style={styles.buttonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ------------- INFO/SUCCESS MODAL ------------- */}
+      <Modal
+        visible={infoModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setInfoModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Info</Text>
+            <Text style={styles.modalMessage}>{infoModalMessage}</Text>
+            <TouchableOpacity
+              style={[styles.button, { marginTop: 20 }]}
+              onPress={() => setInfoModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
+export default AdminPage;
 
 const styles = StyleSheet.create({
   container: {
@@ -321,37 +401,32 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     width: 190,
+    backgroundColor: '#ccc',
   },
   activeButton: {
     backgroundColor: '#0056b3',
   },
   deleteUsersButton: {
-    backgroundColor: '#FF5555', // Light red
+    backgroundColor: '#FF5555',
   },
   openTicketButton: {
-    backgroundColor: '#ffa500', // Orange
+    backgroundColor: '#ffa500',
   },
   resolvedTicketButton: {
-    backgroundColor: '#4caf50', // Green
+    backgroundColor: '#4caf50',
   },
   expandButton: {
     backgroundColor: '#007bff',
     marginTop: 10,
   },
   cancelButton: {
-    backgroundColor: '#ff6347', // Tomato red for cancel button
+    backgroundColor: '#ff6347',
     marginTop: 10,
   },
   ticketNavContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    marginTop: 20,
   },
   ticketItem: {
     padding: 10,
@@ -366,6 +441,11 @@ const styles = StyleSheet.create({
   ticketTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  ticketDescription: {
+    fontSize: 14,
+    color: '#555',
   },
   responseInput: {
     height: 40,
@@ -399,9 +479,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   narrowDeleteButton: {
-    backgroundColor: '#FF5555', // Light red for delete button
+    backgroundColor: '#FF5555',
     marginTop: 10,
-    width: 100, // Make the delete button narrower
+    width: 100,
   },
   errorText: {
     color: 'red',
@@ -415,6 +495,33 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     padding: 8,
   },
+  // Modals
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: 300,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 20,
+  },
 });
-
-export default AdminPage;

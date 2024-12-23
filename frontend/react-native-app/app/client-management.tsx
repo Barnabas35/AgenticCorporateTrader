@@ -27,41 +27,24 @@ interface AssetReportData {
 const ClientManagement: React.FC = () => {
   const [sessionToken] = useSessionToken();
   const navigate = useNavigate();
-
-  // -----------------------------
-  // CLIENT & ASSET STATES
-  // -----------------------------
   const [clients, setClients] = useState<any[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedClientName, setSelectedClientName] = useState<string>('');
   const [assets, setAssets] = useState<string[]>([]);
   const [assetDetails, setAssetDetails] = useState<{ [ticker: string]: number }>({});
-
-  // -----------------------------
-  // TABS & BASIC FORM
-  // -----------------------------
   const [activeTab, setActiveTab] = useState<string>('Manage Assets');
   const [newClientName, setNewClientName] = useState<string>('');
   const [market, setMarket] = useState<string>('stocks');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // -----------------------------
-  // PURCHASE & SELL STATES
-  // -----------------------------
   const [balance, setBalance] = useState<number | null>(null);
   const [buyModalVisible, setBuyModalVisible] = useState(false);
   const [purchaseTicker, setPurchaseTicker] = useState('');
   const [purchaseAmount, setPurchaseAmount] = useState<string>('');
-
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [sellTicker, setSellTicker] = useState('');
   const [sellQuantity, setSellQuantity] = useState<string>('');
   const [sellMaxQuantity, setSellMaxQuantity] = useState<number>(0);
-
-  // -----------------------------
-  // ACCOUNTING & ASSET REPORT
-  // -----------------------------
   const [accountingModalVisible, setAccountingModalVisible] = useState(false);
   const [accountingTicker, setAccountingTicker] = useState('');
   const [accountingData, setAccountingData] = useState<AccountingData | null>(null);
@@ -69,17 +52,12 @@ const ClientManagement: React.FC = () => {
   const [reportModalVisible, setReportModalVisible] = useState<boolean>(false);
   const [reportData, setReportData] = useState<AssetReportData | null>(null);
 
-  // -----------------------------
-  // REDIRECT IF NOT LOGGED IN
-  // -----------------------------
+
   if (!sessionToken) {
     navigate('/login');
     return null;
   }
 
-  // -----------------------------
-  // FETCH CLIENT LIST
-  // -----------------------------
   const fetchClientList = async () => {
     setLoading(true);
     setError(null);
@@ -102,9 +80,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // ADD CLIENT
-  // -----------------------------
   const addClient = async () => {
     if (!newClientName.trim()) {
       Alert.alert('Error', 'Client name cannot be empty.');
@@ -135,9 +110,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // REMOVE CLIENT
-  // -----------------------------
   const removeClient = async (clientName: string) => {
     try {
       const response = await fetch('https://tradeagently.dev/remove-client', {
@@ -163,9 +135,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // FETCH USER ASSETS
-  // -----------------------------
   const fetchUserAssets = async (clientId: string) => {
     try {
       setAssets([]);
@@ -197,9 +166,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // FETCH ASSET DETAILS
-  // -----------------------------
   const fetchAssetDetails = async (tickers: string[], clientId: string) => {
     const details: { [ticker: string]: number } = {};
     for (const tk of tickers) {
@@ -227,9 +193,6 @@ const ClientManagement: React.FC = () => {
     setAssetDetails(details);
   };
 
-  // -----------------------------
-  // FETCH BALANCE (for purchase)
-  // -----------------------------
   const fetchBalance = async () => {
     if (!sessionToken) return;
     try {
@@ -255,7 +218,7 @@ const ClientManagement: React.FC = () => {
   // -----------------------------
   const openPurchaseModal = async (ticker: string = '') => {
     if (!selectedClientId) return;
-    await fetchBalance(); // update balance each time
+    await fetchBalance(); 
     setPurchaseTicker(ticker);
     setPurchaseAmount('');
     setBuyModalVisible(true);
@@ -296,9 +259,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // OPEN/CLOSE SELL MODAL
-  // -----------------------------
   const openSellModal = (ticker: string) => {
     if (!selectedClientId) return;
     setSellTicker(ticker);
@@ -349,20 +309,13 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // OPEN/CLOSE ACCOUNTING MODAL
-  // -----------------------------
   const openAccountingModal = async (ticker: string) => {
     if (!selectedClientId) return;
-
-    // 1) Show the modal immediately so we know it opens
     setAccountingModalVisible(true);
 
-    // 2) Clear previous data
     setAccountingData(null);
     setAccountingTicker(ticker);
 
-    // 3) Fetch the new data
     try {
       const resp = await fetch('https://tradeagently.dev/get-ai-accounting', {
         method: 'POST',
@@ -386,9 +339,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // GET ASSET REPORT
-  // -----------------------------
   const getAssetReport = async (ticker: string) => {
     if (!selectedClientId || !ticker) {
       Alert.alert('Error', 'Invalid client or ticker for asset report.');
@@ -421,9 +371,6 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  // -----------------------------
-  // DOWNLOAD CSV
-  // -----------------------------
   const handleDownloadReports = async () => {
     try {
       const resp = await fetch('https://tradeagently.dev/download-asset-reports', {
@@ -451,10 +398,6 @@ const ClientManagement: React.FC = () => {
       Alert.alert('Error', 'An error occurred while downloading the CSV file.');
     }
   };
-
-  // -----------------------------
-  // useEffect INIT
-  // -----------------------------
   useEffect(() => {
     if (sessionToken) {
       fetchClientList();
@@ -469,9 +412,7 @@ const ClientManagement: React.FC = () => {
     }
   }, [market, selectedClientId]);
 
-  // -----------------------------
-  // RENDER
-  // -----------------------------
+
   return (
     <View style={styles.pageContainer}>
       <View style={styles.centeredContainer}>
@@ -732,7 +673,7 @@ const ClientManagement: React.FC = () => {
             <Text style={styles.modalSubtitle}>Client: {selectedClientName}</Text>
             <Text style={{ marginVertical: 5 }}>Asset: {accountingTicker}</Text>
 
-            {/* Minimal text if accountingData is still null */}
+            {/* Displaying fetching data if loading NOT BROKEN! */}
             {!accountingData ? (
               <Text style={{ marginVertical: 10 }}>Fetching data...</Text>
             ) : (
@@ -782,9 +723,6 @@ const ClientManagement: React.FC = () => {
   );
 };
 
-// -----------------------------
-// STYLES
-// -----------------------------
 const styles = StyleSheet.create({
   pageContainer: {
     flex: 1,

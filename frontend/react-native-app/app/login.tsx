@@ -5,13 +5,12 @@ import { useSessionToken, useUser } from '../components/userContext';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import firebaseApp from '../components/firebase';
 
-// Basic email regex
+// Email format for error checking I have below
 function validateEmail(email: string): boolean {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email.toLowerCase());
 }
 
-// Path to your Google icon asset
 const googleIcon = require('../assets/images/google-icon.png');
 
 const Login: React.FC = () => {
@@ -64,13 +63,13 @@ const Login: React.FC = () => {
     setEmailError('');
     setLoginError('');
 
-    // Validate presence
+    // Validating presence
     if (!email || !password) {
       Alert.alert('Missing Fields', 'Please fill out both email and password.');
       return;
     }
 
-    // Validate email format
+    // Validating email format
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email address.');
       return;
@@ -85,12 +84,10 @@ const Login: React.FC = () => {
 
       const data = await response.json();
 
-      // Check for session token
       if (data.status === 'Success' && data.session_token) {
         setSessionToken(data.session_token);
         navigate('/');
       } else {
-        // Show a styled error box
         setLoginError('Invalid login credentials. Please try again.');
       }
     } catch (error) {
@@ -117,7 +114,7 @@ const Login: React.FC = () => {
         value={email}
         onChangeText={(val) => {
           setEmail(val);
-          if (emailError) setEmailError(''); // clear as user types
+          if (emailError) setEmailError(''); 
         }}
         keyboardType="email-address"
       />
@@ -143,7 +140,6 @@ const Login: React.FC = () => {
         </View>
       </TouchableOpacity>
 
-      {/* Nicer "Error Box" for invalid credentials */}
       {loginError ? (
         <View style={styles.errorBox}>
           <Text style={styles.errorBoxText}>{loginError}</Text>
@@ -157,9 +153,6 @@ const Login: React.FC = () => {
   );
 };
 
-// ----------------
-// Styles
-// ----------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -174,8 +167,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
-
-  // Info box for email errors
   infoBox: {
     width: '30%',
     backgroundColor: '#fff4e5',
@@ -232,8 +223,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
   },
-
-  // Nicer error box for login credentials
   errorBox: {
     width: '30%',
     backgroundColor: '#f8d7da',

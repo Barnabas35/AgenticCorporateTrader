@@ -12,7 +12,6 @@ export default function CheckoutForm() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Destructure amount along with clientSecret from state
   const { clientSecret, amount } = location.state || {};
 
   const [message, setMessage] = useState(null);
@@ -38,7 +37,6 @@ export default function CheckoutForm() {
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Optionally, include the amount in the payment confirmation if needed
         return_url: `${window.location.origin}/complete`,
       },
     });
@@ -65,11 +63,11 @@ export default function CheckoutForm() {
 
   const paymentElementOptions = {
     layout: {
-      type: "accordion", // Accordion layout for a cleaner UI
+      type: "accordion", 
     },
     style: {
       base: {
-        fontSize: "18px", // Larger font size for better readability
+        fontSize: "18px", 
         color: "#32325d",
         "::placeholder": {
           color: "#aab7c4",
@@ -116,7 +114,7 @@ const styles = {
     width: "100%",
   },
   form: {
-    width: "600px", // Wider form for better usability
+    width: "600px", 
     padding: "30px",
     borderRadius: "10px",
     backgroundColor: "#fff",
@@ -127,7 +125,7 @@ const styles = {
     width: "45%",
   },
   paymentElementContainer: {
-    width: "100%", // Ensure the payment element takes up full width
+    width: "100%", 
     marginBottom: "20px",
   },
   button: {

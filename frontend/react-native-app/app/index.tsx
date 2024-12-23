@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import for navigation
+import { useNavigate } from 'react-router-dom'; 
 import {
   View,
   Text,
@@ -18,8 +18,8 @@ const Home: React.FC = () => {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [addAmount, setAddAmount] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>(''); // State for error messages
-  const navigate = useNavigate(); // React Router navigation
+  const [errorMessage, setErrorMessage] = useState<string>(''); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -54,19 +54,14 @@ const Home: React.FC = () => {
   }, [sessionToken]);
 
   const handleAddBalance = async () => {
-    // Clear any previous error messages
     setErrorMessage('');
-
-    // Trim whitespace from input
     const trimmedAmount = addAmount.trim();
 
-    // Validation: Check if input is empty
     if (trimmedAmount === '') {
       setErrorMessage('Please input an amount.');
       return;
     }
 
-    // Validation: Check if input is a valid positive number
     const numericAmount = Number(trimmedAmount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
       setErrorMessage('Please input a valid positive number.');
@@ -86,12 +81,13 @@ const Home: React.FC = () => {
       const data = await response.json();
       console.log(data);
       if (data.status === 'Success') {
-        // Redirect to CheckoutForm with clientSecret and amount
+        // Redirect to CheckoutForm with clientSecret and amount but 
+        // For checkout page with stripe 
         navigate('/checkout', {
           state: {
             clientSecret: data.client_secret,
             dpmCheckerLink: data.dpmCheckerLink,
-            amount: numericAmount, // Pass the amount here
+            amount: numericAmount, 
           },
         });
       } else {
@@ -125,13 +121,11 @@ const Home: React.FC = () => {
             Secure and reliable platform ensuring your data safety.
           </Text>
         </View>
-        {/* Conditionally render the "Get Started" message if not logged in */}
         {!sessionToken && (
           <Text style={styles.ctaText}>
             To get started, log in or register, and begin tracking your investments today!
           </Text>
         )}
-        {/* Additional information about the website */}
         <Text style={styles.additionalInfo}>
           Whether you're a seasoned investor or just starting out, TradeAgently provides the tools
           you need to make informed decisions and grow your portfolio.
@@ -161,7 +155,7 @@ const Home: React.FC = () => {
                   </TouchableOpacity>
                 </View>
 
-                {/* Display Error Message in a Light Red Box */}
+                {/* Displaying Error Message in a Light Red Box for incorrect entering balance!*/}
                 {errorMessage !== '' && (
                   <View style={styles.errorBox}>
                     <Text style={styles.errorBoxText}>{errorMessage}</Text>
@@ -219,7 +213,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
     marginLeft: 10,
-    flexShrink: 1, // Allow text to wrap if needed
+    flexShrink: 1,
   },
   ctaText: {
     fontSize: 18,
@@ -271,7 +265,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   addBalanceButton: {
-    backgroundColor: '#27ae60', // Green color
+    backgroundColor: '#27ae60', 
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -283,11 +277,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
-  // The new styles for our error box
   errorBox: {
     marginTop: 10,
-    backgroundColor: '#ffe5e5',   // Light red background
+    backgroundColor: '#ffe5e5',  
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 15,
@@ -295,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorBoxText: {
-    color: '#b71c1c',            // A darker red text
+    color: '#b71c1c',       
     fontSize: 14,
     textAlign: 'center',
   },

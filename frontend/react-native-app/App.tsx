@@ -7,7 +7,6 @@ import { View, Text, StyleSheet } from 'react-native';
 import Menu from './components/Menu';
 import Home from './app/index';
 import Login from './app/login';
-import Contact from './app/contact';
 import Register from './app/register';
 import UserAccount from './app/userAccount';
 import CryptoSearch from './app/cryptoSearch';
@@ -37,7 +36,6 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/register" element={<Register />} />
             <Route path="/user-account" element={<UserAccount />} />
             <Route path="/about" element={<About />} />

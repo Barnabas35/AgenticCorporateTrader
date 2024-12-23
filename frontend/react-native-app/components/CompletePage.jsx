@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useStripe } from "@stripe/react-stripe-js";
 
-// Mapping of payment statuses to corresponding messages and styles
 const STATUS_CONTENT_MAP = {
   succeeded: {
     text: "Payment succeeded",
@@ -27,21 +26,19 @@ const STATUS_CONTENT_MAP = {
 
 export default function CompletePage() {
   const stripe = useStripe();
-  const [status, setStatus] = useState(null); // Initial status is null
+  const [status, setStatus] = useState(null);
   const [intentId, setIntentId] = useState(null);
-  const [fetched, setFetched] = useState(false); // Tracks if the status has been fetched
+  const [fetched, setFetched] = useState(false); 
 
   useEffect(() => {
     if (!stripe) return;
 
-    // Retrieve client secret from URL parameters
     const clientSecret = new URLSearchParams(window.location.search).get(
       "payment_intent_client_secret"
     );
 
     if (!clientSecret) {
       setStatus("default");
-      // Delay setting fetched to true by 1 second
       const timer = setTimeout(() => setFetched(true), 1000);
       return () => clearTimeout(timer);
     }
@@ -56,14 +53,13 @@ export default function CompletePage() {
         } else {
           setStatus("default");
         }
-        // Delay setting fetched to true by 1 second
         const timer = setTimeout(() => setFetched(true), 1000);
         return () => clearTimeout(timer);
       })
       .catch((error) => {
         console.error("Error retrieving payment intent:", error);
         setStatus("default");
-        // Delay setting fetched to true by 1 second
+
         const timer = setTimeout(() => setFetched(true), 1000);
         return () => clearTimeout(timer);
       });
@@ -73,7 +69,6 @@ export default function CompletePage() {
     <div style={styles.outerContainer}>
       <div style={styles.container}>
         {!fetched ? (
-          // Loading Indicator
           <div style={styles.loadingContainer}>
             <div style={styles.spinner}></div>
             <p style={styles.loadingText}>Loading...</p>
@@ -118,16 +113,15 @@ export default function CompletePage() {
   );
 }
 
-// Inline Styles
 const styles = {
   outerContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    height: "100vh", // Full vertical height
-    width: "100vw", // Full horizontal width
-    backgroundColor: "#f2f2f2", // Light background color
-    fontFamily: "'Poppins', sans-serif", // Rounded font
+    height: "100vh", 
+    width: "100vw", 
+    backgroundColor: "#f2f2f2", 
+    fontFamily: "'Poppins', sans-serif", 
   },
   container: {
     display: "flex",
@@ -135,11 +129,11 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     padding: "30px",
-    backgroundColor: "#fff", // White background for rectangle
-    borderRadius: "15px", // Rounded edges
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow
-    width: "400px", // Fixed width
-    textAlign: "center", // Center text alignment
+    backgroundColor: "#fff", 
+    borderRadius: "15px", 
+    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", 
+    width: "400px",
+    textAlign: "center", 
   },
   loadingContainer: {
     display: "flex",
@@ -154,17 +148,13 @@ const styles = {
     marginTop: "10px",
   },
   spinner: {
-    border: "4px solid #f3f3f3", // Light grey
-    borderTop: "4px solid #3498db", // Blue
+    border: "4px solid #f3f3f3", 
+    borderTop: "4px solid #3498db", 
     borderRadius: "50%",
     width: "40px",
     height: "40px",
     animation: "spin 2s linear infinite",
   },
-  // Note: React inline styles do not support keyframes. To implement spinner animation,
-  // you need to add the keyframes to your global CSS or use styled-components.
-  // For simplicity, the spinner animation is not functional here.
-
   iconContainer: {
     display: "flex",
     alignItems: "center",
@@ -181,12 +171,12 @@ const styles = {
     fontWeight: "bold",
     marginBottom: "20px",
     color: "#333",
-    fontFamily: "'Poppins', sans-serif", // Rounded font
+    fontFamily: "'Poppins', sans-serif", 
   },
   detailsTable: {
     width: "100%",
     marginBottom: "20px",
-    fontFamily: "'Poppins', sans-serif", // Rounded font
+    fontFamily: "'Poppins', sans-serif", 
   },
   row: {
     display: "flex",
@@ -205,7 +195,7 @@ const styles = {
     fontSize: "16px",
     fontWeight: "bold",
     color: "#fff",
-    backgroundColor: "#27ae60", // Green
+    backgroundColor: "#27ae60", 
     borderRadius: "10px",
     textDecoration: "none",
     cursor: "pointer",
@@ -219,7 +209,7 @@ const styles = {
     fontSize: "16px",
     fontWeight: "bold",
     color: "#fff",
-    backgroundColor: "#007bff", // Blue
+    backgroundColor: "#007bff", 
     borderRadius: "10px",
     textDecoration: "none",
     cursor: "pointer",

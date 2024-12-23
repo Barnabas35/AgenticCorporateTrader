@@ -1,8 +1,7 @@
-// firebase.ts
+//This file is just for google login
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
-// Firebase configuration for Agentic Corporate Trader
 const firebaseConfig = {
     apiKey: "AIzaSyDpIaiuRrQcE8Get-eXXhOI8R_Unr7GawQ", 
     authDomain: "agenticcorporatetrader.firebaseapp.com",
@@ -16,7 +15,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Firebase Authentication instance
 export const auth = getAuth(firebaseApp);
 
-// Google Auth Provider for Sign-In
+
 export const googleProvider = new GoogleAuthProvider();
 
 export default firebaseApp;

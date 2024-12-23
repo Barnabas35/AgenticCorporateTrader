@@ -44,7 +44,7 @@ const UserAccount: React.FC = () => {
 
   useEffect(() => {
     if (username && email && profileIconUrl && userType) {
-      // Once user data is loaded, fetch subscription
+      // Once user data and only when is loaded, fetch subscription
       fetchSubscriptionDetails();
     }
   }, [username, email, profileIconUrl, userType]);
@@ -128,11 +128,9 @@ const UserAccount: React.FC = () => {
         setSubscriptionEnd(data.subscription_end);
         setRenewSubscription(data.renew_subscription);
       } else {
-        // If no subscription details found or error
         setSubscriptionActive(false);
       }
     } catch (err) {
-      // If error occurred fetching subscription, assume not active
       setSubscriptionActive(false);
     }
   };
@@ -185,7 +183,6 @@ const UserAccount: React.FC = () => {
         setPriceAlerts(data.alerts || []);
         setPriceAlertModalVisible(true);
       } else if (data.status === 'No alerts found.') {
-        // No alerts scenario
         setPriceAlerts([]);
         setPriceAlertModalVisible(true);
       } else {

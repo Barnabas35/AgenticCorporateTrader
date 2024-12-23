@@ -237,7 +237,7 @@ const Register: React.FC = () => {
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 
-      {/* Google Button w/ icon */}
+      {/* Google login  Button w/ icon */}
       <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister}>
         <View style={styles.googleButtonContent}>
           <Image source={googleIcon} style={styles.googleIcon} />
@@ -275,9 +275,6 @@ const Register: React.FC = () => {
 
 export default Register;
 
-// ------------------------------------
-// STYLES
-// ------------------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -292,7 +289,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  // Inline error "info box"
   infoBox: {
     width: '30%',
     backgroundColor: '#fff4e5',

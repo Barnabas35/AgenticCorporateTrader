@@ -42,7 +42,7 @@ const MyAssets: React.FC = () => {
   const [selectedAssetQuantity, setSelectedAssetQuantity] = useState<number | null>(null);
   const [sellModalError, setSellModalError] = useState<string>('');
 
-  // NEW: AI Accounting Modal State
+  // AI accounting related stuff
   const [aiAccountingModalVisible, setAiAccountingModalVisible] = useState<boolean>(false);
   const [selectedAiAccounting, setSelectedAiAccounting] = useState<{
     asset_growth: string;
@@ -83,7 +83,6 @@ const MyAssets: React.FC = () => {
       link.click();
       document.body.removeChild(link);
 
-      // 5) Clean up
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error('Error downloading CSV:', err);
@@ -123,7 +122,6 @@ const MyAssets: React.FC = () => {
     setSelectedTicker('');
   };
 
-  // Fetch first client ID
   const fetchClientId = async () => {
     try {
       const response = await fetch('https://tradeagently.dev/get-client-list', {
@@ -202,7 +200,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
-  // Fetch quantity for a given ticker
+  // Fetch quantity for a given ticker or crypto
   const fetchAssetQuantity = async (ticker: string): Promise<number | null> => {
     try {
       const response = await fetch('https://tradeagently.dev/get-asset', {
@@ -223,7 +221,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
-  // Fetch single asset report
+  // Fetch single asset report gray button
   const fetchAssetReport = async (ticker: string) => {
     try {
       const response = await fetch('https://tradeagently.dev/get-asset-report', {
@@ -254,7 +252,7 @@ const MyAssets: React.FC = () => {
     }
   };
 
-  // NEW: Fetch AI Accounting
+  // Fetch AI Accounting
   const fetchAiAccounting = async (ticker: string) => {
     try {
       const response = await fetch('https://tradeagently.dev/get-ai-accounting', {
@@ -369,7 +367,6 @@ const MyAssets: React.FC = () => {
     }
   };
 
-  // On mount
   useEffect(() => {
     if (sessionToken) {
       fetchClientId();
@@ -377,7 +374,6 @@ const MyAssets: React.FC = () => {
     }
   }, [sessionToken]);
 
-  // On client or market change
   useEffect(() => {
     if (clientId) {
       fetchUserAssets();
@@ -441,8 +437,6 @@ const MyAssets: React.FC = () => {
               >
                 <Text style={styles.reportButtonText}>View Report</Text>
               </TouchableOpacity>
-
-              {/* NEW: "View Accounting" Button */}
               <TouchableOpacity
                 style={styles.accountingButton}
                 onPress={() => fetchAiAccounting(item.ticker)}
@@ -573,7 +567,7 @@ const MyAssets: React.FC = () => {
         </View>
       </Modal>
 
-      {/* NEW: AI Accounting Modal */}
+      {/* AI Accounting Modal */}
       <Modal
         visible={aiAccountingModalVisible}
         animationType="slide"
@@ -609,9 +603,6 @@ const MyAssets: React.FC = () => {
   );
 };
 
-// ----------------------------
-// Styles
-// ----------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -730,8 +721,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-
-  // NEW: Accounting button style
   accountingButton: {
     backgroundColor: '#6a1b9a',
     paddingVertical: 5,

@@ -11,7 +11,7 @@ const About: React.FC = () => {
       <View style={styles.box}>
         <Text style={styles.sectionTitle}>Who Are We?</Text>
         <Text style={styles.paragraph}>
-          Welcome to Trade Agently! We're a group of enthusiastic developers and business minds who came together to build an app that makes trading and managing your investments easier and more efficient. Our team is composed of students from diverse disciplines, each bringing their unique expertise to the table.
+          Welcome to Trade Agently! We're a group of enthusiastic developers  who came together to build an app that makes trading and managing your investments easier and more efficient. Our team is composed of students, each bringing their unique expertise to the table.
         </Text>
       </View>
 
@@ -28,8 +28,8 @@ const About: React.FC = () => {
           This app was developed as part of a group project for our university coursework. Each team member played a critical role—from front-end development to back-end integration, and everything in between. This collaboration has allowed us to create a well-rounded product that reflects our combined strengths.
         </Text>
         <Text style={styles.paragraph}>Here are some fun facts about our group:</Text>
-        <Text style={styles.listItem}>• Our team consists of 4 members with backgrounds in business and computer science.</Text>
-        <Text style={styles.listItem}>• We spent over 100 hours designing, coding, and refining this website, backend, AI Agents and the mobile app.</Text>
+        <Text style={styles.listItem}>• Our team consists of 4 members with backgrounds in Software Development.</Text>
+        <Text style={styles.listItem}>• We spent over 200 combined hours designing, coding, and refining this website, backend, AI Agents and the mobile app.</Text>
         <Text style={styles.listItem}>• The project has helped us learn a lot about teamwork, version control, and the challenges of building a full-stack application.</Text>
       </View>
 
@@ -70,13 +70,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    elevation: 5,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#2e86de', // Blue color for the title
+    color: '#2e86de', 
     textAlign: 'center',
   },
   sectionTitle: {
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 16,
-    color: '#e74c3c', // Red color to make the email stand out
+    color: '#e74c3c', 
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,

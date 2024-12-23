@@ -103,7 +103,6 @@ const StockSearch: React.FC = () => {
     fetchBalance();
   }, []);
 
-  // Load aggregates each time the timeframe or the selected stock changes
   useEffect(() => {
     if (selectedStock) {
       fetchStockAggregates(selectedStock.symbol);
@@ -137,8 +136,6 @@ const StockSearch: React.FC = () => {
       const data = await response.json();
       if (data.status === 'Success') {
         setUserType(data.user_type);
-
-        // If fm or fa, fetch clients
         if (data.user_type === 'fm') {
           setIsFundManager(true);
           fetchClients();
@@ -160,10 +157,7 @@ const StockSearch: React.FC = () => {
       });
       const data = await response.json();
       if (data.status === 'Success') {
-        // For 'fa', typically only 1 "client" is returned, which is actually the FA’s own user ID
         setClients(data.clients);
-
-        // If there's exactly 1 client returned, set it as selected
         if (data.clients.length === 1) {
           setSelectedClient(data.clients[0].client_id);
         }
@@ -257,7 +251,6 @@ const StockSearch: React.FC = () => {
 
   function getIntervalAndLimit(historyWindow: string): { interval: string; limit: number } {
     switch (historyWindow) {
-      // Removed the "hour" case
       case 'day':
         return { interval: 'hour', limit: 24 };
       case 'week':
@@ -685,7 +678,6 @@ const StockSearch: React.FC = () => {
                 ) : aiReportData ? (
                   <View style={styles.aiReportCard}>
                     <Text style={styles.aiReportTitle}>AI Asset Report</Text>
-                    {/* Nicely spaced paragraphs */}
                     <Text style={styles.aiReportText}>
                       {aiReportData.response}
                     </Text>
@@ -709,7 +701,7 @@ const StockSearch: React.FC = () => {
             )}
           </View>
 
-          {/* Back Button (matched size, different color) */}
+          {/* Back Button */}
           <TouchableOpacity
             style={[styles.actionButton, styles.backButton]}
             onPress={() => {
@@ -747,7 +739,7 @@ const StockSearch: React.FC = () => {
               value={buyAmount}
               onChangeText={setBuyAmount}
             />
-            {/* If user is FM or FA, allow client selection */}
+            {/* If user is FM, allow client selection */}
             {(isFundManager || userType === 'fa') && (
               <View style={styles.dropdownContainer}>
                 <Text style={styles.modalLabel}>Select Client:</Text>
@@ -769,7 +761,6 @@ const StockSearch: React.FC = () => {
                     </Picker>
                   </View>
                 ) : (
-                  // If there's exactly one client, show it as read-only
                   <Text style={styles.clientNameText}>
                     {clients.length === 1
                       ? clients[0].client_name
@@ -938,7 +929,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
-  // We added some spacing (lineHeight) for readability:
   aiReportText: {
     fontSize: 16,
     marginBottom: 10,
@@ -956,8 +946,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#333',
   },
-
-  // Shared style for action buttons (Generate AI / Back)
   actionButton: {
     padding: 12,
     borderRadius: 8,

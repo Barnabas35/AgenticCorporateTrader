@@ -95,19 +95,14 @@ const CryptoSearch: React.FC = () => {
     fetchBalance();
   }, []);
 
-  // Load aggregates each time the timeframe or the selected crypto changes
   useEffect(() => {
     if (selectedCrypto) {
       fetchCryptoAggregates(selectedCrypto.symbol);
     }
   }, [historyWindow, selectedCrypto]);
 
-  // ----------------------
-  // Utility: get interval/limit
-  // ----------------------
   const getIntervalAndLimit = (hw: string): { interval: string; limit: number } => {
     switch (hw) {
-      // Removed 'hour' in the Picker, but leaving it here won't hurt unless you want to remove completely
       case 'hour':
         return { interval: '1m', limit: 60 };
       case 'day':
@@ -193,9 +188,6 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
-  // ----------------------
-  // Fetch cryptos & search
-  // ----------------------
   const fetchTopCryptos = async (limit = 10) => {
     setLoading(true);
     setError(null);
@@ -272,9 +264,6 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
-  // ----------------------
-  // Fetch historical data
-  // ----------------------
   const fetchCryptoAggregates = async (symbol: string) => {
     setLoading(true);
     setError(null);
@@ -283,7 +272,6 @@ const CryptoSearch: React.FC = () => {
     let startDate = '';
 
     switch (historyWindow) {
-      // We removed the hour option from the UI, but the code can remain:
       case 'hour':
         startDate = endDate;
         break;
@@ -429,10 +417,6 @@ const CryptoSearch: React.FC = () => {
         );
         setBuyModalVisible(false);
         setBuyUsdQuantity('');
-
-        // *** Removed the line that sets the selectedClient to null. ***
-        // so user can continue buying for the same client
-
         fetchBalance();
       } else {
         Alert.alert('Error', data.message || 'Failed to complete the purchase.');
@@ -448,9 +432,6 @@ const CryptoSearch: React.FC = () => {
     return client ? client.client_name : 'Unknown Client';
   };
 
-  // ----------------------
-  // PRICE ALERT logic
-  // ----------------------
   const handleSetPriceAlert = (ticker: string) => {
     setAlertTicker(ticker);
     setPriceAlertModalVisible(true);
@@ -494,9 +475,6 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
-  // ----------------------
-  // AI REPORT logic
-  // ----------------------
   const fetchAiAssetReport = async () => {
     if (!selectedCrypto) return;
     setAiReportLoading(true);
@@ -515,7 +493,6 @@ const CryptoSearch: React.FC = () => {
       });
       const data = await response.json();
       if (data.status === 'success') {
-        // Insert extra blank lines for nicer paragraph spacing:
         const spacedResponse = data.response.replace(/\n/g, '\n\n');
         setAiReportData({
           response: spacedResponse,
@@ -535,9 +512,6 @@ const CryptoSearch: React.FC = () => {
     }
   };
 
-  // ----------------------
-  // Render an individual crypto row
-  // ----------------------
   const renderCryptoItem = ({ item }: { item: Crypto }) => (
     <View style={styles.cryptoItem}>
       <TouchableOpacity onPress={() => fetchCryptoDetails(item.symbol)}>
@@ -596,7 +570,7 @@ const CryptoSearch: React.FC = () => {
             </View>
           </View>
 
-          {/* Historical Data & Chart Container */}
+          {/* Historical Data & Chart Container i.e. selector etc */}
           <View style={styles.chartSection}>
             <Text style={styles.sectionTitle}>Historical Data</Text>
             <View style={styles.dropdownWrapper}>
@@ -607,7 +581,6 @@ const CryptoSearch: React.FC = () => {
                   onValueChange={(value) => setHistoryWindow(value)}
                   style={styles.pickerStyle}
                 >
-                  {/* REMOVED the Last Hour option */}
                   <Picker.Item label="Last Day" value="day" />
                   <Picker.Item label="Last Week" value="week" />
                   <Picker.Item label="Last Month" value="month" />
@@ -683,7 +656,7 @@ const CryptoSearch: React.FC = () => {
                     </Text>
                   </View>
                 ) : (
-                  // Show button to fetch AI report if subscription is active but no data fetched yet
+                  // AI button
                   <TouchableOpacity
                     style={[styles.actionButton, styles.generateReportButton]}
                     onPress={fetchAiAssetReport}
@@ -699,7 +672,7 @@ const CryptoSearch: React.FC = () => {
             )}
           </View>
 
-          {/* Back Button: matched size, different color */}
+          {/* Back Button for each asset */}
           <TouchableOpacity
             style={[styles.actionButton, styles.backButton]}
             onPress={() => {
@@ -824,6 +797,7 @@ const CryptoSearch: React.FC = () => {
   );
 };
 
+// If you are reading this have a nice day :)
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, width: '100%' },
   searchInput: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 16, paddingHorizontal: 8 },
@@ -933,7 +907,6 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-  // Shared style for action buttons
   actionButton: {
     padding: 12,
     borderRadius: 8,
@@ -947,10 +920,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   generateReportButton: {
-    backgroundColor: '#28a745', // green
+    backgroundColor: '#28a745',
   },
   backButton: {
-    backgroundColor: '#dc3545', // red
+    backgroundColor: '#dc3545', 
   },
 
   subscriptionError: {

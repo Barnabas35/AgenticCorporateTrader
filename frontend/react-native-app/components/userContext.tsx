@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
-// Define the shape of the context data
 interface UserContextType {
   username: string;
   setUsername: (username: string) => void; // Setter for username
@@ -12,16 +11,14 @@ interface UserContextType {
   setSessionToken: (token: string | null) => void; // Setter for session token
 }
 
-// Create a context with a default value of `undefined`
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Define the props for the provider, including children
 interface UserProviderProps {
   children: ReactNode;
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  // Initialize state with localStorage values if they exist
+  // Initializing state with localStorage values if they exist
   const [username, setUsername] = useState<string>(() => {
     return localStorage.getItem('username') || '';
   });
@@ -71,16 +68,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   // Value to provide to the context
   const value = {
     username,
-    setUsername, // Provide the setter function for username
+    setUsername, 
     email,
-    setEmail, // Provide the setter function for email
+    setEmail, 
     profileIconUrl,
-    setProfileIconUrl, // Provide the setter function for profile icon URL
+    setProfileIconUrl, 
     sessionToken,
-    setSessionToken, // Provide the setter function for session token
+    setSessionToken, 
   };
 
-  // Return the context provider
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
