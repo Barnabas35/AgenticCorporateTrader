@@ -44,6 +44,10 @@ def q_get_asset_report(request_json):
         client = StockAPIAccess.get_client()
         snapshot = client.get_snapshot_ticker("stocks", ticker)
         asset_usd_unit_price_current = snapshot.day.close
+
+        if asset_usd_unit_price_current == 0:
+            asset_usd_unit_price_current = snapshot.prev_day.close
+
     elif market == "crypto":
         crypto_usd = f"{ticker}-USD"
         asset_usd_unit_price_current = yf.Ticker(crypto_usd).history(period="1d")["Close"].iloc[0]
