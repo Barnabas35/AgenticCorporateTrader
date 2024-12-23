@@ -14,8 +14,8 @@ class AdminToolsAdapter(
     private val reviews: List<Review>? = null,
     private val users: List<User>? = null,
     private val context: Context,
-    private val onUserDeleteClick: ((String) -> Unit)? = null
-) : RecyclerView.Adapter<AdminToolsAdapter.ViewHolder>() {
+    private val onUserDeleteClick: ((String?) -> Unit)? = null)
+    : RecyclerView.Adapter<AdminToolsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val subjectText: TextView = view.findViewById(R.id.subjectText)
@@ -68,7 +68,7 @@ class AdminToolsAdapter(
                 holder.deleteButton.visibility = View.VISIBLE
 
                 holder.deleteButton.setOnClickListener {
-                    onUserDeleteClick?.invoke(user.client_id)
+                    onUserDeleteClick?.invoke(user.id)
                 }
             }
         }

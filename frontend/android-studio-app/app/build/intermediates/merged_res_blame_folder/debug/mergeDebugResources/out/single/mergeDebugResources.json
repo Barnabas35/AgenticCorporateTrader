@@ -1,162 +1,278 @@
 [
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_item_suggestion_crypto.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/item_suggestion_crypto.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xhdpi/ic_launcher_round.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_menu.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_menu.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_stock_selector.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_stock_selector.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_item_crypto.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/item_crypto.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-mdpi/ic_launcher_round.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_reviewpage.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_reviewpage.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable-w50dp_tradeagentlylogogray.png.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable-w50dp/tradeagentlylogogray.png"
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_ic_chart.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/ic_chart.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_launcher_background.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_launcher_background.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable-w50dp_tradeagentlylogogray.png.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable-w50dp/tradeagentlylogogray.png"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xhdpi/ic_launcher.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_item_stock.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/item_stock.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_menu_selector.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_menu_selector.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xhdpi/ic_launcher_foreground.webp"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_menu.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_menu.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xhdpi/ic_launcher.webp"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-mdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_burger_menu.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_burger_menu.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/menu/bottom_nav_menu.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_drawer_menu.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/drawer_menu.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_price_alert.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_price_alert.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_stock.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_stock.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_item_admin_tools.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/item_admin_tools.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_bottom_nav_menu.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/bottom_nav_menu.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_stock_green.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_stock_green.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_buy_manager.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_buy_manager.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/menu_ic_more.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/menu/ic_more.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_admin_tools.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_admin_tools.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-hdpi/ic_launcher.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_resolve_ticket.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_resolve_ticket.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/xml_data_extraction_rules.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/xml/data_extraction_rules.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_main.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_main.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_assets_selector.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_assets_selector.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_input_field_background.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/input_field_background.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_assets.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_assets.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_register.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_register.xml"
     },
     {
-        "merged": "com.example.act_app-debug-31:/layout_activity_menu.xml.flat",
-        "source": "com.example.act_app-main-33:/layout/activity_menu.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_stock_profile.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_stock_profile.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxxhdpi/ic_launcher_round.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_price_alert_item.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/price_alert_item.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_menu.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_menu.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_assets.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_assets.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_my_assets.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_my_assets.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_sell.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_sell.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxhdpi/ic_launcher.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_asset_item.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/asset_item.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxxhdpi/ic_launcher.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable-w50dp_tradeagentlylogo.png.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable-w50dp/tradeagentlylogo.png"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_stock.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_stock.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_price_alerts.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_price_alerts.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_main.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_main.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_ai_accounting.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_ai_accounting.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_launcher_foreground.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_menu.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_menu.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-xxhdpi/ic_launcher_round.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_market.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_market.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable-w50dp_tradeagentlylogo.png.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable-w50dp/tradeagentlylogo.png"
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_register.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_register.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_asset_report.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_asset_report.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/xml_backup_rules.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/xml/backup_rules.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_supportpage.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_supportpage.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_btn_bg.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/btn_bg.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_market.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_market.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-mdpi/ic_launcher.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_crypto_profile.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_crypto_profile.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_menu_green.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_menu_green.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_my_assets.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_my_assets.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/layout_activity_login.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/layout/activity_login.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_client_item.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/client_item.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/mipmap-hdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/mipmap-hdpi/ic_launcher_round.webp"
+        "merged": "com.tradeagently.act_app-debug-87:/layout_dialog_buy.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/dialog_buy.xml"
     },
     {
-        "merged": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-debug-31:/drawable_ic_assets_green.xml.flat",
-        "source": "/Users/luisgiliberti/.gradle/daemon/8.7/com.example.act_app-main-33:/drawable/ic_assets_green.xml"
+        "merged": "com.tradeagently.act_app-debug-87:/xml_data_extraction_rules.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_profile_placeholder.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_profile_placeholder.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_error.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_error.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_btn_bg.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/btn_bg.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_edit_text_background.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/edit_text_background.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_client_management.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_client_management.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_item_client.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/item_client.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_add_balance.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_add_balance.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_reviewdetail.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_reviewdetail.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_item_suggestion_stock.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/item_suggestion_stock.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_profile.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_profile.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_login.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_ticketdetail.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_ticketdetail.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_more_vert.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_more_vert.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_red_x.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_red_x.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_client_profile.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_client_profile.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/layout_activity_subscription.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/layout/activity_subscription.xml"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.tradeagently.act_app-main-89:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.tradeagently.act_app-debug-87:/xml_backup_rules.xml.flat",
+        "source": "com.tradeagently.act_app-main-89:/xml/backup_rules.xml"
     }
 ]
