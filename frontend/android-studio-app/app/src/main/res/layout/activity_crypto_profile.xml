@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundLight">
 
-    <!-- Toolbar with Crypto Symbol -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/cryptoProfileToolbar"
         android:layout_width="0dp"
@@ -53,7 +52,6 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-            <!-- Line Chart -->
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/cryptoLineChart"
                 android:layout_width="match_parent"
@@ -61,7 +59,6 @@
                 android:layout_marginBottom="16dp"
                 android:background="#E0E0E0" />
 
-            <!-- Timeframe Spinner and Search Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -92,7 +89,6 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <!-- Crypto Details (Open, Close, High, Low, Volume) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -140,7 +136,6 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Buy Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -162,7 +157,6 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <!-- Button container for Description and AI Forecast buttons -->
             <LinearLayout
                 android:id="@+id/buttonContainer"
                 android:layout_width="285dp"
@@ -213,10 +207,28 @@
                 android:text="AI Forecast..."
                 android:textSize="16sp"
                 android:visibility="gone" />
+
+            <FrameLayout
+                android:id="@+id/loadingOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ProgressBar
+                    android:id="@+id/loadingProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:layout_gravity="center" />
+
+            </FrameLayout>
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="0dp"

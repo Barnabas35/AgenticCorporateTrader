@@ -27,13 +27,12 @@ import retrofit2.Response
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 1001 // Request code for Google Sign-In
+    private val RC_SIGN_IN = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Initialize Firebase
         initializeFirebase()
 
         val emailEditText: EditText = findViewById(R.id.editTextEmail)
@@ -42,7 +41,6 @@ class LoginActivity : AppCompatActivity() {
         val registerTextView: TextView = findViewById(R.id.textViewRegister)
         val googleSignInButton: SignInButton = findViewById(R.id.buttonGoogleSignIn)
 
-        // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("68009005920-gkrtmda8m8hrq0273t5ptgsr1voivf0n.apps.googleusercontent.com")
             .requestEmail()
@@ -50,16 +48,13 @@ class LoginActivity : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // Handle Google Sign-In button click
         googleSignInButton.setOnClickListener {
-            // Clear cached token before initiating sign-in
             googleSignInClient.signOut().addOnCompleteListener {
                 val signInIntent = googleSignInClient.signInIntent
                 startActivityForResult(signInIntent, RC_SIGN_IN)
             }
         }
 
-        // Handle manual login
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
@@ -77,7 +72,6 @@ class LoginActivity : AppCompatActivity() {
             performLogin(email, password)
         }
 
-        // Handle register link click
         registerTextView.setOnClickListener {
             startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
         }
@@ -106,15 +100,12 @@ class LoginActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Firebase sign-in successful
                         val user = FirebaseAuth.getInstance().currentUser
                         if (user != null) {
-                            // Get the Firebase Auth token
                             user.getIdToken(true).addOnCompleteListener { tokenTask ->
                                 if (tokenTask.isSuccessful) {
                                     val firebaseToken = tokenTask.result?.token
                                     if (!firebaseToken.isNullOrEmpty()) {
-                                        // Now you have a Firebase token suitable for your backend
                                         exchangeTokens(firebaseToken)
                                     } else {
                                         Toast.makeText(this, "Could not retrieve Firebase token", Toast.LENGTH_SHORT).show()
@@ -138,7 +129,6 @@ class LoginActivity : AppCompatActivity() {
     private fun exchangeTokens(authToken: String) {
         val request = ExchangeTokensRequest(auth_token = authToken)
 
-        // Make API call
         RetrofitClient.apiService.exchangeTokens(request).enqueue(object : Callback<ExchangeTokensResponse> {
             override fun onResponse(
                 call: Call<ExchangeTokensResponse>,
@@ -148,18 +138,15 @@ class LoginActivity : AppCompatActivity() {
                     val exchangeResponse = response.body()
                     when (exchangeResponse?.status) {
                         "Success" -> {
-                            // Save the session token and proceed
                             exchangeResponse.session_token?.let {
                                 saveSessionToken(it)
                             }
                             navigateToAssetsActivity()
                         }
                         "Success: Register User" -> {
-                            // User does not exist, redirect to register with token
                             showUserTypeSelectionDialog(authToken)
                         }
                         "Invalid auth token." -> {
-                            // Show a message and sign out to retry
                             Toast.makeText(this@LoginActivity, "Invalid token. Please try signing in again.", Toast.LENGTH_LONG).show()
                             googleSignInClient.signOut().addOnCompleteListener {
                                 val signInIntent = googleSignInClient.signInIntent
@@ -199,7 +186,6 @@ class LoginActivity : AppCompatActivity() {
             }
 
             dialog.dismiss()
-            // Now call registerWithToken again, this time with the chosen userType
             registerWithToken(firebaseToken, selectedUserType)
         }
 
@@ -267,14 +253,13 @@ class LoginActivity : AppCompatActivity() {
 
     private fun initializeFirebase() {
         val options = FirebaseOptions.Builder()
-            .setApiKey("AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko") // Corrected API key
-            .setApplicationId("1:68009005920:android:2c5b77919be0a2d0e60405") // Corrected app ID
-            .setProjectId("agenticcorporatetrader") // Verified project ID
-            .setDatabaseUrl("https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app") // Corrected database URL
+            .setApiKey("AIzaSyDRxJ8lASX6gQrHbmK8hcmUjplWy-aLuko")
+            .setApplicationId("1:68009005920:android:2c5b77919be0a2d0e60405")
+            .setProjectId("agenticcorporatetrader")
+            .setDatabaseUrl("https://agenticcorporatetrader-default-rtdb.europe-west1.firebasedatabase.app")
             .build()
 
         try {
-            // Initialize Firebase only if not already initialized
             if (FirebaseApp.getApps(this).isEmpty()) {
                 FirebaseApp.initializeApp(this, options)
             }

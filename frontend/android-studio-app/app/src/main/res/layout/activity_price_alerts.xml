@@ -7,7 +7,6 @@
     android:background="@color/backgroundLight"
     tools:context=".PriceAlertsActivity">
 
-    <!-- Toolbar for Price Alerts -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/priceAlertsToolbar"
         android:layout_width="0dp"
@@ -29,7 +28,6 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- TextView for "Your Price Alerts" -->
     <TextView
         android:id="@+id/priceAlertsHeader"
         android:layout_width="wrap_content"
@@ -43,7 +41,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- TextView to display when no alerts exist -->
     <TextView
         android:id="@+id/noAlertsTextView"
         android:layout_width="wrap_content"
@@ -58,7 +55,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- RecyclerView for listing price alerts -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPriceAlerts"
         android:layout_width="match_parent"
@@ -68,7 +64,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/priceAlertsHeader" />
 
-    <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

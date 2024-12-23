@@ -30,7 +30,6 @@ class StockSuggestionAdapter(
             onSuggestionClick(suggestion)
         }
 
-        // Only show the bottom divider except for the last item
         holder.bottomDivider.visibility = if (position == itemCount - 1) View.GONE else View.VISIBLE
     }
 

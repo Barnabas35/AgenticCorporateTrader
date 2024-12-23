@@ -31,27 +31,20 @@ class ProfileActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         sessionToken = sharedPreferences.getString("session_token", null)
 
-        // Redirect to login if token is null
         if (sessionToken == null) {
             navigateToLogin()
             return
         }
 
-        // Fetch and display user information each time the user opens this activity
         fetchUserDetails(sessionToken!!)
 
-        // Logout button functionality
         findViewById<Button>(R.id.logoutButton).setOnClickListener {
             clearUserDetails()
             navigateToMainActivity()
         }
-
-        // Delete account functionality with confirmation dialog
-        // (We will set up the delete button after fetching user details)
     }
 
     private fun fetchUserDetails(token: String) {
-        // 1) Fetch Username
         RetrofitClient.apiService.getUsername(TokenRequest(token)).enqueue(object : Callback<UsernameResponse> {
             override fun onResponse(call: Call<UsernameResponse>, response: Response<UsernameResponse>) {
                 val username = if (response.isSuccessful && response.body()?.status == "Success") {
@@ -60,17 +53,14 @@ class ProfileActivity : AppCompatActivity() {
                     "Unknown"
                 }
 
-                // Save username
                 sharedPreferences.edit().putString("user_name", username).apply()
 
-                // Now fetch email
                 fetchUserEmail(token)
             }
 
             override fun onFailure(call: Call<UsernameResponse>, t: Throwable) {
                 Log.e("ProfileActivity", "Failed to fetch username: ${t.message}")
                 sharedPreferences.edit().putString("user_name", "Unknown").apply()
-                // Still attempt to fetch email
                 fetchUserEmail(token)
             }
         })
@@ -85,17 +75,14 @@ class ProfileActivity : AppCompatActivity() {
                     "Unknown"
                 }
 
-                // Save email
                 sharedPreferences.edit().putString("user_email", email).apply()
 
-                // Now fetch profile icon
                 fetchProfileIcon(token)
             }
 
             override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
                 Log.e("ProfileActivity", "Failed to fetch email: ${t.message}")
                 sharedPreferences.edit().putString("user_email", "Unknown").apply()
-                // Still attempt to fetch profile icon
                 fetchProfileIcon(token)
             }
         })
@@ -115,14 +102,12 @@ class ProfileActivity : AppCompatActivity() {
                     sharedPreferences.edit().remove("profile_icon_url").apply()
                 }
 
-                // Fetch user type if needed, then set up UI
                 fetchUserTypeIfNeeded(token)
             }
 
             override fun onFailure(call: Call<ProfileIconResponse>, t: Throwable) {
                 Log.e("ProfileActivity", "Failed to fetch profile icon: ${t.message}")
                 sharedPreferences.edit().remove("profile_icon_url").apply()
-                // Fetch user type if needed, then set up UI
                 fetchUserTypeIfNeeded(token)
             }
         })
@@ -140,26 +125,22 @@ class ProfileActivity : AppCompatActivity() {
                     }
                     sharedPreferences.edit().putString("user_type", userType).apply()
 
-                    // Now that all details are fetched, setup UI
                     setupUI()
                 }
 
                 override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
                     Log.e("ProfileActivity", "Failed to fetch user type: ${t.message}")
                     sharedPreferences.edit().putString("user_type", "Unknown").apply()
-                    // Setup UI anyway
                     setupUI()
                 }
             })
         } else {
-            // If user type already known, just setup UI
             setupUI()
         }
     }
 
     private fun setupUI() {
         setupUserInfo(sharedPreferences)
-        // Setup the delete account button now that we have user_type
         sessionToken?.let { setupDeleteAccountButton(sharedPreferences, it) }
     }
 
@@ -184,7 +165,6 @@ class ProfileActivity : AppCompatActivity() {
                 .load(profileIconUrl)
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .error(R.drawable.ic_error)
-                // Apply the circle crop transformation
                 .circleCrop()
                 .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
                     override fun onLoadFailed(
@@ -241,11 +221,9 @@ class ProfileActivity : AppCompatActivity() {
         RetrofitClient.apiService.deleteUser(requestBody).enqueue(object : Callback<DeleteUserResponse> {
             override fun onResponse(call: Call<DeleteUserResponse>, response: Response<DeleteUserResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
-                    // Successful delete response
                     clearUserDetails()
                     navigateToLogin()
                 } else if (response.code() == 500) {
-                    // Assume deletion succeeded if server returns 500 but still deletes
                     Log.w("DELETE_ACCOUNT_WARNING", "Server returned 500, but account likely deleted.")
                     Toast.makeText(this@ProfileActivity, "Account deleted successfully.", Toast.LENGTH_SHORT).show()
                     clearUserDetails()

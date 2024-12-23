@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -37,6 +38,8 @@ class MyAssetsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_my_assets)
 
         NavigationHelper.setupBottomNavigation(this, R.id.nav_my_assets)
+
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         sessionToken = prefs.getString("session_token", "") ?: ""
@@ -118,7 +121,6 @@ class MyAssetsActivity : AppCompatActivity() {
         }
     }
 
-
     private fun fetchInitialData() {
         when (userType) {
             "fm" -> fetchClientList()
@@ -129,7 +131,7 @@ class MyAssetsActivity : AppCompatActivity() {
 
     private fun setButtonSelected(button: Button, isSelected: Boolean) {
         button.isSelected = isSelected
-        button.setTextColor(resources.getColor(if (isSelected) android.R.color.white else android.R.color.white))
+        button.setTextColor(resources.getColor(android.R.color.white))
     }
 
     private fun fetchUserBalance() {
@@ -258,10 +260,10 @@ class MyAssetsActivity : AppCompatActivity() {
                 holder.itemView.setOnClickListener {
                     val selectedClient = clients[position]
 
-                    // Start ClientProfileActivity
                     val intent = Intent(this@MyAssetsActivity, ClientProfileActivity::class.java)
                     intent.putExtra("client_id", selectedClient.client_id)
                     intent.putExtra("client_name", selectedClient.client_name)
+                    intent.putExtra("myUserClientId", selectedClient.client_id)
                     startActivity(intent)
                     overridePendingTransition(0, 0)
                 }
@@ -293,7 +295,6 @@ class MyAssetsActivity : AppCompatActivity() {
 
                 assetName.text = ticker
 
-                // Fetch and display the asset quantity
                 val request = GetAssetRequest(
                     session_token = sessionToken,
                     market = market,
@@ -318,7 +319,6 @@ class MyAssetsActivity : AppCompatActivity() {
                         }
                     })
 
-                // Open specific profile activity on item click
                 holder.itemView.setOnClickListener {
                     if (market == "stocks") {
                         fetchTickerInfoAndOpenStockProfile(ticker)
@@ -327,25 +327,27 @@ class MyAssetsActivity : AppCompatActivity() {
                     }
                 }
 
-                // Handle Buy button click
                 buyButton.setOnClickListener {
                     openBuyDialog(ticker)
                 }
 
-                // Handle Sell button click
                 sellButton.setOnClickListener {
                     openSellDialog(ticker)
                 }
 
-                // Handle More button click
                 settingsButton.setOnClickListener {
-                    val options = arrayOf("Asset Report", "Asset Email Notification")
+                    val options = arrayOf(
+                        "Asset Report",
+                        "Asset Email Notification",
+                        "Asset Accounting"
+                    )
                     val builder = AlertDialog.Builder(this@MyAssetsActivity)
                     builder.setTitle("More")
                     builder.setItems(options) { _, which ->
                         when (which) {
                             0 -> fetchAssetReport(ticker)
                             1 -> showEmailNotificationSettings(ticker)
+                            2 -> fetchAiAccounting(ticker)
                         }
                     }
                     builder.create().show()
@@ -378,6 +380,7 @@ class MyAssetsActivity : AppCompatActivity() {
                         putExtra("homepage", tickerInfo.homepage)
                     }
                     startActivity(intent)
+                    overridePendingTransition(0, 0)
                 } else {
                     Toast.makeText(this@MyAssetsActivity, "Failed to fetch stock info", Toast.LENGTH_SHORT).show()
                 }
@@ -427,6 +430,39 @@ class MyAssetsActivity : AppCompatActivity() {
     private fun logApiError(response: Response<*>) {
         val errorBody = response.errorBody()?.string()
         Log.e("API_ERROR", "Status: ${response.code()}, Error: $errorBody")
+    }
+
+    private fun fetchAiAccounting(ticker: String) {
+        if (sessionToken.isEmpty()) {
+            Toast.makeText(this, "Session token missing. Please log in again.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val market = if (buttonStock.isSelected) "stocks" else "crypto"
+        val request = AiAccountingRequest(
+            session_token = sessionToken,
+            market = market,
+            ticker = ticker,
+            client_id = client_id
+        )
+
+        RetrofitClient.apiService.getAiAccounting(request).enqueue(object : Callback<AiAccountingResponse> {
+            override fun onResponse(call: Call<AiAccountingResponse>, response: Response<AiAccountingResponse>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val accResp = response.body()!!
+                    showAiAccountingDialog(ticker, accResp)
+                } else {
+                    Toast.makeText(this@MyAssetsActivity, "Failed to fetch AI accounting.", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("AIAccounting", "HTTP Error: ${response.code()}, $errorBody")
+                }
+            }
+
+            override fun onFailure(call: Call<AiAccountingResponse>, t: Throwable) {
+                Log.e("AIAccounting", "API Failure: ${t.message}")
+                Toast.makeText(this@MyAssetsActivity, "Error fetching AI accounting data.", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun openBuyDialog(ticker: String) {
@@ -486,7 +522,7 @@ class MyAssetsActivity : AppCompatActivity() {
                         "Successfully bought $ticker!",
                         Toast.LENGTH_SHORT
                     ).show()
-                    fetchUserAssetsForSelf() // Refresh asset list
+                    fetchUserAssetsForSelf()
                 } else {
                     logApiError(response)
                     Toast.makeText(
@@ -589,13 +625,12 @@ class MyAssetsActivity : AppCompatActivity() {
         val totalInvestedTextView = dialogView.findViewById<TextView>(R.id.totalInvestedTextView)
         val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
-        // Populate the dialog with report data
         tickerTextView.text = "Ticker: $ticker"
         profitTextView.text = "Profit: $%.2f".format(report.profit)
         totalInvestedTextView.text = "Total Invested: $%.2f".format(report.total_usd_invested)
 
-        // Create and show the dialog
         val dialog = AlertDialog.Builder(this)
+            .setTitle("Asset Report")
             .setView(dialogView)
             .setCancelable(true)
             .create()
@@ -608,16 +643,13 @@ class MyAssetsActivity : AppCompatActivity() {
     }
 
     private fun showEmailNotificationSettings(ticker: String) {
-        // Inflate the dialog layout
         val dialogView = layoutInflater.inflate(R.layout.dialog_price_alert, null)
         val tickerTextView: TextView = dialogView.findViewById(R.id.tickerTextView)
         val priceInput: EditText = dialogView.findViewById(R.id.priceInput)
         val setAlertButton: Button = dialogView.findViewById(R.id.setAlertButton)
 
-        // Set the ticker in the TextView
         tickerTextView.text = "Ticker: $ticker"
 
-        // Create and show the dialog
         val dialog = AlertDialog.Builder(this)
             .setTitle("Set Price Alert")
             .setView(dialogView)
@@ -628,7 +660,6 @@ class MyAssetsActivity : AppCompatActivity() {
 
         setAlertButton.setOnClickListener {
             val price = priceInput.text.toString().toDoubleOrNull()
-
             if (price != null && price > 0) {
                 dialog.dismiss()
                 setPriceAlert(ticker, price)
@@ -644,7 +675,6 @@ class MyAssetsActivity : AppCompatActivity() {
             return
         }
 
-        // Create the API request
         val request = SetPriceAlertRequest(
             session_token = sessionToken,
             ticker = ticker,
@@ -652,7 +682,6 @@ class MyAssetsActivity : AppCompatActivity() {
             market = if (buttonStock.isSelected) "stocks" else "crypto"
         )
 
-        // Send the request
         RetrofitClient.apiService.createPriceAlert(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
@@ -670,4 +699,31 @@ class MyAssetsActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun showAiAccountingDialog(ticker: String, accResp: AiAccountingResponse) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_ai_accounting, null)
+        val tickerTextView: TextView = dialogView.findViewById(R.id.tickerTextView)
+        val growthTextView: TextView = dialogView.findViewById(R.id.growthTextView)
+        val liquidityTextView: TextView = dialogView.findViewById(R.id.liquidityTextView)
+        val profitabilityTextView: TextView = dialogView.findViewById(R.id.profitabilityTextView)
+        val closeButton: Button = dialogView.findViewById(R.id.closeButton)
+
+        tickerTextView.text = "Ticker: $ticker"
+        growthTextView.text = accResp.asset_growth
+        liquidityTextView.text = accResp.asset_liquidity
+        profitabilityTextView.text = accResp.asset_profitability
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Asset Accounting")
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
 }
+

@@ -26,10 +26,8 @@ class SubscriptionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subscription)
 
-        // Set up the bottom navigation
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Initialize views
         subscriptionStatusText = findViewById(R.id.subscriptionStatusText)
         subscriptionPeriodText = findViewById(R.id.subscriptionPeriodText)
         subscriptionRenewText = findViewById(R.id.subscriptionRenewText)
@@ -37,7 +35,6 @@ class SubscriptionActivity : AppCompatActivity() {
         activateSubscriptionButton = findViewById(R.id.activateSubscriptionButton)
         cancelSubscriptionButton = findViewById(R.id.cancelSubscriptionButton)
 
-        // Fetch session token
         sessionToken = getSharedPreferences("app_prefs", MODE_PRIVATE)
             .getString("session_token", "") ?: ""
 
@@ -47,10 +44,8 @@ class SubscriptionActivity : AppCompatActivity() {
             return
         }
 
-        // Load subscription details
         getSubscriptionDetails()
 
-        // Button actions
         activateSubscriptionButton.setOnClickListener {
             activateSubscription()
         }
@@ -88,12 +83,10 @@ class SubscriptionActivity : AppCompatActivity() {
                         subscriptionPeriodText.text = "Valid Until: $endDate"
                         subscriptionRenewText.text = "Auto-Renews: $autoRenew"
 
-                        // Ensure the views refresh
                         subscriptionStatusText.invalidate()
                         subscriptionPeriodText.invalidate()
                         subscriptionRenewText.invalidate()
 
-                        // Update button visibility
                         activateSubscriptionButton.isEnabled = !isActive
                         cancelSubscriptionButton.isEnabled = isActive
                     } else if (subscriptionDetails?.status == "Insufficient balance.") {
@@ -126,7 +119,7 @@ class SubscriptionActivity : AppCompatActivity() {
                     val actionResponse = response.body()
                     if (actionResponse?.status == "success") {
                         Toast.makeText(this@SubscriptionActivity, "Subscription activated successfully!", Toast.LENGTH_SHORT).show()
-                        getSubscriptionDetails() // Automatically update subscription data
+                        getSubscriptionDetails()
                     } else if (actionResponse?.status == "Insufficient balance.") {
                         Toast.makeText(this@SubscriptionActivity, "Insufficient balance to activate subscription.", Toast.LENGTH_SHORT).show()
                     }
@@ -153,7 +146,7 @@ class SubscriptionActivity : AppCompatActivity() {
                     val actionResponse = response.body()
                     if (actionResponse?.status == "success") {
                         Toast.makeText(this@SubscriptionActivity, "Subscription canceled successfully.", Toast.LENGTH_SHORT).show()
-                        getSubscriptionDetails() // Automatically update subscription data
+                        getSubscriptionDetails()
                     } else {
                         Toast.makeText(this@SubscriptionActivity, "Failed to cancel subscription.", Toast.LENGTH_SHORT).show()
                     }

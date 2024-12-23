@@ -6,7 +6,6 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
-    <!-- Linear layout to hold symbol and company name in a single row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +13,6 @@
         android:gravity="center_vertical"
         android:weightSum="10">
 
-        <!-- Stock Symbol with Bold Style -->
         <TextView
             android:id="@+id/symbolText"
             android:layout_width="0dp"
@@ -28,7 +26,6 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp" />
 
-        <!-- Separator between symbol and company name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +36,6 @@
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
-        <!-- Company Name with ellipsis if too long -->
         <TextView
             android:id="@+id/companyName"
             android:layout_width="0dp"
@@ -55,7 +51,6 @@
 
     </LinearLayout>
 
-    <!-- Bottom Divider, visibility controlled dynamically in adapter -->
     <View
         android:id="@+id/bottomDivider"
         android:layout_width="match_parent"

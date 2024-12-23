@@ -29,7 +29,6 @@ class AdminToolsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_admin_tools)
         NavigationHelper.setupBottomNavigation(this, -1)
 
-        // Initialize UI elements
         ticketButton = findViewById(R.id.buttonTicket)
         reviewButton = findViewById(R.id.buttonReview)
         usersButton = findViewById(R.id.buttonUsers)
@@ -38,30 +37,27 @@ class AdminToolsActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Fetch session token
         val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         sessionToken = sharedPreferences.getString("session_token", null)
 
-        // Default selection for TICKETS and OPEN TICKETS
         setButtonSelected(ticketButton, true)
         setFilterButtonSelected(filterOpenButton, true)
-        showFilterButtons(true) // Show filter buttons when in the TICKETS section
+        showFilterButtons(true)
         fetchSupportTickets()
 
-        // Button listeners
         ticketButton.setOnClickListener {
             setButtonSelected(ticketButton, true)
-            showFilterButtons(true) // Show filter buttons when in the TICKETS section
+            showFilterButtons(true)
             fetchSupportTickets()
         }
         reviewButton.setOnClickListener {
             setButtonSelected(reviewButton, true)
-            showFilterButtons(false) // Hide filter buttons when in the REVIEWS section
+            showFilterButtons(false)
             fetchReviews()
         }
         usersButton.setOnClickListener {
             setButtonSelected(usersButton, true)
-            showFilterButtons(false) // Hide filter buttons when in the USERS section
+            showFilterButtons(false)
             fetchUsers()
         }
 
@@ -113,7 +109,6 @@ class AdminToolsActivity : AppCompatActivity() {
                             else -> allTickets
                         }
 
-                        // Set filtered tickets in the adapter
                         adapter = AdminToolsAdapter(tickets = filteredTickets, context = this@AdminToolsActivity)
                         recyclerView.adapter = adapter
                     } else {
@@ -156,7 +151,7 @@ class AdminToolsActivity : AppCompatActivity() {
                     if (response.isSuccessful && response.body()?.status == "Success") {
                         val users = response.body()?.user_list?.filter { it.user_type != "admin" } ?: emptyList()
                         adapter = AdminToolsAdapter(users = users, context = this@AdminToolsActivity) { userId ->
-                            confirmUserDeletion(userId) // Call confirmUserDeletion here
+                            confirmUserDeletion(userId)
                         }
                         recyclerView.adapter = adapter
                     } else {
@@ -186,7 +181,7 @@ class AdminToolsActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     if (response.isSuccessful && response.body()?.status == "Success") {
                         Toast.makeText(this@AdminToolsActivity, "User deleted successfully", Toast.LENGTH_SHORT).show()
-                        fetchUsers() // Refresh user list
+                        fetchUsers()
                     } else {
                         Toast.makeText(this@AdminToolsActivity, "Failed to delete user", Toast.LENGTH_SHORT).show()
                     }

@@ -36,7 +36,6 @@ class AdminToolsAdapter(
                 holder.descriptionText.text = ticket.issue_description
                 holder.deleteButton.visibility = View.GONE
 
-                // Set click listener to navigate to TicketDetailsActivity
                 holder.itemView.setOnClickListener {
                     val intent = Intent(context, TicketDetailsActivity::class.java).apply {
                         putExtra("issue_subject", ticket.issue_subject)
@@ -54,7 +53,6 @@ class AdminToolsAdapter(
                 holder.descriptionText.text = review.comment
                 holder.deleteButton.visibility = View.GONE
 
-                // Set click listener to navigate to ReviewDetailsActivity
                 holder.itemView.setOnClickListener {
                     val intent = Intent(context, ReviewDetailsActivity::class.java).apply {
                         putExtra("score", review.score)
@@ -69,7 +67,6 @@ class AdminToolsAdapter(
                 holder.descriptionText.text = "Email: ${user.email}"
                 holder.deleteButton.visibility = View.VISIBLE
 
-                // Handle delete button click
                 holder.deleteButton.setOnClickListener {
                     onUserDeleteClick?.invoke(user.client_id)
                 }

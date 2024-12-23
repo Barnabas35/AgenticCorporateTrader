@@ -8,6 +8,7 @@ import android.graphics.Color.BLUE
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.LineChart
@@ -39,44 +40,24 @@ class StockProfileActivity : AppCompatActivity() {
     private lateinit var descriptionStockButton: Button
     private lateinit var aiForecastStockButton: Button
     private lateinit var aiForecastResponseTextView: TextView
-
+    private lateinit var loadingOverlay: FrameLayout
     private var userType: String = ""
     private var clientId: String = ""
     private var clients: List<Client> = emptyList()
-
-    // Keep track of current timeframe
     private var currentTimeframe: String = "Last Day"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stock_profile)
-
-        // Set up the bottom navigation
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         NavigationHelper.setupBottomNavigation(this, -1)
-
-        // Initialize views
         initializeViews()
-
-        // Fetch user details (user type, client ID if applicable)
         fetchUserDetails()
-
-        // Display stock info from Intent
         displayStockInfoFromIntent()
-
-        // Fetch default aggregates (e.g., Last Day)
         fetchDefaultAggregates()
-
-        // Handle "SEARCH" button click
-        searchButton.setOnClickListener {
-            val selectedTimeframe = timeframeSpinner.selectedItem.toString()
-            currentTimeframe = selectedTimeframe
-            applyTimeframeFilter(selectedTimeframe)
-        }
-
-        // Handle Buy Button Click
         val buyButton: Button = findViewById(R.id.buyStockButton)
         buyButton.setOnClickListener {
-            val ticker = intent.getStringExtra("symbol") ?: "AAPL" // Default to AAPL
+            val ticker = intent.getStringExtra("symbol") ?: "AAPL"
             openBuyDialog(ticker)
         }
     }
@@ -98,58 +79,52 @@ class StockProfileActivity : AppCompatActivity() {
         descriptionStockButton = findViewById(R.id.descriptionStock)
         aiForecastStockButton = findViewById(R.id.aiForecastStock)
         aiForecastResponseTextView = findViewById(R.id.aiForecastResponseTextView)
-
-        // Populate timeframeSpinner with options
+        loadingOverlay = findViewById(R.id.loadingOverlay)
         val options = listOf("Last Hour", "Last Day", "Last Week", "Last Month", "Last Year")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         timeframeSpinner.adapter = adapter
-        timeframeSpinner.setSelection(1) // Default to Last Day
-
-        // Set default visibility for description and button colors
-        showDescription() // Default to showing description
+        timeframeSpinner.setSelection(1)
+        showDescription()
         toggleButtonColors(descriptionStockButton, aiForecastStockButton)
-
-        // Handle "Description" Button Click
         descriptionStockButton.setOnClickListener {
             showDescription()
             toggleButtonColors(descriptionStockButton, aiForecastStockButton)
         }
-
-        // Handle "AI Forecast" Button Click
         aiForecastStockButton.setOnClickListener {
+            showLoadingOverlay()
+            descriptionTextView.visibility = View.GONE
             val ticker = intent.getStringExtra("symbol") ?: "AAPL"
             fetchAiAssetReport(ticker)
             toggleButtonColors(aiForecastStockButton, descriptionStockButton)
         }
+        searchButton.setOnClickListener {
+            val selectedTimeframe = timeframeSpinner.selectedItem.toString()
+            currentTimeframe = selectedTimeframe
+            applyTimeframeFilter(selectedTimeframe)
+        }
     }
 
     private fun fetchUserDetails() {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val sessionToken = sharedPreferences.getString("session_token", null)
-
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = prefs.getString("session_token", null)
         if (sessionToken.isNullOrEmpty()) {
             Toast.makeText(this, "Session token is missing. Please log in.", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // Fetch user type
-        val userTypeRequest = TokenRequest(sessionToken)
-        RetrofitClient.apiService.getUserType(userTypeRequest).enqueue(object : Callback<UserTypeResponse> {
+        val request = TokenRequest(sessionToken)
+        RetrofitClient.apiService.getUserType(request).enqueue(object : Callback<UserTypeResponse> {
             override fun onResponse(call: Call<UserTypeResponse>, response: Response<UserTypeResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
                     userType = response.body()?.user_type.toString()
                     Log.d("StockProfileActivity", "User type: $userType")
-
-                    // Fetch client_id if user is FA
-                    if (userType == "fa") {
+                    if (userType == "fa" || userType == "fm") {
                         fetchClientId(sessionToken)
                     }
                 } else {
                     Toast.makeText(this@StockProfileActivity, "Failed to fetch user type.", Toast.LENGTH_SHORT).show()
                 }
             }
-
             override fun onFailure(call: Call<UserTypeResponse>, t: Throwable) {
                 Log.e("StockProfileActivity", "Error fetching user type: ${t.message}")
             }
@@ -171,7 +146,6 @@ class StockProfileActivity : AppCompatActivity() {
                     Toast.makeText(this@StockProfileActivity, "Failed to fetch client list.", Toast.LENGTH_SHORT).show()
                 }
             }
-
             override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
                 Log.e("StockProfileActivity", "Error fetching client list: ${t.message}")
             }
@@ -189,7 +163,6 @@ class StockProfileActivity : AppCompatActivity() {
         val openPrice = intent.getDoubleExtra("open_price", 0.0)
         val volume = intent.getDoubleExtra("volume", 0.0)
         val homepage = intent.getStringExtra("homepage")
-
         symbolTextView.text = symbol ?: "N/A"
         companyNameTextView.text = companyName ?: "N/A"
         closePriceTextView.text = "Close Price: ${String.format("%.2f", closePrice)}"
@@ -202,14 +175,75 @@ class StockProfileActivity : AppCompatActivity() {
         homepageTextView.text = homepage ?: "No homepage available"
     }
 
-    private fun toggleButtonColors(selectedButton: Button, otherButton: Button) {
-        selectedButton.setBackgroundResource(R.drawable.btn_bg) // Use drawable for round button
-        selectedButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4caf50")) // Selected color (Green)
-        selectedButton.setTextColor(Color.WHITE)
+    private fun showLoadingOverlay() {
+        loadingOverlay.visibility = View.VISIBLE
+    }
 
-        otherButton.setBackgroundResource(R.drawable.btn_bg) // Use drawable for round button
-        otherButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333")) // Unselected color (Gray)
-        otherButton.setTextColor(Color.WHITE)
+    private fun hideLoadingOverlay() {
+        loadingOverlay.visibility = View.GONE
+    }
+
+    private fun displayNoSubscriptionMessage() {
+        aiForecastResponseTextView.text = "No Subscription. Please go to AI Subscription to unlock this feature."
+        aiForecastResponseTextView.visibility = View.VISIBLE
+    }
+
+    private fun fetchAiAssetReport(ticker: String) {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = prefs.getString("session_token", null)
+        if (sessionToken.isNullOrEmpty()) {
+            hideLoadingOverlay()
+            displayNoSubscriptionMessage()
+            return
+        }
+        aiForecastStockButton.isEnabled = false
+        Log.d("StockProfileActivity", "fetchAiAssetReport -> START for $ticker")
+        val request = AiAssetReportRequest(session_token = sessionToken, market = "stocks", ticker = ticker)
+        RetrofitClient.apiService.getAiAssetReport(request).enqueue(object : Callback<AiAssetReportResponse> {
+            override fun onResponse(call: Call<AiAssetReportResponse>, response: Response<AiAssetReportResponse>) {
+                aiForecastStockButton.isEnabled = true
+                hideLoadingOverlay()
+                if (response.isSuccessful) {
+                    val aiBody = response.body()
+                    if (aiBody == null) {
+                        Toast.makeText(this@StockProfileActivity, "An error has occurred.", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                    if (aiBody.status.equals("No active subscription.", ignoreCase = true)) {
+                        displayNoSubscriptionMessage()
+                        return
+                    } else if (!aiBody.status.equals("success", ignoreCase = true)) {
+                        Toast.makeText(this@StockProfileActivity, "An error has occurred.", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                    val future = aiBody.future ?: "No future prediction"
+                    val recommend = aiBody.recommend ?: "No recommendation"
+                    val mainText = aiBody.response
+                    val forecastReport = """
+                        Prediction: $future
+                        Recommendation: $recommend
+
+                        $mainText
+                    """.trimIndent()
+                    aiForecastResponseTextView.text = forecastReport
+                    aiForecastResponseTextView.visibility = View.VISIBLE
+                } else {
+                    val errorBody = response.errorBody()?.string().orEmpty()
+                    if (errorBody.contains("No active subscription.", ignoreCase = true)) {
+                        displayNoSubscriptionMessage()
+                    } else {
+                        Toast.makeText(this@StockProfileActivity, "An error has occurred.", Toast.LENGTH_SHORT).show()
+                    }
+                    Log.e("StockProfileActivity", "fetchAiAssetReport -> FAIL: $errorBody")
+                }
+            }
+            override fun onFailure(call: Call<AiAssetReportResponse>, t: Throwable) {
+                aiForecastStockButton.isEnabled = true
+                hideLoadingOverlay()
+                Log.e("StockProfileActivity", "fetchAiAssetReport -> ERROR: ${t.message}")
+                Toast.makeText(this@StockProfileActivity, "An error has occurred.", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun showDescription() {
@@ -217,45 +251,16 @@ class StockProfileActivity : AppCompatActivity() {
         descriptionTextView.visibility = View.VISIBLE
     }
 
-    private fun fetchAiAssetReport(ticker: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val sessionToken = sharedPreferences.getString("session_token", null)
-
-        if (sessionToken.isNullOrEmpty()) {
-            Toast.makeText(this, "Session token is missing. Please log in.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        aiForecastStockButton.isEnabled = false
-
-        val request = AiAssetReportRequest(session_token = sessionToken, market = "stocks", ticker = ticker)
-        RetrofitClient.apiService.getAiAssetReport(request).enqueue(object : Callback<AiAssetReportResponse> {
-            override fun onResponse(call: Call<AiAssetReportResponse>, response: Response<AiAssetReportResponse>) {
-                aiForecastStockButton.isEnabled = true
-
-                if (response.isSuccessful && response.body()?.status == "success") {
-                    val aiResponse = response.body()
-                    val future = aiResponse?.future ?: "No future prediction"
-                    val recommend = aiResponse?.recommend ?: "No recommendation"
-
-                    val detailedReport = "${aiResponse?.response}\n\nPrediction: $future\nRecommendation: $recommend"
-                    aiForecastResponseTextView.text = detailedReport
-                    aiForecastResponseTextView.visibility = View.VISIBLE
-                    descriptionTextView.visibility = View.GONE
-                } else {
-                    Toast.makeText(this@StockProfileActivity, "Failed to fetch AI Forecast.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<AiAssetReportResponse>, t: Throwable) {
-                aiForecastStockButton.isEnabled = true
-                Toast.makeText(this@StockProfileActivity, "Error fetching AI Forecast.", Toast.LENGTH_SHORT).show()
-            }
-        })
+    private fun toggleButtonColors(selectedButton: Button, otherButton: Button) {
+        selectedButton.setBackgroundResource(R.drawable.btn_bg)
+        selectedButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4caf50"))
+        selectedButton.setTextColor(Color.WHITE)
+        otherButton.setBackgroundResource(R.drawable.btn_bg)
+        otherButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333"))
+        otherButton.setTextColor(Color.WHITE)
     }
 
     private fun fetchDefaultAggregates() {
-        // Default to "Last Day"
         currentTimeframe = "Last Day"
         applyTimeframeFilter("Last Day")
     }
@@ -264,7 +269,6 @@ class StockProfileActivity : AppCompatActivity() {
         currentTimeframe = timeframe
         val now = Calendar.getInstance()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
         val (startCalendar, interval) = when (timeframe) {
             "Last Hour" -> {
                 now.add(Calendar.HOUR_OF_DAY, -1)
@@ -291,10 +295,8 @@ class StockProfileActivity : AppCompatActivity() {
                 Pair(now, "hour")
             }
         }
-
         val startDate = dateFormat.format(startCalendar.time)
         val endDate = dateFormat.format(Calendar.getInstance().time)
-
         fetchTickerAggregates(startDate, endDate, interval, timeframe)
     }
 
@@ -304,16 +306,14 @@ class StockProfileActivity : AppCompatActivity() {
         interval: String,
         timeframe: String
     ) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val sessionToken = sharedPreferences.getString("session_token", null)
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = prefs.getString("session_token", null)
         val ticker = intent.getStringExtra("symbol") ?: "AAPL"
-
         if (sessionToken == null) {
             Log.e("StockProfileActivity", "Session token is missing.")
             lineChart.setNoDataText("Please log in to view this data.")
             return
         }
-
         val request = TickerAggregatesRequest(
             ticker = ticker,
             session_token = sessionToken,
@@ -322,7 +322,6 @@ class StockProfileActivity : AppCompatActivity() {
             interval = interval,
             limit = 100
         )
-
         RetrofitClient.apiService.getTickerAggregates(request).enqueue(object : Callback<TickerAggregatesResponse> {
             override fun onResponse(
                 call: Call<TickerAggregatesResponse>,
@@ -334,12 +333,10 @@ class StockProfileActivity : AppCompatActivity() {
                         lineChart.setNoDataText("No data available for the selected range.")
                         lineChart.invalidate()
                     } else {
-                        // If timeframe is "Last Hour", filter data to only the last 60 minutes
                         if (timeframe == "Last Hour") {
                             data = filterLastHourData(data)
                         }
-
-                        if (data.isNullOrEmpty()) {
+                        if (data.isEmpty()) {
                             lineChart.setNoDataText("No data in the last hour.")
                             lineChart.invalidate()
                         } else {
@@ -351,7 +348,6 @@ class StockProfileActivity : AppCompatActivity() {
                     lineChart.invalidate()
                 }
             }
-
             override fun onFailure(call: Call<TickerAggregatesResponse>, t: Throwable) {
                 Log.e("StockProfileActivity", "Error: ${t.message}")
                 lineChart.setNoDataText("Error fetching data. Check your connection.")
@@ -363,8 +359,6 @@ class StockProfileActivity : AppCompatActivity() {
     private fun filterLastHourData(aggregates: List<TickerAggregate>): List<TickerAggregate> {
         val now = System.currentTimeMillis()
         val oneHourMillis = 60 * 60 * 1000L
-
-        // Keep only points from the last 60 minutes
         return aggregates.filter { aggregate ->
             val diff = now - aggregate.timestamp
             diff in 0..oneHourMillis
@@ -374,33 +368,26 @@ class StockProfileActivity : AppCompatActivity() {
     private fun updateChartWithData(aggregates: List<TickerAggregate>) {
         val entries = mutableListOf<Entry>()
         val dateLabels = mutableListOf<String>()
-
-        // Sort by timestamp to ensure chronological order
         val sortedAggregates = aggregates.sortedBy { it.timestamp }
-
-        // If we are showing Last Hour data, display times. Otherwise, display dates
         val displayHourForLastHour = currentTimeframe == "Last Hour"
         val dateFormat = if (displayHourForLastHour) {
             SimpleDateFormat("HH:mm", Locale.getDefault())
         } else {
             SimpleDateFormat("dd/MM", Locale.getDefault())
         }
-
         sortedAggregates.forEachIndexed { index, aggregate ->
             val closePrice = aggregate.close.toFloat()
             val date = Date(aggregate.timestamp)
             dateLabels.add(dateFormat.format(date))
             entries.add(Entry(index.toFloat(), closePrice))
         }
-
         val lineDataSet = LineDataSet(entries, "Close Price").apply {
             lineWidth = 2f
             color = BLUE
             setCircleColor(BLUE)
-            circleRadius = 2f
+            circleRadius = 3f
             setDrawValues(false)
         }
-
         val lineData = LineData(lineDataSet)
         lineChart.data = lineData
         lineChart.xAxis.apply {
@@ -422,7 +409,6 @@ class StockProfileActivity : AppCompatActivity() {
     private fun openBuyManagerDialog(ticker: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_buy_manager, null)
         val clientSpinner = dialogView.findViewById<Spinner>(R.id.clientSpinner)
-
         fetchClientList { clients ->
             this.clients = clients
             val clientNames = clients.map { it.client_name }
@@ -430,7 +416,6 @@ class StockProfileActivity : AppCompatActivity() {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             clientSpinner.adapter = adapter
         }
-
         val dialog = AlertDialog.Builder(this)
             .setTitle("Buy $ticker for Client")
             .setView(dialogView)
@@ -438,7 +423,6 @@ class StockProfileActivity : AppCompatActivity() {
                 val quantityInput = dialogView.findViewById<EditText>(R.id.quantityInputbuyManager)
                 val quantity = quantityInput.text.toString().toDoubleOrNull()
                 val selectedClient = clientSpinner.selectedItem?.toString()
-
                 if (quantity != null && selectedClient != null) {
                     val client = clients.find { it.client_name == selectedClient }
                     if (client != null) {
@@ -452,7 +436,6 @@ class StockProfileActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .create()
-
         dialog.show()
     }
 
@@ -472,23 +455,16 @@ class StockProfileActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .create()
-
         dialog.show()
     }
 
     private fun executeBuyTransaction(ticker: String, quantity: Double, clientId: String) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val sessionToken = sharedPreferences.getString("session_token", null)
-
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = prefs.getString("session_token", null)
         if (sessionToken.isNullOrEmpty()) {
-            Toast.makeText(
-                this,
-                "Session token is missing. Please log in again.",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "Session token is missing. Please log in again.", Toast.LENGTH_SHORT).show()
             return
         }
-
         val request = PurchaseAssetRequest(
             session_token = sessionToken,
             usd_quantity = quantity,
@@ -496,7 +472,6 @@ class StockProfileActivity : AppCompatActivity() {
             ticker = ticker,
             client_id = clientId
         )
-
         RetrofitClient.apiService.purchaseAsset(request).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
@@ -511,24 +486,17 @@ class StockProfileActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Log.e("StockProfileActivity", "API Failure: ${t.message}")
-                Toast.makeText(
-                    this@StockProfileActivity,
-                    "Failed to connect. Please try again.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@StockProfileActivity, "Failed to connect. Please try again.", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
     private fun fetchClientList(callback: (List<Client>) -> Unit) {
-        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val sessionToken = sharedPreferences.getString("session_token", null)
-
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val sessionToken = prefs.getString("session_token", null)
         if (sessionToken.isNullOrEmpty()) return
-
         RetrofitClient.apiService.getClientList(TokenRequest(sessionToken)).enqueue(object : Callback<ClientListResponse> {
             override fun onResponse(call: Call<ClientListResponse>, response: Response<ClientListResponse>) {
                 if (response.isSuccessful && response.body()?.status == "Success") {
@@ -536,11 +504,9 @@ class StockProfileActivity : AppCompatActivity() {
                     callback(c)
                 }
             }
-
             override fun onFailure(call: Call<ClientListResponse>, t: Throwable) {
                 Toast.makeText(this@StockProfileActivity, "Failed to fetch client list.", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 }

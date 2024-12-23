@@ -9,7 +9,6 @@
     android:background="@color/backgroundLight"
     tools:context=".AdminToolsActivity">
 
-    <!-- Toolbar for Admin Tools Activity -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/admintoolsToolbar"
         android:layout_width="0dp"
@@ -31,7 +30,6 @@
             android:textSize="24sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Button Container with TICKET, REVIEW, and USERS buttons -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="240dp"
@@ -75,7 +73,6 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Filter Buttons -->
     <LinearLayout
         android:id="@+id/filterContainer"
         android:layout_width="match_parent"
@@ -108,7 +105,6 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Scrollable section for RecyclerView -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -117,7 +113,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- RecyclerView for displaying tickets, reviews, or users -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
@@ -125,7 +120,6 @@
             android:nestedScrollingEnabled="false"/>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation for Admin Tools Activity -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

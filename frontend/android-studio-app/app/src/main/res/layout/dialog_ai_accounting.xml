@@ -1,0 +1,52 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tickerTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ticker: AAPL"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="#000000"/>
+
+        <TextView
+            android:id="@+id/growthTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Asset Growth: ..."
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="#000000"/>
+
+        <TextView
+            android:id="@+id/liquidityTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Asset Liquidity: ..."
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:textColor="#000000"/>
+
+        <TextView
+            android:id="@+id/profitabilityTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Asset Profitability: ..."
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"
+            android:textColor="#000000"/>
+
+        <Button
+            android:id="@+id/closeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Close"
+            android:layout_gravity="center" />
+</LinearLayout>
+

@@ -11,21 +11,24 @@
         android:layout_height="wrap_content"
         android:text="Ticker: BTC"
         android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:textColor="#000000"/>
 
     <EditText
         android:id="@+id/priceInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:hint="Enter price"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:textColor="#000000"/>
 
     <Button
         android:id="@+id/setAlertButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Set Alert"
-        android:layout_gravity="end"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:textColor="#000000"
+        android:layout_gravity="center" />
 </LinearLayout>

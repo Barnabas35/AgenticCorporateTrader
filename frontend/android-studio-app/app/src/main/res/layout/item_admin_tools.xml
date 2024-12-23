@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Title or Subject -->
         <TextView
             android:id="@+id/subjectText"
             android:layout_width="match_parent"
@@ -25,7 +24,6 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- Subtitle or Description -->
         <TextView
             android:id="@+id/descriptionText"
             android:layout_width="match_parent"
@@ -35,7 +33,6 @@
             android:textSize="14sp"
             android:layout_marginTop="4dp" />
 
-        <!-- Delete Button (for Users section only) -->
         <Button
             android:id="@+id/deleteButton"
             android:layout_width="wrap_content"

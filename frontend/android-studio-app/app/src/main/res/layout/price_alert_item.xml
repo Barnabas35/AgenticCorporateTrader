@@ -23,7 +23,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Ticker TextView -->
         <TextView
             android:id="@+id/tickerTextView"
             android:layout_width="0dp"
@@ -34,7 +33,6 @@
             android:textColor="#000000"
             android:textStyle="bold" />
 
-        <!-- Market TextView -->
         <TextView
             android:id="@+id/marketTextView"
             android:layout_width="0dp"
@@ -43,7 +41,6 @@
             android:text="Market"
             android:textSize="16sp" />
 
-        <!-- Price TextView -->
         <TextView
             android:id="@+id/priceTextView"
             android:layout_width="0dp"
@@ -52,7 +49,6 @@
             android:text="Price"
             android:textSize="16sp" />
 
-        <!-- Delete Button -->
         <Button
             android:id="@+id/deleteButton"
             android:layout_width="wrap_content"
