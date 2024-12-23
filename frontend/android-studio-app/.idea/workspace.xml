@@ -10,42 +10,12 @@
           <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_add_balance.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_admin_tools.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_client_management.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_client_profile.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_crypto_profile.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_login.xml">
         <config>
           <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
         </config>
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_market.xml">
         <config>
           <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
         </config>
@@ -60,137 +30,12 @@
           <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_price_alerts.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_profile.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_register.xml">
         <config>
           <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_reviewdetail.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_reviewpage.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_stock_profile.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_subscription.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_supportpage.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_ticketdetail.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/asset_item.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/client_item.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_ai_accounting.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_asset_report.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_buy.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_buy_manager.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_price_alert.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_resolve_ticket.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_sell.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_admin_tools.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_client.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_crypto.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_stock.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_suggestion_crypto.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_suggestion_stock.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/price_alert_item.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/menu/bottom_nav_menu.xml">
-        <config>
-          <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/xml/backup_rules.xml">
         <config>
           <theme>@style/Theme.AppCompat.Light.NoActionBar</theme>
         </config>
@@ -201,7 +46,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="139c138c-e1c3-43d3-8c58-bf2f4bb22cfb" name="Changes" comment="" />
+    <list default="true" id="139c138c-e1c3-43d3-8c58-bf2f4bb22cfb" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -219,9 +66,6 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
-        <task path="$PROJECT_DIR$/app">
-          <activation />
-        </task>
         <projects_view>
           <tree_state>
             <expand>
@@ -259,17 +103,11 @@
       <list>
         <option value="Kotlin Class" />
         <option value="layoutResourceFile" />
-        <option value="valueResourceFile" />
         <option value="resourceFile" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$/../.." value="main" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
   <component name="ProblemsViewState">
@@ -286,28 +124,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Android App.App.executor&quot;: &quot;Run&quot;,
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;front-end-android-studio-app&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/res&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Android App.app.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "front-end-android-studio-app",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/luisgiliberti/GroupProject/GitHub/frontend/android-studio-app/app/src/main/res"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;/Users/luisgiliberti/.gradle&quot;
+  "keyToStringList": {
+    "kotlin-gradle-user-dirs": [
+      "/Users/luisgiliberti/.gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/app/src/main/res" />
@@ -322,7 +159,7 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration name="App" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="ACT-app.app.main" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -404,6 +241,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <option name="LAST_COMMIT_MESSAGE" value="" />
   </component>
 </project>
